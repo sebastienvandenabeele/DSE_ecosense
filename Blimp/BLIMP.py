@@ -1,7 +1,8 @@
 #MASTER Blimp script
 import numpy as np
 from first_concept import drag,velocity, balloon_mass, surface_area
-from propulsion_power import power_calc
+from propulsion_power import power_calc, read_irradiance
+from material import Cellophane
 
 ###################
 # Constants
