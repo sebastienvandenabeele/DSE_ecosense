@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
-from materials import Cellophane
 
 ###################
 # Constants
@@ -13,11 +12,11 @@ g                               = 9.81  # [N/kg]
 rho                             = 1.225  # [kg/m3]
 spheroid_ratio                  = 3  # []
 foil_thickness                  = 0.000008  # [m]
-foil_gsm                        = 11.36  # [g/m2]
-linen_light_gsm                 = 30  # [g/m2]
-linen_heavy_gsm                 = 150  # [g/m2]
-silk_gsm                        = 21.65  # [g/m2]
-solar_gsm                 = 0.42  # [g/m2]
+foil_density                    = 0.01136  # [kg/m2]
+linen_light_density             = 0.030  # [kg/m2]
+linen_heavy_density             = 0.150  # [kg/m2]
+silk_density                    = 0.02165  # [kg/m2]
+solar_density                   = 0.425  # [kg/m2]
 p                               = 1.6075  # []
 prop_eff                        = 0.8
 motor_eff                       = 0.9
@@ -36,8 +35,12 @@ lift_he                         = 1.0465
 lift_h2                          = 1.14125
 
 ###################
-# Top-level inputs
+# Requirement inputs
 ###################
+
+
+
+
 class Blimp:
     def __init__(self, mass_payload, mass_undercarriage, mass_propulsion, mass_electronics, mass_balloon, mass_solar_cell, mass_ballonet):
         self.mass_payload = mass_payload
@@ -61,22 +64,31 @@ BLIMP = Blimp(mass_payload =       25,        # [kg]
 
 
 #Solar panel simulation
+tmy=read_irradiance()
+
+
 alphas = []
 vels = []
-tmy=read_irradiance()
-for alpha in np.arange(0, round(np.pi, 2), 0.01):
+vols = []
+masses = []
+for alpha in np.arange(0, np.radians(90), 0.02):
     for i in range(200):
 
         mass_total = BLIMP.mass_payload + BLIMP.mass_undercarriage + BLIMP.mass_propulsion + BLIMP.mass_electronics + BLIMP.mass_balloon + BLIMP.mass_solar_cell + BLIMP.mass_ballonet
         volume = mass_total / lift_h2
-        area_balloon, radius, half_length, BLIMP.mass_balloon = balloon_mass(volume, spheroid_ratio, p, silk_gsm, foil_gsm)
+        area_balloon, radius, half_length, BLIMP.mass_balloon = balloon_mass(volume, spheroid_ratio, p, silk_density, foil_density)
         power_solar, area_solar = power_calc(radius,half_length,alpha,0.8, tmy  )
-        BLIMP.mass_solar_cell=area_solar*solar_gsm
+        BLIMP.mass_solar_cell = area_solar * solar_density
         D = drag(volume, spheroid_ratio, dl_re, rho, np.arange(1,100,1))
         v_max, v_opt = velocity(power_solar / toplevel_margin, prop_eff, motor_eff, D, np.arange(1,100,1))
 
     alphas.append(alpha)
     vels.append(v_opt[0])
+    vols.append(volume)
+    masses.append(mass_total)
     print(alpha)
 plt.scatter(alphas, vels)
+plt.scatter(alphas, vols)
+plt.scatter(alphas, masses)
+plt.legend(['Velocity', 'Volume', 'Mass'])
 plt.show()

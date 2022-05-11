@@ -12,6 +12,6 @@ class Material:
 ###############################
 
 # Balloon Materials
-Cellophane = Material(1, 300, 240)
+test = Material(1, 300, 240)
 
 # Structural Materials

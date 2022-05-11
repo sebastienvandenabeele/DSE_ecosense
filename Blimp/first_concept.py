@@ -21,7 +21,7 @@ def balloon_mass(vol, spheroid_ratio,p,cover,foil):
     b=a
     c=spheroid_ratio*a
     S=surface_area(a,b,c,p)
-    m=S*(cover+foil)/1000
+    m=S*(cover+foil)
     return(S,a,c,m)
 
 def solar(irradiance,a,c,length_factor,ff,eff,solar_d):
