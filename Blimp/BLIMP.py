@@ -13,7 +13,7 @@ from propulsion_power import power_calc, read_irradiance
 lift_he                         = 1.0465
 lift_h2                          = 1.14125
 g                               = 9.81  # [N/kg]
-rho                             = 1.225  # [kg/m3]
+p                               = 1.6075  # []
 
 dl_re=np.array([[0.05    ,2.36],
                 [0.1     ,1.491],
@@ -25,12 +25,11 @@ dl_re=np.array([[0.05    ,2.36],
     ])
 
 
-spheroid_ratio                  = 3  # []
 foil_density                    = 0.01136  # [kg/m2]
 linen_light_density             = 0.030  # [kg/m2]
 linen_heavy_density             = 0.150  # [kg/m2]
 silk_density                    = 0.02165  # [kg/m2]
-p                               = 1.6075  # []
+
 prop_eff                        = 0.8
 motor_eff                       = 0.9
 prop_limit                      = 0.75
@@ -49,9 +48,9 @@ minimum_velocity                = range / maximum_triptime
 
 
 #Environment
-avg_sun_elevation = 52  # [deg]
+avg_sun_elevation               = 52  # [deg]
 tmy = read_irradiance()
-
+rho                             = 1.225  # [kg/m3]
 
 class Blimp:
     def __init__(self, mass_payload, mass_undercarriage, mass_propulsion,
@@ -113,33 +112,38 @@ class Blimp:
         vs = []
         vols = []
         masses = []
-        for alpha in np.arange(0, np.radians(180), 0.01):
-            print(alpha)
-            self.panel_angle = alpha
+        radii = []
+        n_panels = 0
+        while self.panel_angle < np.radians(170):
+            print(np.degrees(self.panel_angle))
+
             for i in np.arange(0, 200, 1):
                 self.mass_total = self.mass_payload + self.mass_undercarriage + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
                 self.volume = self.mass_total / lift_h2
                 self.sizeBalloon()
+                self.panel_angle = n_panels * self.solar_cell.width / self.radius
                 self.sizeSolar()
                 self.mass_solar_cell = self.area_solar * self.solar_cell.density
                 self.ref_area = self.volume**(2/3)
                 self.cruiseV = (2 * self.power_solar * prop_eff * motor_eff * prop_limit / toplevel_margin / rho / self.ref_area / self.CD)**(1/3)
 
             if plot:
-                alphas.append(alpha)
+                alphas.append(self.panel_angle)
                 vs.append(self.cruiseV)
                 vols.append(self.volume)
                 masses.append(self.mass_total)
+                radii.append(self.radius)
             print('volume [m3]: ', self.volume)
             print('mass [kg]: ', self.mass_total)
             print('velocity [m/s]: ', self.cruiseV)
             if self.cruiseV >= v_target: break
-
+            n_panels += 1
         if plot:
-                plt.scatter(alphas, vs)
-                plt.scatter(alphas, vols)
-                plt.scatter(alphas, masses)
-                plt.legend(['Velocity', 'Volume', 'Mass'])
+                plt.scatter(np.arange(0, n_panels, 1), vs)
+                plt.scatter(np.arange(0, n_panels, 1), radii)
+                plt.scatter(np.arange(0, n_panels, 1), vols)
+                plt.scatter(np.arange(0, n_panels, 1), masses)
+                plt.legend(['Velocity', 'Radius', 'Volume', 'Mass'])
                 plt.show()
 
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
@@ -156,7 +160,7 @@ Shlimp = Blimp(mass_payload =       25,  # [kg]
                spheroid_ratio=      3,
                solar_cell=sc.maxeon_gen3)
 
-Shlimp.setCruiseSpeed(minimum_velocity, True)
+Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
 
 
 
