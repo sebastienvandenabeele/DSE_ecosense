@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
-from material import Cellophane
+from materials import Cellophane
 
 ###################
 # Constants
@@ -60,11 +60,11 @@ BLIMP = Blimp(mass_payload =       25,        # [kg]
               mass_solar_cell=      0)        # [kg]
 
 
-#Solar panel optimisation
+#Solar panel simulation
 alphas = []
 vels = []
 tmy=read_irradiance()
-for alpha in np.arange(0, round(np.pi/2, 2), 0.01):
+for alpha in np.arange(0, round(np.pi, 2), 0.01):
     for i in range(200):
 
         mass_total = BLIMP.mass_payload + BLIMP.mass_undercarriage + BLIMP.mass_propulsion + BLIMP.mass_electronics + BLIMP.mass_balloon + BLIMP.mass_solar_cell + BLIMP.mass_ballonet
