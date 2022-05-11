@@ -3,7 +3,7 @@ import numpy as np
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-def area(a,b,c,p):
+def surface_area(a,b,c,p):
     return(4*np.pi*((((a*b)**p+(a*c)**p+(b*c)**p))/3)**(1/p))
 
 def drag(vol,spheroid_ratio,dl_re,rho,v):

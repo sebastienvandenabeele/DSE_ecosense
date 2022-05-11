@@ -57,4 +57,4 @@ def power_calc(a,c,panel_angle,length_factor):
     efficiency=0.8*0.2
     
     power_actual=power_max*efficiency
-    return power_actual
+    return power_actual, panel_area
