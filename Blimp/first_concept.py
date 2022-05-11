@@ -6,15 +6,15 @@ import numpy as np
 def surface_area(a,b,c,p):
     return(4*np.pi*((((a*b)**p+(a*c)**p+(b*c)**p))/3)**(1/p))
 
-def drag(vol,spheroid_ratio,dl_re,rho,v):
-    a=vol**(2/3)
+def drag(vol,spheroid_ratio,dl_re,rho,V):
+    A=vol**(2/3)
     dl=1/spheroid_ratio
     ld=spheroid_ratio   
     list_element=min(dl_re[:,0], key=lambda x:abs(x-dl))
     re=dl_re[np.where(dl_re[:,0]==list_element),1]
-    cd=(0.172*ld**(1/3)+0.252*dl**1.2+1.032*dl**2.7)/((re*10**7)**(1/6))
-    d=0.5*rho*(v/3.6)**2*a*cd
-    return d
+    CD=(0.172*ld**(1/3)+0.252*dl**1.2+1.032*dl**2.7)/((re*10**7)**(1/6))
+    D=0.5*rho*V**2*A*CD
+    return D
     
 def balloon_mass(vol, spheroid_ratio,p,cover,foil):
     a=((3*vol)/(4*spheroid_ratio))**(1/3)
