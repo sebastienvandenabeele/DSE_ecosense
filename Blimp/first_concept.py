@@ -20,7 +20,7 @@ def balloon_mass(vol, spheroid_ratio,p,cover,foil):
     a=((3*vol)/(4*spheroid_ratio))**(1/3)
     b=a
     c=spheroid_ratio*a
-    S=area(a,b,c,p)
+    S=surface_area(a,b,c,p)
     m=S*(cover+foil)/1000
     return(S,a,c,m)
 
