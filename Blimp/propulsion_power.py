@@ -48,12 +48,11 @@ def read_irradiance():
     # 
     # A=panel_ratio*Ap
     # =============================================================================
-def power_calc(a, c, panel_angle, length_factor,tmy):
-    angle = np.radians(52)
-    panel_angle=np.radians(panel_angle)
-    panel_area=0.8*2*c*a*2*panel_angle
-    a_min= 2*np.sin(panel_angle)*a*length_factor*2*c*np.cos(angle)
-    a_max= (1-np.cos(angle+panel_angle))*a*0.8*2*c
+def power_calc(r, l, panel_angle, length_factor, tmy, elevation):
+
+    panel_area= 0.8 * 2 * l / 2 * r * 2 * panel_angle
+    a_min= 2 * np.sin(panel_angle) * r * length_factor * 2 * l / 2 * np.cos(elevation)
+    a_max= (1-np.cos(elevation+panel_angle)) * r * 0.8 * 2 * l / 2
     
     power_max=a_min*np.mean(tmy["DNI"])+np.mean(tmy["DHI"])*panel_area
     
