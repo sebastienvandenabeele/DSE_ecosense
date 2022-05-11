@@ -22,7 +22,7 @@ def balloon_mass(vol, spheroid_ratio,p,cover,foil):
     c=spheroid_ratio*a
     S=surface_area(a,b,c,p)
     m=S*(cover+foil)
-    return(S,a,c,m)
+    return S,a,2*c,m
 
 def solar(irradiance,a,c,length_factor,ff,eff,solar_d):
     area=np.sqrt(2)*a*length_factor*ff*2*c
@@ -36,7 +36,7 @@ def velocity(power,prop_eff,motor_eff,D,v):
     diff_eff=abs(D-T_eff)
     v_max=v[np.where(diff[0]==min(diff[0]))]
     v_opt=v[np.where(diff_eff[0]==min(diff_eff[0]))]
-    return v_max,v_opt
+    return v_max,v_opt[0]
     
 # =============================================================================
 # INPUTS
