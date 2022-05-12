@@ -1,10 +1,12 @@
 #MASTER Blimp script
 import numpy as np
 import matplotlib.pyplot as plt
+from mayavi.mlab import *
 import solarcells as sc
 import gas
 from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
+from projected_panel import plot_blimp, irradiance_distribution
 
 ###################
 # Constants
@@ -201,6 +203,9 @@ class Blimp:
     def estimateCost(self):
         cost = 0
         return cost
+    
+    def calculate_irradiated_area(self):
+        self.irradiated_area=self.area_solar*irradiance_distribution(self)
 
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
 
@@ -220,6 +225,7 @@ Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
 
 Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
 Shlimp.report()
+# plot_blimp(Shlimp)
 
 
 
