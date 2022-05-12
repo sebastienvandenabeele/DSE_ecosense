@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import solarcells as sc
+import gas
 from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
 
@@ -59,7 +60,7 @@ REQ_payload_mass                = n_relays * m_relay + n_sensors * m_sensor + m_
 
 REQ_max_radius                  = 40        # [m]
 REQ_max_length                  = 200       # [m]
-REQ_max_explosive               = 1200      # [J] TBD
+REQ_max_explosive               = 500 * 1000 * 1000     # [J] TBD
 
 
 
