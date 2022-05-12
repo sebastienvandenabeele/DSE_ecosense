@@ -51,6 +51,8 @@ def irradiance_distribution(blimp, angle_sun):
     else:
         u = np.linspace(-alpha, alpha, 10)
     
+    if alpha>=np.pi/2:
+        u=np.linspace(-np.pi/2,np.pi/2,10)
     
     x = rx * np.outer(np.cos(u), np.sin(v))
     y = ry * np.outer(np.sin(u), np.sin(v))
