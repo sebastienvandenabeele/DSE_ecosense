@@ -41,18 +41,17 @@ def irradiance_distribution(blimp, angle_sun):
     # print(beta_vec)
     # for alpha_vec in np.radians(np.arange(15,62,1)):
     corr=0
-    if (np.pi/2-abs(beta_vec))<alpha:
+    u = np.linspace(-alpha, alpha, 10)
+    if (beta_vec+np.pi/2)<alpha or (beta_vec-np.pi/2)<-alpha:
         # print("ye")
         corr=alpha-(np.pi/2-abs(beta_vec))
         if beta_vec > 0:
             u = np.linspace(-alpha+corr, alpha, 10)
         elif beta_vec <0:
             u = np.linspace(-alpha, alpha-corr, 10)
-    else:
-        u = np.linspace(-alpha, alpha, 10)
+        elif (beta_vec+np.pi/2)<alpha and (beta_vec-np.pi/2)<-alpha:
+            u=np.linspace(beta_vec-np.pi/2,beta_vec+np.pi/2,10)
     
-    if alpha>=np.pi/2:
-        u=np.linspace(-np.pi/2,np.pi/2,10)
     
     x = rx * np.outer(np.cos(u), np.sin(v))
     y = ry * np.outer(np.sin(u), np.sin(v))
