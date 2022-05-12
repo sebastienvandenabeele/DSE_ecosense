@@ -49,17 +49,17 @@ rho                             = 1.225  # [kg/m3]
 # Requirement inputs
 ###################
 margin                          = 1.2
-maximum_triptime                = 5 * 3600  # [given in h, processed in s]
-REQ_range                       = 300000    # [m]
+maximum_triptime                = 5 * 3600  # [s]
+REQ_range                       = 300 * 1000    # [m]
 minimum_velocity                = REQ_range / maximum_triptime
 
-n_sensors                       = 1300
+REQ_n_sensors                       = 1295
 relays_per_sensor               = 25
-n_relays                        = int(round(n_sensors/relays_per_sensor, 0))
+n_relays                        = int(round(REQ_n_sensors / relays_per_sensor, 0))
 m_sensor                        = 0.05      # [kg]
 m_relay                         = 0.338     # [kg]
 m_deployment_system             = 2         # [kg]
-REQ_payload_mass                = n_relays * m_relay + n_sensors * m_sensor + m_deployment_system
+REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor + m_deployment_system
 
 REQ_max_radius                  = 40        # [m]
 REQ_max_length                  = 200       # [m]
@@ -121,7 +121,7 @@ class Blimp:
     def report(self):
         print('###################### DESIGN CHARACTERISTICS ###################################')
         print()
-        print('Number of sensors: ', n_sensors)
+        print('Number of sensors: ', REQ_n_sensors)
         print('Number of relays: ', n_relays)
         print()
         print('MTOM: ', round(self.mass_total, 3), ' kg')
