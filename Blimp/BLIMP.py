@@ -59,13 +59,13 @@ REQ_payload_mass                = n_relays * m_relay + n_sensors * m_sensor + m_
 
 REQ_max_radius                  = 40        # [m]
 REQ_max_length                  = 200       # [m]
-REQ_max_explosive               = 1200      # [J]
+REQ_max_explosive               = 1200      # [J] TBD
 
 
 
 
 class Blimp:
-    def __init__(self, mass_payload, mass_undercarriage, mass_propulsion,
+    def __init__(self, mass_payload, mass_undercarriage, mass_propulsion, liftgas,
                  mass_electronics, mass_ballonet, solar_cell, length_factor, spheroid_ratio, n_engines,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0):
 
@@ -82,7 +82,7 @@ class Blimp:
         list_element = min(dl_re[:, 0], key=lambda x: abs(x - dl))
         re = dl_re[np.where(dl_re[:, 0] == list_element), 1][0][0]
         self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6))
-
+        self.liftgas = liftgas
 
 
         #Masses
@@ -128,6 +128,7 @@ class Blimp:
         print('Balloon radius: ', round(self.radius, 3), ' m')
         print('Balloon length: ', round(self.length, 3), ' m')
         print('Balloon volume: ', round(self.volume, 3), ' m^3')
+        print('Explosive potential: ', round(self.explosive_potential, 2), ' J')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print()
         print('Generated power: ', round(self.power_solar, 3), ' W')
@@ -149,6 +150,7 @@ class Blimp:
             for i in np.arange(0, 200, 1):
                 self.mass_total = self.mass_payload + self.mass_undercarriage + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
                 self.volume = self.mass_total / lift_h2
+                self.explosive_potential = self.volume * self.liftgas.spec_energy
                 self.sizeBalloon()
                 self.panel_angle = self.panel_rows * self.solar_cell.width / self.radius
                 self.sizeSolar()
@@ -175,6 +177,10 @@ class Blimp:
                 break
             if self.length >= REQ_max_length:
                 print('MAXIMUM LENGTH REACHED')
+                break
+            if self.explosive_potential >= REQ_max_explosive:
+                print('MAXIMUM EXPLOSIVE POTENTIAL REACHED')
+                break
 
         if plot:
                 plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
@@ -208,6 +214,7 @@ Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
                mass_ballonet=        0.75,  # [kg]
                length_factor=       0.8,
                spheroid_ratio=      3,
+               liftgas=             gas.hydrogen,
                solar_cell=sc.maxeon_gen3)
 
 Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
