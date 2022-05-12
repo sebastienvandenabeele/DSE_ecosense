@@ -52,6 +52,24 @@ avg_sun_elevation               = 52  # [deg]
 tmy = read_irradiance()
 rho                             = 1.225  # [kg/m3]
 
+
+class Gas:
+    R = 8.3145  # ideal gas constant
+    pres_std = 101325  # Pa
+    temp_std = 273.15  # K
+
+    def __init__(self, m_molar, temp, pres):
+        """
+        :param m_molar: Molar mass [kg/mol]
+        :param temp: Temperature [K]
+        :param pres: Pressure [Pa]
+        """
+        self.m_molar = m_molar
+        self.temp = temp
+        self.pres = pres
+        self.dens = (self.pres * self.m_molar)/(self.temp * Gas.R)  # ideal gas law
+
+
 class Blimp:
     def __init__(self, mass_payload, mass_undercarriage, mass_propulsion,
                  mass_electronics, mass_ballonet, solar_cell, length_factor, spheroid_ratio,
