@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from mayavi.mlab import *
 import solarcells as sc
 import gas
-from first_concept import drag,velocity, balloon_mass, surface_area
+#from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
 from projected_panel import plot_blimp, irradiance_distribution
 
@@ -49,11 +49,11 @@ rho                             = 1.225  # [kg/m3]
 # Requirement inputs
 ###################
 margin                          = 1.2
-maximum_triptime                = 5 * 3600  # [s]
-REQ_range                       = 300 * 1000    # [m]
+maximum_triptime                = 6 * 3600  # [s]
+REQ_range                       = 500 * 1000    # [m]
 minimum_velocity                = REQ_range / maximum_triptime
 
-REQ_n_sensors                       = 1295
+REQ_n_sensors                   = 1295
 relays_per_sensor               = 25
 n_relays                        = int(round(REQ_n_sensors / relays_per_sensor, 0))
 m_sensor                        = 0.05      # [kg]
@@ -145,6 +145,7 @@ class Blimp:
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Cruise Speed: ', round(self.cruiseV, 3), ' m/s')
+        print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
     def setCruiseSpeed(self, v_target, plot=False):
         print('designing Blimp for cruise speed of ', v_target, 'm/s')
@@ -154,7 +155,7 @@ class Blimp:
         masses = []
         radii = []
         self.panel_rows = -1
-        while self.panel_angle < np.radians(170):
+        while self.panel_angle < np.radians(178):
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
             for i in np.arange(0, 200, 1):
@@ -167,6 +168,7 @@ class Blimp:
                 self.mass_solar_cell = self.area_solar * self.solar_cell.density
                 self.ref_area = self.volume**(2/3)
                 self.cruiseV = (2 * self.power_solar * prop_eff * motor_eff * prop_limit / rho / self.ref_area / self.CD)**(1/3)
+                self.range = self.cruiseV * maximum_triptime
 
             if plot:
                 alphas.append(self.panel_angle)
