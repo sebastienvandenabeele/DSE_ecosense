@@ -49,11 +49,11 @@ rho                             = 1.225  # [kg/m3]
 # Requirement inputs
 ###################
 margin                          = 1.2
-maximum_triptime                = 6 * 3600  # [s]
-REQ_range                       = 500 * 1000    # [m]
+maximum_triptime                = 5 * 3600  # [s]
+REQ_range                       = 250 * 1000    # [m]
 minimum_velocity                = REQ_range / maximum_triptime
 
-REQ_n_sensors                   = 1295
+REQ_n_sensors                   = 1295 / 2
 relays_per_sensor               = 25
 n_relays                        = int(round(REQ_n_sensors / relays_per_sensor, 0))
 m_sensor                        = 0.05      # [kg]
@@ -125,8 +125,8 @@ class Blimp:
         print('Number of relays: ', n_relays)
         print()
         print('MTOM: ', round(self.mass_total, 3), ' kg')
-        print('     Solar panel mass: ', round(self.mass_solar_cell, 3), ' kg')
-        print('     Balloon mass: ', round(self.mass_balloon, 3), ' kg')
+        print('     Solar panel mass: ', round(self.mass_solar_cell, 2), ' kg')
+        print('     Balloon mass: ', round(self.mass_balloon, 2), ' kg')
         print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
         print('     Undercarriage mass: ', round(self.mass_undercarriage, 2), ' kg')
         print('     Propulsion mass: ', round(self.mass_propulsion, 2), ' kg')
@@ -142,9 +142,10 @@ class Blimp:
         print('Number of engines:', round(self.n_engines, 0))
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
+        print('Number of solar panels: ', round(self.n_panels, 0), ' m^2')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
-        print('Cruise Speed: ', round(self.cruiseV, 3), ' m/s')
+        print('Cruise Speed: ', round(self.cruiseV, 2), ' m/s')
         print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
     def setCruiseSpeed(self, v_target, plot=False):
@@ -210,8 +211,11 @@ class Blimp:
 
 
     def estimateCost(self):
-        cost = self.n_panels
-        return cost
+        cost = {}
+        cost['solar'] = self.n_panels * self.solar_cell.cost
+        cost['h2'] = self.volume * self.liftgas.cost
+
+        print(cost)
 
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
 
@@ -231,6 +235,7 @@ Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
 
 Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
 Shlimp.report()
+Shlimp.estimateCost()
 # plot_blimp(Shlimp)
 
 
