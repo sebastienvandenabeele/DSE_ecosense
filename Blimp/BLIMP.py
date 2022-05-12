@@ -107,7 +107,8 @@ class Blimp:
         self.area_solar = 0.8 * 2 * self.length / 2 * self.radius * 2 * self.panel_angle
         minimum_area = 2 * np.sin(self.panel_angle) * self.radius * self.length_factor * 2 * self.length / 2 * np.cos(avg_sun_elevation)
         # maximum_area = (1 - np.cos(avg_sun_elevation + self.panel_angle)) * self.radius * 0.8 * 2 * self.length / 2
-
+        minimum_area=self.area_solar*irradiance_distribution(self,avg_sun_elevation)
+        # print(irradiance_distribution(self,avg_sun_elevation))
         power_max = minimum_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
         self.power_solar = power_max * self.solar_cell.efficiency * self.solar_cell.fillfac
 
@@ -209,9 +210,6 @@ class Blimp:
     def estimateCost(self):
         cost = self.n_panels
         return cost
-    
-    def calculate_irradiated_area(self):
-        self.irradiated_area=self.area_solar*irradiance_distribution(self)
 
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
 
