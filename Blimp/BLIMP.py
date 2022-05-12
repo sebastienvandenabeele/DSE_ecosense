@@ -50,8 +50,8 @@ rho                             = 1.225  # [kg/m3]
 ###################
 margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [given in h, processed in s]
-range                           = 300000    # [m]
-minimum_velocity                = range / maximum_triptime
+REQ_range                       = 300000    # [m]
+minimum_velocity                = REQ_range / maximum_triptime
 
 n_sensors                       = 1300
 relays_per_sensor               = 25
