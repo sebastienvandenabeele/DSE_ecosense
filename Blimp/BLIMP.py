@@ -45,16 +45,28 @@ rho                             = 1.225  # [kg/m3]
 ###################
 # Requirement inputs
 ###################
-toplevel_margin                 = 1.2
+#toplevel_margin                 = 1.2
 maximum_triptime                = 5 * 3600  # [given in h, processed in s]
 range                           = 300000    # [m]
 minimum_velocity                = range / maximum_triptime
+
+n_sensors                       = 420
+n_relays                        = 17
+m_sensor                        = 0.05      # [kg]
+m_relay                         = 0.338     # [kg]
+m_deployment_system             = 2         # [kg]
+REQ_payload_mass                = n_relays * m_relay + n_sensors * m_sensor + m_deployment_system
+
+REQ_max_radius                  = 40        # [m]
+REQ_max_length                  = 200       # [m]
+REQ_max_explosive               = 1200      # [J]
+
 
 
 
 class Blimp:
     def __init__(self, mass_payload, mass_undercarriage, mass_propulsion,
-                 mass_electronics, mass_ballonet, solar_cell, length_factor, spheroid_ratio,
+                 mass_electronics, mass_ballonet, solar_cell, length_factor, spheroid_ratio, n_engines,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0):
 
         #Solar cells
@@ -84,7 +96,7 @@ class Blimp:
         self.mass_total = mass_payload + mass_undercarriage + mass_propulsion + mass_electronics +  mass_balloon + mass_solar_cell + mass_ballonet
 
         self.volume = self.mass_total/lift_h2
-
+        self.n_engines = n_engines
 
 
     def sizeSolar(self):
@@ -107,19 +119,20 @@ class Blimp:
         print('MTOM: ', round(self.mass_total, 3), ' kg')
         print('     Solar panel mass: ', round(self.mass_solar_cell, 3), ' kg')
         print('     Balloon mass: ', round(self.mass_balloon, 3), ' kg')
-        print('     Ballonet mass: ', self.mass_ballonet, ' kg')
-        print('     Undercarriage mass: ', self.mass_undercarriage, ' kg')
-        print('     Propulsion mass: ', self.mass_propulsion, ' kg')
-        print('     Electronics mass: ', self.mass_electronics, ' kg')
-        print('     Payload mass: ', self.mass_payload, ' kg')
+        print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
+        print('     Undercarriage mass: ', round(self.mass_undercarriage, 2), ' kg')
+        print('     Propulsion mass: ', round(self.mass_propulsion, 2), ' kg')
+        print('     Electronics mass: ', round(self.mass_electronics, 2), ' kg')
+        print('     Payload mass: ', round(self.mass_payload, 2), ' kg')
         print()
         print('Balloon radius: ', round(self.radius, 3), ' m')
         print('Balloon length: ', round(self.length, 3), ' m')
         print('Balloon volume: ', round(self.volume, 3), ' m^3')
-        print('Spheroid ratio: ', self.spheroid_ratio)
+        print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print()
-        print('Drag coefficient: ', round(self.CD, 4))
         print('Generated power: ', round(self.power_solar, 3), ' W')
+
+        print('Drag coefficient: ', round(self.CD, 4))
         print('Cruise Speed: ', round(self.cruiseV, 3), ' m/s')
 
     def setCruiseSpeed(self, v_target, plot=False):
@@ -129,7 +142,7 @@ class Blimp:
         vols = []
         masses = []
         radii = []
-        self.panel_rows = 0
+        self.panel_rows = -1
         while self.panel_angle < np.radians(170):
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
@@ -141,7 +154,7 @@ class Blimp:
                 self.sizeSolar()
                 self.mass_solar_cell = self.area_solar * self.solar_cell.density
                 self.ref_area = self.volume**(2/3)
-                self.cruiseV = (2 * self.power_solar * prop_eff * motor_eff * prop_limit / toplevel_margin / rho / self.ref_area / self.CD)**(1/3)
+                self.cruiseV = (2 * self.power_solar * prop_eff * motor_eff * prop_limit / rho / self.ref_area / self.CD)**(1/3)
 
             if plot:
                 alphas.append(self.panel_angle)
@@ -154,18 +167,29 @@ class Blimp:
             print('velocity [m/s]: ', self.cruiseV)
 
 
-            if self.cruiseV >= v_target: break
+            if self.cruiseV >= v_target:
+                print('Target speed of ', v_target, ' m/s was reached.')
+                break
+            if self.radius >= REQ_max_radius:
+                print('MAXIMUM RADIUS REACHED')
+                break
+            if self.length >= REQ_max_length:
+                print('MAXIMUM LENGTH REACHED')
 
         if plot:
-                plt.plot(np.arange(0, self.panel_rows, 1), vs)
-                plt.plot(np.arange(0, self.panel_rows, 1), radii)
-                plt.plot(np.arange(0, self.panel_rows, 1), vols)
-                plt.plot(np.arange(0, self.panel_rows, 1), masses)
+                plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
+                plt.plot(np.arange(0, self.panel_rows+1, 1), radii)
+                plt.plot(np.arange(0, self.panel_rows+1, 1), vols)
+                plt.plot(np.arange(0, self.panel_rows+1, 1), masses)
                 plt.legend(['Velocity', 'Radius', 'Volume', 'Mass'])
                 plt.grid()
                 plt.xlabel('Number of solar panels per row')
                 plt.show()
+
         self.n_panels = 2 * self.panel_rows * round(self.length_factor * self.length / self.solar_cell.width, 0)
+        self.power_available = self.power_solar * motor_eff * prop_eff * prop_limit
+        self.power_per_engine = self.power_available / self.n_engines
+
 
     def estimateCost(self):
         cost = 0
@@ -176,10 +200,11 @@ class Blimp:
 
 
 #Blimp Initialisation
-Shlimp = Blimp(mass_payload =       25,  # [kg]
+Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
                mass_undercarriage=   3,  # [kg]
                mass_propulsion=      0.8,  # [kg]
                mass_electronics=     1,  # [kg]
+               n_engines=            2,
                mass_ballonet=        0.75,  # [kg]
                length_factor=       0.8,
                spheroid_ratio=      3,
