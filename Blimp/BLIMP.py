@@ -15,13 +15,13 @@ lift_h2                          = 1.14125
 g                               = 9.81  # [N/kg]
 p                               = 1.6075  # []
 
-dl_re=np.array([[0.05    ,2.36],
-                [0.1     ,1.491],
-                [0.15    ,1.138],
-                [0.182   ,1],
-                [0.2     ,0.94],
-                [0.25    ,0.81],
-                [0.3     ,0.716]
+dl_re=np.array([[0.05, 2.36],
+                [0.1, 1.491],
+                [0.15, 1.138],
+                [0.182, 1],
+                [0.2, 0.94],
+                [0.25, 0.81],
+                [0.3, 0.716]
     ])
 
 
@@ -34,6 +34,10 @@ prop_eff                        = 0.8
 motor_eff                       = 0.9
 prop_limit                      = 0.75
 
+#Environment
+avg_sun_elevation               = 52  # [deg]
+tmy = read_irradiance()
+rho                             = 1.225  # [kg/m3]
 
 
 
@@ -42,15 +46,11 @@ prop_limit                      = 0.75
 # Requirement inputs
 ###################
 toplevel_margin                 = 1.2
-maximum_triptime                = 2 * 3600  # [given in h, processed in s]
+maximum_triptime                = 5 * 3600  # [given in h, processed in s]
 range                           = 300000    # [m]
 minimum_velocity                = range / maximum_triptime
 
 
-#Environment
-avg_sun_elevation               = 52  # [deg]
-tmy = read_irradiance()
-rho                             = 1.225  # [kg/m3]
 
 class Blimp:
     def __init__(self, mass_payload, mass_undercarriage, mass_propulsion,
@@ -102,9 +102,26 @@ class Blimp:
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         self.mass_balloon = self.surface_area * (silk_density + foil_density)
 
-
-
-
+    def report(self):
+        print('###################### DESIGN CHARACTERISTICS ###################################')
+        print()
+        print('MTOM: ', round(self.mass_total, 3), ' kg')
+        print('     Solar panel mass: ', round(self.mass_solar_cell, 3), ' kg')
+        print('     Balloon mass: ', round(self.mass_balloon, 3), ' kg')
+        print('     Ballonet mass: ', self.mass_ballonet, ' kg')
+        print('     Undercarriage mass: ', self.mass_undercarriage, ' kg')
+        print('     Propulsion mass: ', self.mass_propulsion, ' kg')
+        print('     Electronics mass: ', self.mass_electronics, ' kg')
+        print('     Payload mass: ', self.mass_payload, ' kg')
+        print()
+        print('Balloon radius: ', round(self.radius, 3), ' m')
+        print('Balloon length: ', round(self.length, 3), ' m')
+        print('Balloon volume: ', round(self.volume, 3), ' m^3')
+        print('Spheroid ratio: ', self.spheroid_ratio)
+        print()
+        print('Drag coefficient: ', round(self.CD, 4))
+        print('Generated power: ', round(self.power_solar, 3), ' W')
+        print('Cruise Speed: ', round(self.cruiseV, 3), ' m/s')
 
     def setCruiseSpeed(self, v_target, plot=False):
         print('designing Blimp for cruise speed of ', v_target, 'm/s')
@@ -136,14 +153,17 @@ class Blimp:
             print('volume [m3]: ', self.volume)
             print('mass [kg]: ', self.mass_total)
             print('velocity [m/s]: ', self.cruiseV)
-            if self.cruiseV >= v_target: break
+
             n_panels += 1
+            if self.cruiseV >= v_target: break
+
         if plot:
-                plt.scatter(np.arange(0, n_panels, 1), vs)
-                plt.scatter(np.arange(0, n_panels, 1), radii)
-                plt.scatter(np.arange(0, n_panels, 1), vols)
-                plt.scatter(np.arange(0, n_panels, 1), masses)
+                plt.plot(np.arange(0, n_panels, 1), vs)
+                plt.plot(np.arange(0, n_panels, 1), radii)
+                plt.plot(np.arange(0, n_panels, 1), vols)
+                plt.plot(np.arange(0, n_panels, 1), masses)
                 plt.legend(['Velocity', 'Radius', 'Volume', 'Mass'])
+                plt.grid()
                 plt.show()
 
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
@@ -161,7 +181,7 @@ Shlimp = Blimp(mass_payload =       25,  # [kg]
                solar_cell=sc.maxeon_gen3)
 
 Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
-
+Shlimp.report()
 
 
 
