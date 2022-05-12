@@ -48,13 +48,14 @@ rho                             = 1.225  # [kg/m3]
 ###################
 # Requirement inputs
 ###################
-#toplevel_margin                 = 1.2
+margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [given in h, processed in s]
 range                           = 300000    # [m]
 minimum_velocity                = range / maximum_triptime
 
-n_sensors                       = 420
-n_relays                        = 17
+n_sensors                       = 1300
+relays_per_sensor               = 25
+n_relays                        = int(round(n_sensors/relays_per_sensor, 0))
 m_sensor                        = 0.05      # [kg]
 m_relay                         = 0.338     # [kg]
 m_deployment_system             = 2         # [kg]
@@ -62,7 +63,7 @@ REQ_payload_mass                = n_relays * m_relay + n_sensors * m_sensor + m_
 
 REQ_max_radius                  = 40        # [m]
 REQ_max_length                  = 200       # [m]
-REQ_max_explosive               = 500 * 1000 * 1000     # [J] TBD
+REQ_max_explosive               = 100000 * 1000 * 1000     # [J] TBD
 
 
 
@@ -84,7 +85,7 @@ class Blimp:
         ld = spheroid_ratio
         list_element = min(dl_re[:, 0], key=lambda x: abs(x - dl))
         re = dl_re[np.where(dl_re[:, 0] == list_element), 1][0][0]
-        self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6))
+        self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6)) * margin
         self.liftgas = liftgas
 
 
@@ -119,6 +120,9 @@ class Blimp:
     def report(self):
         print('###################### DESIGN CHARACTERISTICS ###################################')
         print()
+        print('Number of sensors: ', n_sensors)
+        print('Number of relays: ', n_relays)
+        print()
         print('MTOM: ', round(self.mass_total, 3), ' kg')
         print('     Solar panel mass: ', round(self.mass_solar_cell, 3), ' kg')
         print('     Balloon mass: ', round(self.mass_balloon, 3), ' kg')
@@ -128,14 +132,16 @@ class Blimp:
         print('     Electronics mass: ', round(self.mass_electronics, 2), ' kg')
         print('     Payload mass: ', round(self.mass_payload, 2), ' kg')
         print()
-        print('Balloon radius: ', round(self.radius, 3), ' m')
-        print('Balloon length: ', round(self.length, 3), ' m')
-        print('Balloon volume: ', round(self.volume, 3), ' m^3')
-        print('Explosive potential: ', round(self.explosive_potential, 2), ' J')
+        print('Balloon radius: ', round(self.radius, 2), ' m')
+        print('Balloon length: ', round(self.length, 2), ' m')
+        print('Balloon volume: ', round(self.volume, 2), ' m^3')
+        print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print()
-        print('Generated power: ', round(self.power_solar, 3), ' W')
-
+        print('Number of engines:', round(self.n_engines, 0))
+        print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
+        print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
+        print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Cruise Speed: ', round(self.cruiseV, 3), ' m/s')
 
@@ -201,7 +207,7 @@ class Blimp:
 
 
     def estimateCost(self):
-        cost = 0
+        cost = self.n_panels
         return cost
     
     def calculate_irradiated_area(self):
@@ -218,10 +224,10 @@ Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
                mass_electronics=     1,  # [kg]
                n_engines=            2,
                mass_ballonet=        0.75,  # [kg]
-               length_factor=       0.8,
-               spheroid_ratio=      3,
+               length_factor=        0.8,
+               spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
-               solar_cell=sc.maxeon_gen3)
+               solar_cell=          sc.maxeon_gen3)
 
 Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
 Shlimp.report()

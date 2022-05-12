@@ -20,4 +20,4 @@ class Gas:
 # Gas library
 ##############
 
-hydrogen = Gas(0, 0, 0, 10800000)
+hydrogen = Gas(1, 1, 1, 10800000)
