@@ -95,7 +95,6 @@ class Blimp:
         power_max = minimum_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
         self.power_solar = power_max * self.solar_cell.efficiency * self.solar_cell.fillfac
 
-
     def sizeBalloon(self):
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
@@ -130,15 +129,15 @@ class Blimp:
         vols = []
         masses = []
         radii = []
-        n_panels = 0
+        self.panel_rows = 0
         while self.panel_angle < np.radians(170):
             print(np.degrees(self.panel_angle))
-
+            self.panel_rows += 1
             for i in np.arange(0, 200, 1):
                 self.mass_total = self.mass_payload + self.mass_undercarriage + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
                 self.volume = self.mass_total / lift_h2
                 self.sizeBalloon()
-                self.panel_angle = n_panels * self.solar_cell.width / self.radius
+                self.panel_angle = self.panel_rows * self.solar_cell.width / self.radius
                 self.sizeSolar()
                 self.mass_solar_cell = self.area_solar * self.solar_cell.density
                 self.ref_area = self.volume**(2/3)
@@ -154,17 +153,23 @@ class Blimp:
             print('mass [kg]: ', self.mass_total)
             print('velocity [m/s]: ', self.cruiseV)
 
-            n_panels += 1
+
             if self.cruiseV >= v_target: break
 
         if plot:
-                plt.plot(np.arange(0, n_panels, 1), vs)
-                plt.plot(np.arange(0, n_panels, 1), radii)
-                plt.plot(np.arange(0, n_panels, 1), vols)
-                plt.plot(np.arange(0, n_panels, 1), masses)
+                plt.plot(np.arange(0, self.panel_rows, 1), vs)
+                plt.plot(np.arange(0, self.panel_rows, 1), radii)
+                plt.plot(np.arange(0, self.panel_rows, 1), vols)
+                plt.plot(np.arange(0, self.panel_rows, 1), masses)
                 plt.legend(['Velocity', 'Radius', 'Volume', 'Mass'])
                 plt.grid()
+                plt.xlabel('Number of solar panels per row')
                 plt.show()
+        self.n_panels = 2 * self.panel_rows * round(self.length_factor * self.length / self.solar_cell.width, 0)
+
+    def estimateCost(self):
+        cost = 0
+        return cost
 
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
 
