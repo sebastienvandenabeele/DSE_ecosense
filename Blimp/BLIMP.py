@@ -7,7 +7,7 @@ import gas
 #from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
 from projected_panel import plot_blimp, irradiance_distribution
-import pickle as pick, time
+import pickle as pick
 
 def pickle(obj, filename):
     with open(filename, 'wb') as file:
@@ -133,7 +133,7 @@ class Blimp:
     def report(self):
         print('###################### DESIGN CHARACTERISTICS ###################################')
         print()
-        print('Number of sensors: ', REQ_n_sensors)
+        print('Number of sensors: ', round(REQ_n_sensors, 0))
         print('Number of relays: ', n_relays)
         print()
         print('MTOM: ', round(self.mass_total, 3), ' kg')
@@ -151,10 +151,12 @@ class Blimp:
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print()
-        print('Number of engines:', round(self.n_engines, 0))
-        print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
+        print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
-        print('Number of solar panels: ', round(self.n_panels, 0), ' m^2')
+        print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
+        print('Power available: ', round(self.power_available/1000, 2), ' kW')
+        print('Number of engines:', round(self.n_engines, 0))
+        print('Power per engine: ', round(self.power_per_engine/1000, 2), ' kW')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Cruise Speed: ', round(self.cruiseV, 2), ' m/s')
@@ -242,7 +244,6 @@ def simulateAcceleration(blimp):
         dP = blimp.power_available - 0.5 * rho * v**3 * blimp.ref_area * blimp.CD
         E += dP * dt
 
-
         ts.append(t)
         vs.append(v)
 
@@ -282,8 +283,9 @@ def simulateAcceleration(blimp):
 Shlimp = unpickle('Blimp.txt')
 #Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
 #Shlimp.report()
-simulateAcceleration(Shlimp)
-
+#simulateAcceleration(Shlimp)
+Shlimp.report()
+plot_blimp(Shlimp)
 
 
 
