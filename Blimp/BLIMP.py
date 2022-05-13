@@ -232,24 +232,29 @@ class Blimp:
 
 
 def simulateAcceleration(blimp):
-    vs = []
-    ts = []
+    vs = [0]
+    ts = [0]
     v = 0
     E = 0
     dt = 0.1
     for t in np.arange(0, 30, dt):
-        dP = blimp.power_available - 0.5 * rho * v*3 * blimp.ref_area * blimp.CD
-        print(round(v, 2), round(dP, 2))
-        E += dP * dt
         v = np.sqrt(2 * E / blimp.mass_total)
+        dP = blimp.power_available - 0.5 * rho * v**3 * blimp.ref_area * blimp.CD
+        E += dP * dt
+
 
         ts.append(t)
         vs.append(v)
 
     plt.plot(ts, vs)
+    plt.plot(ts, minimum_velocity * np.ones(len(ts)), linestyle='dashed', color='black')
     plt.grid()
+    plt.xlim(0, 30)
+    plt.ylim(0, 18)
+    plt.legend(['Current velocity', 'Design velocity'])
     plt.xlabel('Time [s]')
     plt.ylabel('Velocity [m/s]')
+    plt.savefig('acceleration.png')
     plt.show()
 
 
@@ -275,8 +280,8 @@ def simulateAcceleration(blimp):
 
 
 Shlimp = unpickle('Blimp.txt')
-Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
-Shlimp.report()
+#Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+#Shlimp.report()
 simulateAcceleration(Shlimp)
 
 
