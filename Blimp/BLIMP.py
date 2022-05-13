@@ -50,7 +50,7 @@ rho                             = 1.225  # [kg/m3]
 ###################
 margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [s]
-REQ_range                       = 250 * 1000    # [m]
+REQ_range                       = 300 * 1000    # [m]
 minimum_velocity                = REQ_range / maximum_triptime
 
 REQ_n_sensors                   = 1295 / 2
@@ -69,7 +69,7 @@ REQ_max_explosive               = 100000 * 1000 * 1000     # [J] TBD
 
 
 class Blimp:
-    def __init__(self, mass_payload, mass_undercarriage, mass_propulsion, liftgas,
+    def __init__(self, mass_payload, mass_undercarriage, mass_propulsion, liftgas, mass_deployment,
                  mass_electronics, mass_ballonet, solar_cell, length_factor, spheroid_ratio, n_engines,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0):
 
@@ -97,6 +97,7 @@ class Blimp:
         self.mass_balloon = mass_balloon
         self.mass_solar_cell = mass_solar_cell
         self.mass_ballonet = mass_ballonet
+        self.mass_deployment = mass_deployment
         self.mass_total = mass_payload + mass_undercarriage + mass_propulsion + mass_electronics +  mass_balloon + mass_solar_cell + mass_ballonet
 
         self.volume = self.mass_total/lift_h2
@@ -224,7 +225,8 @@ class Blimp:
 #Blimp Initialisation
 Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
                mass_undercarriage=   3,  # [kg]
-               mass_propulsion=      0.8,  # [kg]
+               mass_deployment=      1,  # [kg]
+               mass_propulsion=      2,  # [kg]
                mass_electronics=     1,  # [kg]
                n_engines=            2,
                mass_ballonet=        0.75,  # [kg]
