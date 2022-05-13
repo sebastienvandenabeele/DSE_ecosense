@@ -7,6 +7,15 @@ import gas
 #from first_concept import drag,velocity, balloon_mass, surface_area
 from propulsion_power import power_calc, read_irradiance
 from projected_panel import plot_blimp, irradiance_distribution
+import pickle as pick, time
+
+def pickle(obj, filename):
+    with open(filename, 'wb') as file:
+        pick.dump(obj, file)
+
+def unpickle(filename):
+    with open(filename, 'rb') as file:
+        return pick.load(file)
 
 ###################
 # Constants
@@ -39,7 +48,8 @@ prop_limit                      = 0.75
 
 #Environment
 avg_sun_elevation               = 52  # [deg]
-tmy = read_irradiance()
+#tmy = read_irradiance()
+tmy = unpickle('tmy.txt')
 rho                             = 1.225  # [kg/m3]
 
 
@@ -69,9 +79,10 @@ REQ_max_explosive               = 100000 * 1000 * 1000     # [J] TBD
 
 
 class Blimp:
-    def __init__(self, mass_payload, mass_undercarriage, mass_propulsion, liftgas, mass_deployment,
-                 mass_electronics, mass_ballonet, solar_cell, length_factor, spheroid_ratio, n_engines,
+    def __init__(self, mass_payload=0, mass_undercarriage=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
+                 mass_electronics=0, mass_ballonet=0, solar_cell=0, length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0):
+
 
         #Solar cells
         self.solar_cell = solar_cell
@@ -169,7 +180,8 @@ class Blimp:
                 self.sizeSolar()
                 self.mass_solar_cell = self.area_solar * self.solar_cell.density
                 self.ref_area = self.volume**(2/3)
-                self.cruiseV = (2 * self.power_solar * prop_eff * motor_eff * prop_limit / rho / self.ref_area / self.CD)**(1/3)
+                self.power_available = self.power_solar * motor_eff * prop_eff * prop_limit
+                self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
                 self.range = self.cruiseV * maximum_triptime
 
             if plot:
@@ -207,9 +219,7 @@ class Blimp:
                 plt.show()
 
         self.n_panels = 2 * self.panel_rows * round(self.length_factor * self.length / self.solar_cell.width, 0)
-        self.power_available = self.power_solar * motor_eff * prop_eff * prop_limit
         self.power_per_engine = self.power_available / self.n_engines
-
 
     def estimateCost(self):
         cost = {}
@@ -221,24 +231,56 @@ class Blimp:
 ########################### END OF CLASS DEF ############################### END OF CLASS DEF #######################################
 
 
+def simulateAcceleration(blimp):
+    vs = []
+    ts = []
+    v = 0
+    E = 0
+    dt = 0.1
+    for t in np.arange(0, 30, dt):
+        dP = blimp.power_available - 0.5 * rho * v*3 * blimp.ref_area * blimp.CD
+        print(round(v, 2), round(dP, 2))
+        E += dP * dt
+        v = np.sqrt(2 * E / blimp.mass_total)
+
+        ts.append(t)
+        vs.append(v)
+
+    plt.plot(ts, vs)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Velocity [m/s]')
+    plt.show()
+
+
+
+
 
 #Blimp Initialisation
-Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
-               mass_undercarriage=   3,  # [kg]
-               mass_deployment=      1,  # [kg]
-               mass_propulsion=      2,  # [kg]
-               mass_electronics=     1,  # [kg]
-               n_engines=            2,
-               mass_ballonet=        0.75,  # [kg]
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
+# Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
+#                mass_undercarriage=   3,  # [kg]
+#                mass_deployment=      1,  # [kg]
+#                mass_propulsion=      2,  # [kg]
+#                mass_electronics=     1,  # [kg]
+#                n_engines=            2,
+#                mass_ballonet=        0.75,  # [kg]
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
 
-Shlimp.setCruiseSpeed(minimum_velocity, plot=True)
+#Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+# Shlimp.saveToFile('Blimp.txt')
+
+
+
+Shlimp = unpickle('Blimp.txt')
+Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
 Shlimp.report()
-Shlimp.estimateCost()
-# plot_blimp(Shlimp)
+simulateAcceleration(Shlimp)
+
+
+
 
 
 
