@@ -1,4 +1,4 @@
-# Navigating in this GitHub
+# Navigating this GitHub
 Welcome to the GitHub of DSE Group 06: EcoSense. This README is a
 living document and will be updated regularly.
 Files are structured as follows:
