@@ -74,24 +74,6 @@ REQ_max_explosive               = 100000 * 1000 * 1000     # [J] TBD
 
 
 
-
-class Gas:
-    R = 8.3145  # ideal gas constant
-    pres_std = 101325  # Pa
-    temp_std = 273.15  # K
-
-    def __init__(self, m_molar, temp, pres):
-        """
-        :param m_molar: Molar mass [kg/mol]
-        :param temp: Temperature [K]
-        :param pres: Pressure [Pa]
-        """
-        self.m_molar = m_molar
-        self.temp = temp
-        self.pres = pres
-        self.dens = (self.pres * self.m_molar)/(self.temp * Gas.R)  # ideal gas law
-
-
 class Blimp:
     def __init__(self, mass_payload=0, mass_undercarriage=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, length_factor=0, spheroid_ratio=0, n_engines=0,

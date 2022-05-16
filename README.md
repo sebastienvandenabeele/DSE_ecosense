@@ -1,4 +1,4 @@
-# Navigating in this GitHub
+# Navigating this GitHub
 Welcome to the GitHub of DSE Group 06: EcoSense. This README is a
 living document and will be updated regularly.
 Files are structured as follows:
@@ -30,5 +30,7 @@ As the name Classes suggests, classes are stored here. For example, the solarcel
 contains a solar cell class, in which different solar cells can be registered.
 In the BLIMP file, different designs can be easily equipped with different solar
 cell models.
+
+The file test_calc.py was used for unit testing.
 
 
