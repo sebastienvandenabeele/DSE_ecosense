@@ -1,9 +1,6 @@
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy
-import random
 from mayavi.mlab import *
+import matplotlib.pyplot as plt
 
 #plt.ioff()
 
@@ -21,15 +18,8 @@ def angle(v1,v2):
     angle=np.arccos(np.dot(v1,v2)/(np.linalg.norm(v1)*np.linalg.norm(v2)))
     return angle
 
-#print(angle(0.1,0.6))
 
-
-def irradiance_distribution(blimp, angle_sun):
-    
-    
-    # fig = plt.figure(figsize=plt.figaspect(1))
-    # ax = fig.add_subplot(111, projection='3d')
-    
+def irradiance_distribution(blimp, angle_sun):    
     coefs = (blimp.spheroid_ratio**2, blimp.spheroid_ratio**2, 1)  
     rx, ry, rz = 1/np.sqrt(coefs)
     
@@ -41,14 +31,9 @@ def irradiance_distribution(blimp, angle_sun):
     v = np.linspace(0, np.pi, 10)
     beta_vec=0
     alpha_vec=angle_sun
-    # tot=[]
-    # alp=[]
-    # print(beta_vec)
-    # for alpha_vec in np.radians(np.arange(15,62,1)):
     corr=0
     u = np.linspace(-alpha, alpha, 10)
     if (beta_vec+np.pi/2)<alpha or (beta_vec-np.pi/2)<-alpha:
-        # print("ye")
         corr=alpha-(np.pi/2-abs(beta_vec))
         if beta_vec > 0:
             u = np.linspace(-alpha+corr, alpha, 10)
@@ -66,12 +51,10 @@ def irradiance_distribution(blimp, angle_sun):
 
     vector=np.array([np.cos(alpha_vec) * np.cos(beta_vec),np.sin(beta_vec),np.sin(alpha_vec) * np.cos(beta_vec)])
     
-    # X=[]
     proj_point=[]
     for i in range(len(x)):
         for j in range(len(x)):
             if z[i][j]!=0:
-                # X.append([x[i][j],y[i][j],z[i][j]])
                 point_vec=[x[i][j],y[i][j],z[i][j]]-vector
                 dist=np.dot(point_vec,vector)
                 proj=[x[i][j],y[i][j],z[i][j]]-dist*vector
@@ -87,7 +70,6 @@ def irradiance_distribution(blimp, angle_sun):
     twod_coords.append([np.linalg.norm(base_vector),0])
     for i in range(len(proj_point)-2):
         vector=proj_point[i+2]-origin_point
-        # print(type(base_vector))
         ang=angle(vector,base_vector)
         l=np.linalg.norm(vector)
         twod_coords.append([np.cos(ang)*l,np.sin(ang)*l])
@@ -103,40 +85,10 @@ def irradiance_distribution(blimp, angle_sun):
     for i in ind:
         twod_coords.append([twod_coords_temp[0][i],twod_coords_temp[1][i]])
     twod_coords=np.transpose(twod_coords)
-    
-    # ax.plot_surface(x, y, z,  rstride=4, cstride=4, color='b')
-    
-    # max_radius = max(rx, ry, rz)
-    # for axis in 'xyz':
-        # getattr(ax, 'set_{}lim'.format(axis))((-max_radius, max_radius))
-        
-    # for i in proj_point:
-        # ax.scatter(i[0],i[1],i[2])
-        
-    # plt.figure(2)
     polygon=[]
     polygon = plt.fill(twod_coords[0],twod_coords[1])
     area=computeArea(polygon[0].xy)
-    
-    
-    # print(area)
-    # print(surface)
-    # print(area/surface)
-    
-    # alp.append(area/surface)
-    # tot.concatenate((tot,np.transpose(alp)))
-    # plt.close()
-    # tot=np.transpose(tot)
-    # print(tot)
-    # print(area/surface)
     return area/surface
-
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# 
-# ax.scatter(tot[0],tot[1],tot[2])    
-# plt.show()
-
 
 
 def plot_blimp(blimp):
