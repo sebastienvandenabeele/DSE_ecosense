@@ -24,6 +24,11 @@ def read_irradiance():
     df_tmy = df_tmy.reset_index()
     df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
     return df_tmy
+
+def sum(a,b):
+    x = a + b
+    return x
+
     
     # print(np.mean(df_tmy["GHI"]))
     # print(np.mean(df_tmy["DNI"]))
@@ -55,8 +60,12 @@ def power_calc(r, l, panel_angle, length_factor, tmy, elevation):
     a_max= (1-np.cos(elevation+panel_angle)) * r * 0.8 * 2 * l / 2
     
     power_max=a_min*np.mean(tmy["DNI"])+np.mean(tmy["DHI"])*panel_area
-    
+
     efficiency=0.8*0.2
-    
+    print(tmy["DNI"])
+    print(tmy["DHI"])
     power_actual=power_max*efficiency
     return power_actual, panel_area
+
+
+print(power_calc(3,3, 3, 0.5 , 4, 60))

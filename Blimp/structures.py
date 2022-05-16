@@ -99,10 +99,10 @@ def pressure_blimp_gas(initial_volume_H,new_volume_H,T):
 
 #print(pressure_blimp_gas(initial_volume_Hyd,new_volume_H,T))
 
-rel_p_gas = 172526 #pa
-Diameter_blimp = 4.3 #m
-wall_thickness = 0.003 #m
-       
+rel_p_gas = 112526 #pa
+Diameter_blimp = 6.3 #m
+wall_thickness = 0.0003 #m
+6.3,112526,0.0003
 def stress_blimp(diameter, inside_pressure, wall_thickness):
     """
     hoop stress for blimp
@@ -111,4 +111,4 @@ def stress_blimp(diameter, inside_pressure, wall_thickness):
     ss = inside_pressure*diameter/(2*wall_thickness)
     return ss*10**(-6)
 
-print(stress_blimp(Diameter_blimp, rel_p_gas, wall_thickness))
+print(stress_blimp(0.3, 172526, 0.1))

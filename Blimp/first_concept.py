@@ -3,8 +3,10 @@ import numpy as np
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
+
 def surface_area(a,b,c,p):
     return(4*np.pi*((((a*b)**p+(a*c)**p+(b*c)**p))/3)**(1/p))
+
 
 def drag(vol,spheroid_ratio,dl_re,rho,V):
     A=vol**(2/3)
@@ -15,6 +17,8 @@ def drag(vol,spheroid_ratio,dl_re,rho,V):
     CD=(0.172*ld**(1/3)+0.252*dl**1.2+1.032*dl**2.7)/((re*10**7)**(1/6))
     D=0.5*rho*V**2*A*CD
     return D
+
+#print(drag(40,0.5,3,1.255,30))
     
 def balloon_mass(vol, spheroid_ratio,p,cover,foil):
     a=((3*vol)/(4*spheroid_ratio))**(1/3)
@@ -23,11 +27,13 @@ def balloon_mass(vol, spheroid_ratio,p,cover,foil):
     S=surface_area(a,b,c,p)
     m=S*(cover+foil)
     return S,a,2*c,m
+#print(balloon_mass(80, 0.1, 3, 0.6, 0.1))
 
 def solar(irradiance,a,c,length_factor,ff,eff,solar_d):
     area=np.sqrt(2)*a*length_factor*ff*2*c
     power=eff*area*irradiance
     return power,(area*solar_d)
+#print(solar(8, 0.5, 20, 0.1, 7, 3, 10))
 
 def velocity(power,prop_eff,motor_eff,D,v):
     T=(power*prop_eff*motor_eff)/(v/3.6)
@@ -37,6 +43,8 @@ def velocity(power,prop_eff,motor_eff,D,v):
     v_max=v[np.where(diff[0]==min(diff[0]))]
     v_opt=v[np.where(diff_eff[0]==min(diff_eff[0]))]
     return v_max,v_opt[0]
+
+print(velocity(1990,0.8,0.3,19,12))
     
 # =============================================================================
 # INPUTS

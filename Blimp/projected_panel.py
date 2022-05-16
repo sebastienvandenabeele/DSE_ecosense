@@ -5,19 +5,24 @@ import scipy
 import random
 from mayavi.mlab import *
 
-plt.ioff()
+#plt.ioff()
 
 def surface_area(a,b,c):
     p=1.6075
     return(4*np.pi*((((a*b)**p+(a*c)**p+(b*c)**p))/3)**(1/p))
 
+
 def computeArea(pos):
     x, y = (zip(*pos))
     return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
+
 def angle(v1,v2):
     angle=np.arccos(np.dot(v1,v2)/(np.linalg.norm(v1)*np.linalg.norm(v2)))
     return angle
+
+#print(angle(0.1,0.6))
+
 
 def irradiance_distribution(blimp, angle_sun):
     
@@ -131,6 +136,8 @@ def irradiance_distribution(blimp, angle_sun):
 # 
 # ax.scatter(tot[0],tot[1],tot[2])    
 # plt.show()
+
+
 
 def plot_blimp(blimp):
     alpha=blimp.panel_angle
