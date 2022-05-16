@@ -1,20 +1,16 @@
 #MASTER Blimp script
 import numpy as np
 import matplotlib.pyplot as plt
-from mayavi.mlab import *
-import solarcells as sc
-import gas
-#from first_concept import drag,velocity, balloon_mass, surface_area
-from propulsion_power import power_calc, read_irradiance
 from projected_panel import plot_blimp, irradiance_distribution
+from Classes import solarcells as sc, gas
 import pickle as pick
 
 def pickle(obj, filename):
-    with open(filename, 'wb') as file:
+    with open('Pickle Shelf/' + filename, 'wb') as file:
         pick.dump(obj, file)
 
 def unpickle(filename):
-    with open(filename, 'rb') as file:
+    with open('Pickle Shelf/' + filename, 'rb') as file:
         return pick.load(file)
 
 ###################
@@ -281,21 +277,20 @@ def simulateAcceleration(blimp):
 
 
 
-#Blimp Initialisation
-# Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
-#                mass_undercarriage=   3,  # [kg]
-#                mass_deployment=      1,  # [kg]
-#                mass_propulsion=      2,  # [kg]
-#                mass_electronics=     1,  # [kg]
-#                n_engines=            2,
-#                mass_ballonet=        0.75,  # [kg]
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
+Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
+               mass_undercarriage=   3,  # [kg]
+               mass_deployment=      1,  # [kg]
+               mass_propulsion=      2,  # [kg]
+               mass_electronics=     1,  # [kg]
+               n_engines=            2,
+               mass_ballonet=        0.75,  # [kg]
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
 
-#Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
-# Shlimp.saveToFile('Blimp.txt')
+Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+pickle(Shlimp, 'Blimp.txt')
 
 
 
