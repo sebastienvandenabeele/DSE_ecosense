@@ -19,8 +19,7 @@ def unpickle(filename):
 #Physical Constants
 lift_he                         = 1.0465
 lift_h2                          = 1.14125
-g                               = 9.81  # [N/kg]
-p                               = 1.6075  # []
+p                               = 1.6075  # []          Constant for ellipsoid calculation
 
 dl_re=np.array([[0.05, 2.36],
                 [0.1, 1.491],
