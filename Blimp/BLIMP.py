@@ -1,4 +1,3 @@
-#MASTER Blimp script
 import numpy as np
 import matplotlib.pyplot as plt
 from projected_panel import plot_blimp, irradiance_distribution

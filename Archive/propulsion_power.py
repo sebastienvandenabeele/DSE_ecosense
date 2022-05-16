@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pvlib
 
 def read_irradiance():
-    df_tmy, meta_dict = pvlib.iotools.read_tmy3("tmy.csv")
+    df_tmy, meta_dict = pvlib.iotools.read_tmy3("../Blimp/tmy.csv")
     df_tmy = df_tmy.reset_index()
     for i in range(len(df_tmy)):
         df_tmy["Time (HH:MM)"][i]=int(df_tmy["Time (HH:MM)"][i].split(":")[0])
@@ -25,9 +25,6 @@ def read_irradiance():
     df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
     return df_tmy
 
-def sum(a,b):
-    x = a + b
-    return x
 
     
     # print(np.mean(df_tmy["GHI"]))
