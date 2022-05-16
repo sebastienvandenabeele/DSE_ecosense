@@ -1,4 +1,4 @@
-# Welcome
+# Navigating in this GitHub
 Welcome to the GitHub of DSE Group 06: EcoSense. This README is a
 living document and will be updated regularly.
 Files are structured as follows:
@@ -13,7 +13,7 @@ Files are structured as follows:
 - Sensor: This folder houses everything related to Sensor and Sensor
             Network design.
 
-#Blimp Directory
+## Blimp Directory
 The main file to consider is BLIMP.py, which houses the Blimp class.
 This class allows creating different blimp designs with different parameters.
 Moreover, methods are created to simulate e.g. the performance of the 
