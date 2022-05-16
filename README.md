@@ -31,4 +31,6 @@ contains a solar cell class, in which different solar cells can be registered.
 In the BLIMP file, different designs can be easily equipped with different solar
 cell models.
 
+The file test_calc.py was used for unit testing.
+
 
