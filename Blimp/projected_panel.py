@@ -123,6 +123,7 @@ def plot_blimp(blimp):
     z = rz * np.outer(np.ones_like(u), np.cos(v))
     
     mesh(x, y, z, colormap="gray")
+    show(blimp)
     # ax.plot_surface(x, y, z,  rstride=4, cstride=4, color='r', zorder=0.2)
         
     # max_radius = max(rx, ry, rz)
