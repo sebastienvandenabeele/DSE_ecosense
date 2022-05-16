@@ -275,21 +275,21 @@ def simulateAcceleration(blimp):
 
 
 
-
-Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
-               mass_undercarriage=   3,  # [kg]
-               mass_deployment=      1,  # [kg]
-               mass_propulsion=      2,  # [kg]
-               mass_electronics=     1,  # [kg]
-               n_engines=            2,
-               mass_ballonet=        0.75,  # [kg]
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
-
-Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
-pickle(Shlimp, 'Blimp.txt')
+#
+# Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
+#                mass_undercarriage=   3,  # [kg]
+#                mass_deployment=      1,  # [kg]
+#                mass_propulsion=      2,  # [kg]
+#                mass_electronics=     1,  # [kg]
+#                n_engines=            2,
+#                mass_ballonet=        0.75,  # [kg]
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
+#
+# Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+# pickle(Shlimp, 'Blimp.txt')
 
 
 
@@ -298,7 +298,8 @@ Shlimp = unpickle('Blimp.txt')
 #Shlimp.report()
 #simulateAcceleration(Shlimp)
 Shlimp.report()
-plot_blimp(Shlimp)
+#plot_blimp(Shlimp)
+
 
 
 

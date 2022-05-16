@@ -21,7 +21,7 @@ def angle(v1,v2):
     angle=np.arccos(np.dot(v1,v2)/(np.linalg.norm(v1)*np.linalg.norm(v2)))
     return angle
 
-#print(angle(0.1,0.6))
+print(angle([3,3,3],[1,6,2]))
 
 
 def irradiance_distribution(blimp, angle_sun):
