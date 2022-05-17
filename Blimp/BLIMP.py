@@ -74,11 +74,28 @@ REQ_max_explosive               = 100000 * 10001000     # [J] TBD
 
 # Creation of Blimp class
 class Blimp:
-    # Constructor, all parameters set to optional
-    def __init__(self, name, mass_payload=0, mass_undercarriage=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
-                 mass_electronics=0, mass_ballonet=0, solar_cell=0, length_factor=0, spheroid_ratio=0, n_engines=0,
+    def __init__(self, name, mass_payload=0, mass_gondola=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
+                 mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0):
-
+        """
+        A class describing a virtual blimp object, used as vehicle design model
+        :param name: [str] Name of instance
+        :param mass_payload: [float] Design payload mass [kg]
+        :param mass_gondola: [float] Mass estimate of gondola [kg]
+        :param mass_propulsion: [float] Mass estimate of propulsion system [kg]
+        :param liftgas: [gas] gas used for lifting
+        :param mass_deployment: [float] Mass estimate of deployment system [kg]
+        :param mass_electronics: [float] Mass estimate of on-board electronics [kg]
+        :param mass_ballonet: [float] Mass estimate of ballonets [kg]
+        :param solar_cell: [solarcell] Solar cell model used
+        :param length_factor: [float] Percentage of length covered in solar cells (0.0 - 1.0)
+        :param spheroid_ratio: [float] Mathematical parameter for balloon calculations [-]
+        :param n_engines: [int] number of engines [-]
+        :param mass_solar_cell: [float] Mass estimate of solar cells [kg]
+        :param mass_balloon: [float] Mass estimate of balloon envelope [kg]
+        :param panel_angle: [float] One-sided angle from the top of the balloon, describing how much of the surface
+                is covered in solar cells [rad]
+        """
         self.name = name
 
         # Solar cells
@@ -99,14 +116,14 @@ class Blimp:
 
         # Masses
         self.mass_payload = mass_payload
-        self.mass_undercarriage = mass_undercarriage
+        self.mass_undercarriage = mass_gondola
         self.mass_propulsion = mass_propulsion
         self.mass_electronics = mass_electronics
         self.mass_balloon = mass_balloon
         self.mass_solar_cell = mass_solar_cell
         self.mass_ballonet = mass_ballonet
         self.mass_deployment = mass_deployment
-        self.mass_total = mass_payload + mass_undercarriage + mass_propulsion + mass_electronics +  mass_balloon + mass_solar_cell + mass_ballonet
+        self.mass_total = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet
 
         self.volume = self.mass_total/lift_h2
         self.n_engines = n_engines
@@ -292,7 +309,8 @@ def simulateVelocity(blimp, v0=0, throttle=1, tmax=30):
 
 
 # Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
+# Shlimp = Blimp(name=                "Shlimp",
+#                mass_payload =       REQ_payload_mass,  # [kg]
 #                mass_undercarriage=   3,  # [kg]
 #                mass_deployment=      1,  # [kg]
 #                mass_propulsion=      2,  # [kg]
@@ -304,13 +322,14 @@ def simulateVelocity(blimp, v0=0, throttle=1, tmax=30):
 #                liftgas=             gas.hydrogen,
 #                solar_cell=          sc.maxeon_gen3)
 
-# Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
-# pickle(Shlimp, 'Shlimp.txt')
+#Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
 
 
+Shlimp = unpickle('Shlimp')
+Shlimp.report()
 
-Shlimp = unpickle('Shlimp.txt')
-simulateVelocity(Shlimp, v0=17, throttle=0, tmax=50)
+# Shlimp = unpickle('Shlimp.txt')
+# simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)
 
