@@ -252,19 +252,19 @@ class Blimp:
 ########################### END OF CLASS DEFINITION ############################### END OF CLASS DEFINTION #######################################
 
 
-def simulateAcceleration(blimp):
+def simulateVelocity(blimp, v0=0, throttle=1, tmax=30):
     """
     :param blimp: Instance of blimp class used for acceleration simulation
     """
 
-    vs = [0]
+    vs = [v0]
     ts = [0]
     v = 0
-    E = 0
+    E = 0.5 * v0**2 * blimp.mass_total
     dt = 0.1
-    for t in np.arange(0, 30, dt):
+    for t in np.arange(0, tmax, dt):
         v = np.sqrt(2 * E / blimp.mass_total)
-        dP = blimp.power_available - 0.5 * rho * v**3 * blimp.ref_area * blimp.CD
+        dP = blimp.power_available * throttle - 0.5 * rho * v**3 * blimp.ref_area * blimp.CD
         E += dP * dt
 
         ts.append(t)
@@ -273,39 +273,39 @@ def simulateAcceleration(blimp):
     plt.plot(ts, vs)
     plt.plot(ts, minimum_velocity * np.ones(len(ts)), linestyle='dashed', color='black')
     plt.grid()
-    plt.xlim(0, 30)
+    plt.xlim(0, tmax)
     plt.ylim(0, 18)
     plt.legend(['Current velocity', 'Design velocity'])
     plt.xlabel('Time [s]')
     plt.ylabel('Velocity [m/s]')
-    plt.savefig('acceleration.png')
+    #plt.savefig('acceleration.png')
     plt.show()
 
 
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
-               mass_undercarriage=   3,  # [kg]
-               mass_deployment=      1,  # [kg]
-               mass_propulsion=      2,  # [kg]
-               mass_electronics=     1,  # [kg]
-               n_engines=            2,
-               mass_ballonet=        0.75,  # [kg]
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
+# Shlimp = Blimp(mass_payload =       REQ_payload_mass,  # [kg]
+#                mass_undercarriage=   3,  # [kg]
+#                mass_deployment=      1,  # [kg]
+#                mass_propulsion=      2,  # [kg]
+#                mass_electronics=     1,  # [kg]
+#                n_engines=            2,
+#                mass_ballonet=        0.75,  # [kg]
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
 
-Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
-pickle(Shlimp, 'Shlimp.txt')
+# Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+# pickle(Shlimp, 'Shlimp.txt')
 
 
 
 Shlimp = unpickle('Shlimp.txt')
-simulateAcceleration(Shlimp)
-Shlimp.report()
-plot_blimp(Shlimp)
+simulateVelocity(Shlimp, v0=17, throttle=0, tmax=50)
+#Shlimp.report()
+#plot_blimp(Shlimp)
 
 
 
