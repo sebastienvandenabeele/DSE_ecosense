@@ -2,7 +2,7 @@
 initial_volume_Hyd = 38.9 # m^3
 m_take_off = 45.9 # kg
 m_payload = 25 # kg
-
+(38.9, 45.9, 25)
 def required_density_gas(initial_volume_H,m_take_off,m_payload):
     """
     This definition calculates the required density of the gas 
@@ -15,7 +15,7 @@ def required_density_gas(initial_volume_H,m_take_off,m_payload):
     final_density_gas = (density_air*initial_volume_H-(m_take_off-m_payload))/initial_volume_H
     return final_density_gas
 
-#print(required_density_gas(initial_volume_Hyd,m_take_off,m_payload))
+print(required_density_gas(initial_volume_Hyd,m_take_off,m_payload))
 
 initial_volume_Hyd = 38.9 # m^3
 density_gas_final = 0.6877 # kg/m^3
@@ -111,4 +111,4 @@ def stress_blimp(diameter, inside_pressure, wall_thickness):
     ss = inside_pressure*diameter/(2*wall_thickness)
     return ss*10**(-6)
 
-print(stress_blimp(0.3, 172526, 0.1))
+
