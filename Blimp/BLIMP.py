@@ -75,10 +75,11 @@ REQ_max_explosive               = 100000 * 10001000     # [J] TBD
 # Creation of Blimp class
 class Blimp:
     # Constructor, all parameters set to optional
-    def __init__(self, mass_payload=0, mass_undercarriage=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
+    def __init__(self, name, mass_payload=0, mass_undercarriage=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0):
 
+        self.name = name
 
         # Solar cells
         self.solar_cell = solar_cell
@@ -249,12 +250,18 @@ class Blimp:
 
         print(cost)
 
+    def save(self):
+        pickle(self, self.name)
+
 ########################### END OF CLASS DEFINITION ############################### END OF CLASS DEFINTION #######################################
 
 
 def simulateVelocity(blimp, v0=0, throttle=1, tmax=30):
     """
     :param blimp: Instance of blimp class used for acceleration simulation
+    :param v0: Initial velocity of blimp
+    :param throttle: Throttle factor multiplied with steady-state power available
+    :param tmax: simulation time
     """
 
     vs = [v0]

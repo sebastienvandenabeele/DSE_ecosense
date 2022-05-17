@@ -14,3 +14,6 @@ class Solarcell:
 #####################
 
 maxeon_gen3 = Solarcell(0.0425, 0.231, 0.125, 0.125, 0.0153, 0.8, 3.33) #Ultra High Performance variant (conservative)
+
+
+solarcells = [maxeon_gen3]
