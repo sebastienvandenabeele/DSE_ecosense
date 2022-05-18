@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from projected_panel import plot_blimp, irradiance_distribution
 from Classes import solarcells as sc, gas
 import pickle as pick
+import requirements as REQ
 
 def pickle(obj, filename):
     with open('Pickle Shelf/' + filename, 'wb') as file:
