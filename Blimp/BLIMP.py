@@ -133,6 +133,7 @@ class Blimp:
         """
         solar power estimation subroutine for iteration
         """
+        self.panel_angle = self.panel_rows * self.solar_cell.width / self.radius
         self.area_solar = 0.8 * 2 * self.length / 2 * self.radius * 2 * self.panel_angle
         minimum_area = 2 * np.sin(self.panel_angle) * self.radius * self.length_factor * 2 * self.length / 2 * np.cos(avg_sun_elevation)
         # maximum_area = (1 - np.cos(avg_sun_elevation + self.panel_angle)) * self.radius * 0.8 * 2 * self.length / 2
@@ -140,15 +141,19 @@ class Blimp:
         # print(irradiance_distribution(self,avg_sun_elevation))
         power_max = minimum_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
         self.power_solar = power_max * self.solar_cell.efficiency * self.solar_cell.fillfac
+        self.mass_solar_cell = self.area_solar * self.solar_cell.density
 
     def sizeBalloon(self):
         """
         lifting body estimation subroutine for iteration
         """
+        self.volume = self.mass_total / lift_h2
+        self.explosive_potential = self.volume * self.liftgas.spec_energy
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         self.mass_balloon = self.surface_area * (silk_density + foil_density)
+        self.ref_area = self.volume ** (2 / 3)
 
     def report(self):
         """
@@ -194,7 +199,6 @@ class Blimp:
         performs design iterations for solar panel area and balloon volume to reach a given cruise speed
         """
 
-        print('designing Blimp for cruise speed of ', v_target, 'm/s')
         alphas = []
         vs = []
         vols = []
@@ -208,13 +212,9 @@ class Blimp:
             self.panel_rows += 1
             for i in np.arange(0, 200, 1): # Iterative Calculations
                 self.mass_total = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
-                self.volume = self.mass_total / lift_h2
-                self.explosive_potential = self.volume * self.liftgas.spec_energy
                 self.sizeBalloon()
-                self.panel_angle = self.panel_rows * self.solar_cell.width / self.radius
                 self.sizeSolar()
-                self.mass_solar_cell = self.area_solar * self.solar_cell.density
-                self.ref_area = self.volume**(2/3)
+
                 self.power_available = self.power_solar * motor_eff * prop_eff * prop_limit
                 self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
                 self.range = self.cruiseV * maximum_triptime
@@ -316,7 +316,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_conventional",
                solar_cell=          sc.maxeon_gen3)
 
 Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
-Shlimp.save()
+#Shlimp.save()
 
 #Shlimp = unpickle('Shlimp')
 Shlimp.report()
