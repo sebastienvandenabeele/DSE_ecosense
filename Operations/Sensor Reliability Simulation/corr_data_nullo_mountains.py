@@ -3,8 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn
 from scipy import stats
+import simulation_functions as smfunc
 
-data = pd.read_excel(r"../data/temperature_data.xlsx")
+data = pd.read_excel(r"data/temperature_data.xlsx")
 wind_directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE",
                    "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N"]
 wind_angles = [22.5*s for s in range(len(wind_directions))]
@@ -20,7 +21,7 @@ data["wind direction"] = ["land" if direction ==
                           0 else "sea" for direction in data["wind_dir"].values]
 print(data.corr())
 
-fire_counts = pd.read_csv(r"../data/fire_counts_NSW.csv").dropna(axis=1)
+fire_counts = pd.read_csv(r"data/fire_counts_NSW.csv").dropna(axis=1)
 fire_counts['Date'] = pd.to_datetime(
     fire_counts['DOY'], format='%j').dt.strftime('%m')
 fire_counts.set_index("Date", inplace=True)
@@ -47,21 +48,9 @@ df = data[["max_temp", "RH", "wind_spd"]]
 df = df[df.RH <= 80]
 
 
-def MC(RH, T):
-    return 5.658+0.04651*RH+(0.0003151*(RH**3)/T)-0.184*(T**0.77)
-
-
-def FFDI(MC, U):
-    return (34.81*np.exp(0.987*np.log(10))*(MC)**(-2.1))*(np.exp(0.0234*U))
-
-
-def R(ffdi, w):
-    return 0.0012*ffdi*w
-
-
-df["MC"] = MC(df["RH"].values, df["max_temp"].values)
-df["FFDI"] = FFDI(df["MC"].values, df["wind_spd"].values)
-df["R"] = R(df["FFDI"].values, 23.57)/3.6
+df["MC"] = smfunc.MC(df["RH"].values, df["max_temp"].values)
+df["FFDI"] = smfunc.FFDI(df["MC"].values, df["wind_spd"].values)
+df["R"] = smfunc.R(df["FFDI"].values, 23.57)/3.6
 df["LB"] = 1+10*(1-np.exp(-0.06*(1/3.6)*df["wind_spd"].values))
 
 t_max = 10*60
@@ -94,3 +83,4 @@ if plot:
     seaborn.scatterplot(ax=ax[1], data=data, x="max_temp", y="RH", hue="month")
     seaborn.scatterplot(ax=ax[2], data=data,
                         x="max_temp", y="RH", hue="wind_spd")
+    plt.show()
