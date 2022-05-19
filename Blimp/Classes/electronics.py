@@ -20,7 +20,7 @@ class Electronic:
 # Electronics library
 #####################
 
-ZED_F9P = Electronic("ZED_F9P", mass=0.005, 0.204, 189.99, "GPS Module")
+ZED_F9P = Electronic(name="ZED_F9P", mass=0.005, power_consumption=0.204, cost=189.99, type="GPS Module")
 
 
 ############################################
