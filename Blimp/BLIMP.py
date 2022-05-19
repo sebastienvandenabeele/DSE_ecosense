@@ -19,7 +19,7 @@ def unpickle(filename):
 
 #Physical Constants
 lift_he                         = 1.0465
-lift_h2                          = 1.14125
+lift_h2                         = 1.14125
 p                               = 1.6075  # []          Constant for ellipsoid calculation
 
 dl_re=np.array([[0.05, 2.36],
@@ -56,7 +56,6 @@ rho                             = 1.225  # [kg/m3]
 ###################
 margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [s]
-REQ_range                       = 300 * 1000    # [m]
 minimum_velocity                = REQ.range / maximum_triptime
 
 REQ_n_sensors                   = 1295 / 2
@@ -117,7 +116,7 @@ class Blimp:
 
         # Masses
         self.mass_payload = mass_payload
-        self.mass_undercarriage = mass_gondola
+        self.mass_gondola = mass_gondola
         self.mass_propulsion = mass_propulsion
         self.mass_electronics = mass_electronics
         self.mass_balloon = mass_balloon
@@ -164,7 +163,7 @@ class Blimp:
         print('     Solar panel mass: ', round(self.mass_solar_cell, 2), ' kg')
         print('     Balloon mass: ', round(self.mass_balloon, 2), ' kg')
         print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
-        print('     Undercarriage mass: ', round(self.mass_undercarriage, 2), ' kg')
+        print('     Undercarriage mass: ', round(self.mass_gondola, 2), ' kg')
         print('     Propulsion mass: ', round(self.mass_propulsion, 2), ' kg')
         print('     Electronics mass: ', round(self.mass_electronics, 2), ' kg')
         print('     Payload mass: ', round(self.mass_payload, 2), ' kg')
@@ -208,7 +207,7 @@ class Blimp:
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
             for i in np.arange(0, 200, 1): # Iterative Calculations
-                self.mass_total = self.mass_payload + self.mass_undercarriage + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
+                self.mass_total = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
                 self.volume = self.mass_total / lift_h2
                 self.explosive_potential = self.volume * self.liftgas.spec_energy
                 self.sizeBalloon()
@@ -232,6 +231,8 @@ class Blimp:
 
             # Addition of solar panels is stopped if requirements are infringed
             requirements_met = REQ.checkRequirements(self)
+            if self.cruiseV >= minimum_velocity:
+                break
 
         if plot:
                 plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
@@ -300,28 +301,28 @@ def simulateVelocity(blimp, v0=0, throttle=1, tmax=30):
 
 
 
-# Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp",
-#                mass_payload =       REQ_payload_mass,  # [kg]
-#                mass_undercarriage=   3,  # [kg]
-#                mass_deployment=      1,  # [kg]
-#                mass_propulsion=      2,  # [kg]
-#                mass_electronics=     1,  # [kg]
-#                n_engines=            2,
-#                mass_ballonet=        0.75,  # [kg]
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
+#Creation of blimp design, run either this or unpickle from file
+Shlimp = Blimp(name=                "Shlimp_350km_conventional",
+               mass_payload =       REQ_payload_mass,  # [kg]
+               mass_gondola=   3,  # [kg]
+               mass_deployment=      1,  # [kg]
+               mass_propulsion=      2,  # [kg]
+               mass_electronics=     1,  # [kg]
+               n_engines=            2,
+               mass_ballonet=        0.75,  # [kg]
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
 
-#Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+Shlimp.setCruiseSpeed(minimum_velocity, plot=False)
+Shlimp.save()
 
-
-Shlimp = unpickle('Shlimp')
+#Shlimp = unpickle('Shlimp')
 Shlimp.report()
 
 # Shlimp = unpickle('Shlimp.txt')
-# simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
+#simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)
 
