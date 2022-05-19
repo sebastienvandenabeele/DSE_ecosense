@@ -57,7 +57,7 @@ rho                             = 1.225  # [kg/m3]
 margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [s]
 REQ_range                       = 300 * 1000    # [m]
-minimum_velocity                = REQ_range / maximum_triptime
+minimum_velocity                = REQ.range / maximum_triptime
 
 REQ_n_sensors                   = 1295 / 2
 relays_per_sensor               = 25
@@ -202,8 +202,9 @@ class Blimp:
         masses = []
         radii = []
         self.panel_rows = -1
+        requirements_met = True
         # One row of solar panels is added along the perimeter
-        while self.panel_angle < np.radians(178):
+        while self.panel_angle < np.radians(178) and requirements_met:
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
             for i in np.arange(0, 200, 1): # Iterative Calculations
@@ -230,18 +231,7 @@ class Blimp:
             print('velocity [m/s]: ', self.cruiseV)
 
             # Addition of solar panels is stopped if requirements are infringed
-            if self.cruiseV >= v_target:
-                print('Target speed of ', v_target, ' m/s was reached.')
-                break
-            if self.radius >= REQ_max_radius:
-                print('MAXIMUM RADIUS REACHED')
-                break
-            if self.length >= REQ_max_length:
-                print('MAXIMUM LENGTH REACHED')
-                break
-            if self.explosive_potential >= REQ_max_explosive:
-                print('MAXIMUM EXPLOSIVE POTENTIAL REACHED')
-                break
+            requirements_met = REQ.checkRequirements(self)
 
         if plot:
                 plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
