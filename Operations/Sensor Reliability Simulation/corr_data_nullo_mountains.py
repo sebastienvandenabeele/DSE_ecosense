@@ -5,7 +5,7 @@ import seaborn
 from scipy import stats
 import simulation_functions as smfunc
 
-data = pd.read_excel(r"../data/temperature_data.xlsx")
+data = pd.read_excel(r"data/temperature_data.xlsx")
 wind_directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE",
                    "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N"]
 wind_angles = [22.5*s for s in range(len(wind_directions))]
@@ -21,7 +21,7 @@ data["wind direction"] = ["land" if direction ==
                           0 else "sea" for direction in data["wind_dir"].values]
 print(data.corr())
 
-fire_counts = pd.read_csv(r"../data/fire_counts_NSW.csv").dropna(axis=1)
+fire_counts = pd.read_csv(r"data/fire_counts_NSW.csv").dropna(axis=1)
 fire_counts['Date'] = pd.to_datetime(
     fire_counts['DOY'], format='%j').dt.strftime('%m')
 fire_counts.set_index("Date", inplace=True)
@@ -83,3 +83,4 @@ if plot:
     seaborn.scatterplot(ax=ax[1], data=data, x="max_temp", y="RH", hue="month")
     seaborn.scatterplot(ax=ax[2], data=data,
                         x="max_temp", y="RH", hue="wind_spd")
+    plt.show()
