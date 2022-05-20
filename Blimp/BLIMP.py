@@ -119,6 +119,7 @@ class Blimp:
         self.mass_solar_cell = mass_solar_cell
         self.mass_ballonet = mass_ballonet
         self.mass_deployment = mass_deployment
+        self.mass_battery = 0
         self.mass_total = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet
 
         self.volume = self.mass_total/lift_h2
@@ -155,7 +156,18 @@ class Blimp:
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         self.mass_balloon = self.surface_area * (silk_density + foil_density)
         self.ref_area = self.volume ** (2 / 3)
-
+        
+    def sizeBattery(self):
+        dod=0.9 
+        battery_density = 250 # [Wh/kg]
+        voltage_nominal=3.7 # [V]
+        n_series=12
+        
+        self.battery_V=(2*self.power_electronics/(rho*self.ref_area*self.CD))**(1/3)
+        self.battery_P=2*self.power_electronics*REQ.range_on_battery/self.battery_V/dod*margin
+        self.mass_battery=self.battery_P/battery_density
+        self.battery_capacity=self.battery_P/(n_series*voltage_nominal)
+        
     def report(self):
         """
         User-friendly output of most important design characteristics
@@ -212,10 +224,10 @@ class Blimp:
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
             for i in np.arange(0, 200, 1): # Iterative Calculations
-                self.mass_total = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
+                self.mass_total = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet +self.mass_battery
                 self.sizeBalloon()
                 self.sizeSolar()
-
+                self.sizeBattery()
                 self.power_available = self.power_solar * motor_eff * prop_eff * prop_limit
                 self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
                 self.range = self.cruiseV * maximum_triptime
