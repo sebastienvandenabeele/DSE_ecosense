@@ -12,6 +12,9 @@ df["R"] = simfunc.R(df["FFDI"].values, 23.57)/3.6
 df["LB"] = 1+10*(1-np.exp(-0.06*(1/3.6)*df["wind_spd"].values))
 df = df[df.FFDI > 11]
 df["wind_dir"] = 270-df["wind_dir"]
+df = df[df.temp > 22]
+df.index = np.arange(len(df))
+print(df)
 
 t_max = 8*60
 N, M = 100, len(df)
@@ -19,46 +22,63 @@ size = 10000
 x_spacing, y_spacing = 280, 280
 x_sensor = np.arange(0, size+x_spacing, x_spacing)
 y_sensor = np.arange(0, size+y_spacing, y_spacing)
-X_sens, Y_sens = np.meshgrid(x_sensor, y_sensor)
+mesh_points = np.vstack(
+    map(np.ravel, np.meshgrid(x_sensor, y_sensor))).transpose()
 
 time = np.linspace(0, t_max, N)*np.ones((M, 1))
 
 
-def ellips_params(t, R, lb):
-    l = R*t
-    w = l/lb
-    c = np.sqrt((l/2)**2 - (w/2)**2)
-    return np.array([l, w, c])
-
-
-def cone_params(t, u, lb):
-    l = u*t
-    w = l/lb
-    return np.array([l, w])
+def detection_time(patch, points):
+    arg = np.array([patch.contains_point(point) for point in points])
+    if any(arg) == True:
+        return True
+    else:
+        return False
 
 
 for index, t in enumerate(time):
-    if index < 1:
-        x_f, y_f = np.random.uniform(0, size, 2)
-        R, lb, wind_dir, wind_spd, temp = df.iloc[index]["R"], df.iloc[index][
-            "LB"], df.iloc[index]["wind_dir"], df.iloc[index]["wind_spd"], df.iloc[index]["temp"]
-        length, width, centre = ellips_params(t, R, lb)
-        length_triangle, width_triangle = cone_params(t, wind_spd/3.6, lb)
-        centre = [x_f+centre*np.cos(np.deg2rad(wind_dir)),
-                  y_f + centre*np.sin(np.deg2rad(wind_dir))]
+    print(f"Running try no. {index+1}")
+    x_f, y_f = np.random.uniform(0, size, 2)
+    R, lb, wind_dir, wind_spd, temp = df.iloc[index]["R"], df.iloc[index][
+        "LB"], df.iloc[index]["wind_dir"], df.iloc[index]["wind_spd"], df.iloc[index]["temp"]
+    length, width, centre = simfunc.ellips_params(t, R, lb)
+    length_triangle, width_triangle = simfunc.cone_params(
+        t, wind_spd/3.6, lb)
+    centre = [x_f+centre*np.cos(np.deg2rad(wind_dir)),
+              y_f + centre*np.sin(np.deg2rad(wind_dir))]
 
-        ellipse_patches = [Ellipse(
-            (centre[0][i], centre[1][i]), length[i], width[i], wind_dir, facecolor="none", edgecolor="orange", linewidth="0.2") for i in range(N)]
+    for i in range(N):
 
-        length_triangle, width_triangle = cone_params(t, wind_spd, lb)
-        print(np.shape(centre), np.shape(
-            length_triangle), np.shape(width_triangle))
+        ellipse_patches = Ellipse((centre[0][i], centre[1][i]), length[i], width[i],
+                                  wind_dir, facecolor="none", edgecolor="orange", linewidth="0.2")
 
-        fig, ax = plt.subplots(figsize=(9, 9))
+        triangle_points = simfunc.triangle_points(
+            length_triangle, width_triangle, centre, wind_dir, i)
+
+        triangle_patches = Polygon(
+            triangle_points, closed=True, facecolor="none", edgecolor="grey", linewidth="0.2")
+
+        detection_gas = detection_time(triangle_patches, mesh_points)
+        if detection_gas == True:
+            detection_time_gas = time[0][i]
+            df.loc[index, "detection_time_gas"] = detection_time_gas
+            break
+
+    #
+    # try:
+    #    detection = time[0][np.argwhere(np.array(detection) == True)[0][0]]
+    # except:
+    #    detection = np.nan
+
+    #df.loc[index, "detection_time"] = detection
+
+    plotting = False
+    if plotting:
+        fig, ax = plt.subplots(figsize=(8, 8))
         for i, ellipse in enumerate(ellipse_patches):
             ax.add_patch(ellipse)
-
-        ax.scatter(X_sens, Y_sens)
+            ax.add_patch(triangle_patches[i])
+        ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
         plt.scatter(x_f, y_f, color='red')
         plt.xlim(0, size)
         plt.ylim(0, size)
@@ -66,5 +86,4 @@ for index, t in enumerate(time):
             f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Direction: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
         plt.show()
 
-    #R, lb = df.iloc[index]["R"], df.iloc[index]["LB"]
-    #l, w, c = ellips_params(t, R, lb)
+print(df)
