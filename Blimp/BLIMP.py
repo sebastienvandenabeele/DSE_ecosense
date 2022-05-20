@@ -127,9 +127,9 @@ class Blimp:
         self.mass_ballonet = mass_ballonet
         self.mass_deployment = mass_deployment
         self.mass_battery = 0
-        self.mass_total = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet
+        self.MTOM = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet
 
-        self.volume = self.mass_total/lift_h2
+        self.volume = self.MTOM / lift_h2
         self.n_engines = n_engines
 
         self.target_speed = target_speed
@@ -156,7 +156,7 @@ class Blimp:
         """
         lifting body estimation subroutine for iteration
         """
-        self.volume = self.mass_total / lift_h2
+        self.volume = self.MTOM / lift_h2
         self.explosive_potential = self.volume * self.liftgas.spec_energy
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
@@ -173,7 +173,7 @@ class Blimp:
         print('Number of sensors: ', round(REQ_n_sensors, 0))
         print('Number of relays: ', n_relays)
         print()
-        print('MTOM: ', round(self.mass_total, 3), ' kg')
+        print('MTOM: ', round(self.MTOM, 3), ' kg')
         print('     Solar panel mass: ', round(self.mass_solar_cell, 2), ' kg')
         print('     Balloon mass: ', round(self.mass_balloon, 2), ' kg')
         print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
@@ -220,7 +220,7 @@ class Blimp:
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
             for i in np.arange(0, 200, 1): # Iterative Calculations
-                self.mass_total = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
+                self.MTOM = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
                 self.sizeBalloon()
                 self.sizeSolar()
 
@@ -232,7 +232,7 @@ class Blimp:
                 alphas.append(self.panel_angle)
                 vs.append(self.cruiseV)
                 vols.append(self.volume)
-                masses.append(self.mass_total)
+                masses.append(self.MTOM)
                 radii.append(self.radius)
 
             # Addition of solar panels is stopped if requirements are infringed
@@ -279,10 +279,10 @@ class Blimp:
         vs = [v0]
         ts = [0]
         v = 0
-        E = 0.5 * v0 ** 2 * self.mass_total
+        E = 0.5 * v0 ** 2 * self.MTOM
         dt = 0.1
         for t in np.arange(0, tmax, dt):
-            v = np.sqrt(2 * E / self.mass_total)
+            v = np.sqrt(2 * E / self.MTOM)
             dP = self.power_available * throttle - 0.5 * rho * v ** 3 * self.ref_area * self.CD
             E += dP * dt
 
