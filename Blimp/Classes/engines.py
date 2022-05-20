@@ -52,9 +52,9 @@ tmt_2307_1950 = Engine(mfg="tmt", name="2307", max_power=534, mass=35.5, n_cells
 tmt_f1000_510 = Engine(mfg="tmt", name="F1000", max_power=4000, mass=404, n_cells=8, prop_diameter=13, KV=510, cost=114.2)
 tmt_f1000_300 = Engine(mfg="tmt", name="F1000", max_power=4548, mass=400, n_cells=12, prop_diameter=13, KV=300, cost=114.2)
 # Fixed wing
-tmt_2303_1500 = Engine(mfg="tmt", name="2303", max_power=100, mass=18, n_cells=3, prop_diameter=10, KV=1500, cost=34.3, safe_throttle=0.75)
-tmt_2303_1800 = Engine(mfg="tmt", name="2303", max_power=70, mass=18, n_cells=2, prop_diameter=9, KV=1800, cost=34.3, safe_throttle=0.8)
-tmt_2303_2300 = Engine(mfg="tmt", name="2303", max_power=65, mass=18, n_cells=2, prop_diameter=7, KV=2300, cost=34.3, safe_throttle=0.85)
+tmt_2303_1500 = Engine(mfg="tmt", name="2303", max_power=100, mass=18, n_cells=3, prop_diameter=10, KV=1500, cost=34.3, safe_thr=0.75)
+tmt_2303_1800 = Engine(mfg="tmt", name="2303", max_power=70, mass=18, n_cells=2, prop_diameter=9, KV=1800, cost=34.3, safe_thr=0.8)
+tmt_2303_2300 = Engine(mfg="tmt", name="2303", max_power=65, mass=18, n_cells=2, prop_diameter=7, KV=2300, cost=34.3, safe_thr=0.85)
 tmt_2321_950 = Engine(mfg="tmt", name="2321", max_power=450, mass=93, n_cells=4, prop_diameter=12, KV=950, cost=42.8, safe_thr=0.7)
 tmt_2321_1250 = Engine(mfg="tmt", name="2321", max_power=700, mass=94, n_cells=4, prop_diameter=11, KV=1250, cost=42.8)
 tmt_4130_230 = Engine(mfg="tmt", name="4130", max_power=2500, mass=408, n_cells=12, prop_diameter=17, KV=230, cost=114.2)

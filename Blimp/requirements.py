@@ -38,7 +38,7 @@ def checkRequirements(blimp):
     elif blimp.length > max_length:
         print('Too long.')
         return False
-    elif blimp.mass_total > max_MTOM:
+    elif blimp.MTOM > max_MTOM:
         print('Too heavy.')
         return False
 
