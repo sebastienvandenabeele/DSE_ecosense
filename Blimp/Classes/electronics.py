@@ -21,6 +21,8 @@ class Electronic:
 #####################
 
 ZED_F9P = Electronic(name="ZED_F9P", mass=0.005, power_consumption=0.204, cost=189.99, type="GPS Module")
+Honeywell_SATCOM = Electronic("Honeywell SATCOM", 0.994, 44, 2800, "TX/RX")
+pixhawk = Electronic("Pixhawk 4", 0.0158, 2, 180, "FC")
 
 
 ############################################
