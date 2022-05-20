@@ -2,9 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn
-from scipy import stats
 
-data = pd.read_excel(r"data/temperature_data.xlsx")
+data = pd.read_excel(r"./data/temperature_data.xlsx")
 wind_directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE",
                    "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N"]
 wind_angles = [22.5*s for s in range(len(wind_directions))]
@@ -31,7 +30,7 @@ def normal_distr_params(x):
 
 data_distribution = pd.DataFrame([])
 samples = pd.DataFrame([])
-N = 1000000
+N = 100000
 parameters = ["RH", "wind_dir", "wind_spd"]
 for parameter in parameters:
     mu, sig = normal_distr_params(data[parameter].values)

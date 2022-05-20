@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from projected_panel import plot_blimp, irradiance_distribution
-from Classes import solarcells as sc, engines as eng, electronics as el, gas
+from Classes import solarcells as sc, gas
 import pickle as pick
 import requirements as REQ
 
@@ -126,10 +126,11 @@ class Blimp:
         self.mass_balloon = mass_balloon
         self.mass_ballonet = mass_ballonet
         self.mass_deployment = mass_deployment
-        self.MTOM = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet
+        self.mass_battery = 0
+        self.mass_total = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet
 
-        self.volume = self.MTOM / lift_h2
-
+        self.volume = self.mass_total/lift_h2
+        self.n_engines = n_engines
 
         self.target_speed = target_speed
         self.setCruiseSpeed()
@@ -146,6 +147,7 @@ class Blimp:
         minimum_area = 2 * np.sin(self.panel_angle) * self.radius * self.length_factor * 2 * self.length / 2 * np.cos(avg_sun_elevation)
         # maximum_area = (1 - np.cos(avg_sun_elevation + self.panel_angle)) * self.radius * 0.8 * 2 * self.length / 2
         minimum_area=self.area_solar*irradiance_distribution(self, avg_sun_elevation)
+        # print(irradiance_distribution(self,avg_sun_elevation))
         power_max = minimum_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
         self.power_solar = power_max * self.solar_cell.efficiency * self.solar_cell.fillfac
         self.mass_solar_cell = self.area_solar * self.solar_cell.density
@@ -154,7 +156,7 @@ class Blimp:
         """
         lifting body estimation subroutine for iteration
         """
-        self.volume = self.MTOM / lift_h2
+        self.volume = self.mass_total / lift_h2
         self.explosive_potential = self.volume * self.liftgas.spec_energy
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
@@ -171,7 +173,7 @@ class Blimp:
         print('Number of sensors: ', round(REQ_n_sensors, 0))
         print('Number of relays: ', n_relays)
         print()
-        print('MTOM: ', round(self.MTOM, 3), ' kg')
+        print('MTOM: ', round(self.mass_total, 3), ' kg')
         print('     Solar panel mass: ', round(self.mass_solar_cell, 2), ' kg')
         print('     Balloon mass: ', round(self.mass_balloon, 2), ' kg')
         print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
@@ -200,6 +202,7 @@ class Blimp:
 
     def setCruiseSpeed(self, plot=False):
         """
+        :param v_target: target cruise speed, blimp should be sized for
         :param plot: boolean, if iteration results should be plotted
 
         performs design iterations for solar panel area and balloon volume to reach a given cruise speed
@@ -217,7 +220,7 @@ class Blimp:
             print(np.degrees(self.panel_angle))
             self.panel_rows += 1
             for i in np.arange(0, 200, 1): # Iterative Calculations
-                self.MTOM = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
+                self.mass_total = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet
                 self.sizeBalloon()
                 self.sizeSolar()
 
@@ -229,7 +232,7 @@ class Blimp:
                 alphas.append(self.panel_angle)
                 vs.append(self.cruiseV)
                 vols.append(self.volume)
-                masses.append(self.MTOM)
+                masses.append(self.mass_total)
                 radii.append(self.radius)
 
             # Addition of solar panels is stopped if requirements are infringed
@@ -264,6 +267,7 @@ class Blimp:
         print(cost)
 
 
+
     def simulateVelocity(self, v0=0, throttle=1, tmax=30):
         """
         :param blimp: Instance of blimp class used for acceleration simulation
@@ -275,10 +279,10 @@ class Blimp:
         vs = [v0]
         ts = [0]
         v = 0
-        E = 0.5 * v0 ** 2 * self.MTOM
+        E = 0.5 * v0 ** 2 * self.mass_total
         dt = 0.1
         for t in np.arange(0, tmax, dt):
-            v = np.sqrt(2 * E / self.MTOM)
+            v = np.sqrt(2 * E / self.mass_total)
             dP = self.power_available * throttle - 0.5 * rho * v ** 3 * self.ref_area * self.CD
             E += dP * dt
 
@@ -306,8 +310,8 @@ Shlimp = Blimp(name=                "Shlimp_350km_conventional",
                target_speed=        minimum_velocity,
                mass_gondola=   3,  # [kg]
                mass_deployment=      1,
-               engine=               eng.tmt_2321_950,
-               electronics=          [el.ZED_F9P],
+               mass_propulsion=      2,
+               mass_electronics=     1,
                n_engines=            2,
                mass_ballonet=        0.75,
                length_factor=        0.8,
