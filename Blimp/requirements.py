@@ -4,7 +4,7 @@ max_length          =        200     # [m]   REQ-VEH-2
 max_radius          =         40     # [m]   REQ-VEH-2
 n_sensors           =        100     # [-]   REQ-VEH-3
 lifetime            =         10     # [yr]  REQ-VEH-4
-explosive_potential =       6575     # [MJ]  REQ-VEH-5
+explosive_potential =       6575 *10**6    # [J]  REQ-VEH-5
 
 ### STRUCTURAL REQUIREMENTS ###
 gust_at_maxcruise   =         10.6   # [m/s] REQ-VEH-STR-5
@@ -19,10 +19,10 @@ payload_mass        =         44     # [kg]  REQ-VEH-STR-15
 
 
 ### PROPULSION AND POWER ###
-range_on_battery    =        100     # [km]  REQ-VEH-POW-2
+range_on_battery    =        100    # [km]  REQ-VEH-POW-2
 
 ### CONTROL AND OPERATIONS ###
-range               =        350     # [km]  REQ-VEH-CO-12
+range               =        350*10**3     # [m]  REQ-VEH-CO-12
 path_accuracy       =         25     # [m]   REQ-VEH-CO-13
 max_ground_alt      =        500     # [m]   REQ-VEH-CO-14
 deployment_accuracy =         25     # [m]   REQ-VEH-CO-15
@@ -38,7 +38,7 @@ def checkRequirements(blimp):
     elif blimp.length > max_length:
         print("Too long")
         return False
-    elif blimp.mass_total > max_MTOM:
+    elif blimp.MTOM > max_MTOM:
         print("too heavy")
         return False
     elif blimp.explosive_potential > explosive_potential:

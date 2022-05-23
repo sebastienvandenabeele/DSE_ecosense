@@ -139,7 +139,7 @@ class Blimp:
         self.n_engines = n_engines
 
         self.target_speed = target_speed
-        self.setCruiseSpeed(plot=True)
+        self.setCruiseSpeed(plot=False)
 
     def save(self):
         pickle(self, self.name)
