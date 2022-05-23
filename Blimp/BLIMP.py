@@ -121,20 +121,20 @@ class Blimp:
 
 
         # Masses
-        mass = {}
-        self.mass_payload = mass_payload
-        self.mass_gondola = mass_gondola
+        self.mass = {}
+        self.mass['payload'] = mass_payload
+        self.mass['gondola'] = mass_gondola
 
         self.electronics = electronics
-        self.mass_electronics = sum([el.mass for el in self.electronics])
+        self.mass['electronics'] = sum([el.mass for el in self.electronics])
 
-        self.mass_solar_cell = mass_solar_cell
-        self.mass_balloon = mass_balloon
-        self.mass_ballonet = mass_ballonet
-        self.mass_deployment = mass_deployment
-        self.mass_battery = 0
-        self.MTOM = mass_payload + mass_gondola + mass_propulsion + mass_electronics + mass_balloon + mass_solar_cell + mass_ballonet 
+        self.mass['solar'] = mass_solar_cell
+        self.mass['envelope'] = mass_balloon
+        self.mass['deployment'] = mass_deployment
+        self.mass['ballonet'] = mass_ballonet
+        self.mass['battery'] = 0
 
+        self.MTOM = sum(self.mass.values())
         self.volume = self.MTOM / lift_h2
         self.n_engines = n_engines
 
@@ -168,7 +168,7 @@ class Blimp:
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
-        self.mass_balloon = self.surface_area * (silk_density + foil_density)
+        self.mass['envelope'] = self.surface_area * (silk_density + foil_density)
         self.ref_area = self.volume ** (2 / 3)
         
     def sizeBattery(self):
@@ -180,7 +180,7 @@ class Blimp:
         self.power_electronics=sum([el.power_consumption for el in self.electronics])
         self.battery_speed= (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3)
         self.battery_capacity= 2 * self.power_electronics * REQ.range_on_battery / (self.battery_speed * 3.6) / dod * margin
-        self.mass_battery= self.battery_capacity / battery_density
+        self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
 
     def report(self):
@@ -242,7 +242,7 @@ class Blimp:
         while self.panel_angle < np.radians(178) and requirements_met:
             self.panel_rows += 1
             for i in np.arange(0, 200, 1):  # Iterative Calculations
-                self.MTOM = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet + self.mass_battery
+                self.MTOM = sum(self.mass.values())
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
