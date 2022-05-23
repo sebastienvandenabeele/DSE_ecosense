@@ -43,7 +43,7 @@ fin_wood_density                = 150 # [kg/m3]
 
 prop_eff                        = 0.8
 motor_eff                       = 0.9
-prop_limit                      = 0.75
+prop_limit                      = 0.55
 
 #Environment
 avg_sun_elevation               = 52  # [deg]
@@ -173,7 +173,7 @@ class Blimp:
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
-        self.mass['envelope'] = self.surface_area * (silk_density + foil_density)
+        self.mass['envelope'] = self.surface_area * (silk_density + foil_density) * 10
         self.ref_area = self.volume ** (2 / 3)
         
     def sizeBattery(self):
@@ -212,10 +212,12 @@ class Blimp:
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
-        print('Power available: ', round(self.prop_power_available / 1000, 2), ' kW')
-        print('Engine max power: ', round(self.engine.max_power / 1000, 2), ' kW')
+        print('On-board electronics power: ', round(self.power_electronics, 2), ' W')
+        print('Single engine max power: ', round(self.engine.max_power / 1000, 2), ' kW')
         print('Number of engines:', round(self.n_engines, 0))
-        print('Power per engine: ', round(self.power_per_engine/1000, 2), ' kW')
+        print('Actual propulsion power available: ', round(self.prop_power_available / 1000, 2), ' kW')
+        print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
+        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power * 100, 2), ' %')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
@@ -352,7 +354,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1625",
                mass_propulsion=      2,
                mass_electronics=     1,
 
-               n_engines=            3,
+               n_engines=            4,
                engine=              eng.tmt_f60prov_2020,
 
                electronics=         EL.config_max_consumption,
