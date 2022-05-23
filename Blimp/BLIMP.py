@@ -18,7 +18,7 @@ def unpickle(filename):
 ###################
 
 #Physical Constants
-lift_he                         = 1.0465
+lift_he                         = 1.0465 #    kg lift per cubic meter
 lift_h2                          = 1.14125
 p                               = 1.6075  # []          Constant for ellipsoid calculation
 
