@@ -6,7 +6,7 @@ def computeArea(pos):
     return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
 def sizeControl(blimp):
-    
+    plt.ioff()
     
     baseline_diameter=1.64
     
@@ -85,6 +85,7 @@ def sizeControl(blimp):
     polygon = []
     polygon = plt.fill(naca[0],naca[1])
     area = computeArea(polygon[0].xy)
+    plt.close()
     
     volume=area*span
     
