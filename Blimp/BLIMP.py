@@ -130,6 +130,7 @@ class Blimp:
         self.mass['control'] = mass_control
 
         self.electronics = electronics
+        self.power_electronics = sum([el.power_consumption for el in self.electronics])
         self.mass['electronics'] = sum([el.mass for el in self.electronics])
 
         self.mass['solar'] = mass_solar_cell
@@ -158,7 +159,7 @@ class Blimp:
         shone_area = self.area_solar * irradiance_distribution(self, avg_sun_elevation)
         net_power = shone_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
         self.power_solar = net_power * self.solar_cell.efficiency * self.solar_cell.fillfac
-        self.mass_solar_cell = self.area_solar * self.solar_cell.density
+        self.mass['solar'] = self.area_solar * self.solar_cell.density
 
         if np.isnan(self.power_solar):
             self.power_solar = 0
@@ -181,8 +182,9 @@ class Blimp:
         voltage_nominal=3.7 # [V]
         n_series=12
         
-        self.power_electronics=sum([el.power_consumption for el in self.electronics])
-        self.battery_speed= (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3)
+
+        self.battery_speed = (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (
+                    1 / 3)
         self.battery_capacity= 2 * self.power_electronics * REQ.range_on_battery / (self.battery_speed * 3.6) / dod * margin
         self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
@@ -196,15 +198,9 @@ class Blimp:
         print('Number of sensors: ', round(REQ_n_sensors, 0))
         print('Number of relays: ', n_relays)
         print()
-        print('MTOM: ', round(self.MTOM, 3), ' kg')
-        print('     Solar panel mass: ', round(self.mass_solar_cell, 2), ' kg')
-        print('     Balloon mass: ', round(self.mass_balloon, 2), ' kg')
-        print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
-        print('     Undercarriage mass: ', round(self.mass_gondola, 2), ' kg')
-        print('     Engines mass: ', round(self.mass_propulsion, 2), ' kg')
-        print('     Electronics mass: ', round(self.mass_electronics, 2), ' kg')
-        print('     Payload mass: ', round(self.mass_payload, 2), ' kg')
-        print('     Battery mass: ', round(self.mass_battery, 2), ' kg')
+        print('MTOM: ', round(self.MTOM, 2), ' kg')
+        for key, value in self.mass.items():
+            print('Mass of ', key, ': ', round(value, 2), " kg")
         print()
         print('Balloon radius: ', round(self.radius, 2), ' m')
         print('Balloon length: ', round(self.length, 2), ' m')
@@ -253,7 +249,7 @@ class Blimp:
                 self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
 
                 # Uncomment this if an engine is selected
-                self.solar_power_available = self.power_solar * self.engine.efficiency * prop_eff
+                self.solar_power_available = (self.power_solar - self.power_electronics) * self.engine.efficiency * prop_eff
                 self.prop_power_available = min([self.cruise_prop_power, self.solar_power_available])
 
 
@@ -348,7 +344,7 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2305_1235",
+Shlimp = Blimp(name=                "Shlimp_350km_2305_1625",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_gondola=   3,  # [kg]
@@ -359,7 +355,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1235",
                n_engines=            3,
                engine=              eng.tmt_f60prov_2020,
 
-               electronics=         EL.max_consumption,
+               electronics=         EL.config_max_consumption,
                mass_ballonet=        0.75,
                length_factor=        0.8,
                spheroid_ratio=       3,

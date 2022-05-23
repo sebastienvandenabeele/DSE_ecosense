@@ -5,7 +5,7 @@ class Engine:
     instances = set()
     std_safe_thr = 0.55
 
-    def __init__(self, mfg, name, max_power, mass, n_cells, prop_diameter, KV, cost, safe_thr=std_safe_thr, efficiency=0.55):
+    def __init__(self, mfg, name, max_power, mass, n_cells, prop_diameter, KV, cost, safe_thr=std_safe_thr, efficiency=0.80):
         """
         A class describing electrical motors used for propulsion
         :param mfg: [str] Name of manufacturer [-]
