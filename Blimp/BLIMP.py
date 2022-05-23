@@ -75,7 +75,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
-                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0):
+                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_controls=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
         :param name: [str] Name of instance
@@ -96,7 +96,7 @@ class Blimp:
                 is covered in solar cells [rad]
         """
         self.name = name
-
+        self.mass = {}
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
@@ -121,10 +121,11 @@ class Blimp:
         re = dl_re[np.where(dl_re[:, 0] == list_element), 1][0][0]
         self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6)) * margin
         self.liftgas = liftgas
+        self.n_controls = n_controls
 
 
         # Masses
-        self.mass = {}
+
         self.mass['payload'] = mass_payload
         self.mass['gondola'] = mass_gondola
         self.mass['control'] = mass_control
@@ -243,7 +244,7 @@ class Blimp:
         # One row of solar panels is added along the perimeter
         while self.panel_angle < np.radians(178) and requirements_met:
             self.panel_rows += 1
-            for i in np.arange(0, 100, 1):  # Iterative Calculations
+            for i in np.arange(0, 50, 1):  # Iterative Calculations
                 self.MTOM = sum(self.mass.values())
                 self.sizeBalloon()
                 self.sizeSolar()
@@ -277,7 +278,7 @@ class Blimp:
             if self.cruiseV >= self.target_speed:
                 print('Target design speed reached.')
                 break
-            if np.abs(self.prop_power_available - self.cruise_prop_power) <= 20:
+            if np.abs(self.prop_power_available - self.cruise_prop_power) <= 10:
                 print('Engine limit reached')
                 break
 
@@ -351,9 +352,10 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1732",
                target_speed=        minimum_velocity,
                mass_gondola=   5,  # [kg]
                mass_deployment=      1,
+               n_controls=           4,
 
                n_engines=            4,
-               engine=              eng.tmt_f60prov_2020,
+               engine=              eng.tmt_4130_230,
 
                electronics=         EL.config_max_consumption,
                mass_ballonet=        0.75,

@@ -95,7 +95,7 @@ def sizeControl(blimp):
     
     volume = area*span
     
-    return 3 * volume
+    return blimp.n_controls * volume
 
 
 
