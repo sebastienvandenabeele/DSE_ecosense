@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as stats
 
+
 def MC(rh, t):
     """Calculates moisture contents of a eucalypt forest wildfire
 
@@ -38,7 +39,6 @@ def R(ffdi, w):
         float: fire rate of spread in the direction of the wind
     """
     return 0.0012*ffdi*w
-<<<<<<< HEAD
 
 
 def ellips_params(t, R, lb):
@@ -70,7 +70,7 @@ def cone_params(t, u, lb):
         _type_: _description_
     """
     l = u*t
-    w = l/lb
+    w = l/(2*lb)
     return np.array([l, w])
 
 
@@ -105,13 +105,13 @@ def concentration_distr(w, c0):
     Returns:
         _type_: _description_
     """
-    mu,sig = w/2 , (w/2)/(2.576)
-    x = np.linspace(-w/2,w/2,1000)
-    pdf_result = c0*stats.norm.pdf(x,loc=mu,scale=sig)
+    mu, sig = w/2, (w/2)/(2.576)
+    x = np.linspace(-w/2, w/2, 1000)
+    pdf_result = c0*stats.norm.pdf(x, loc=mu, scale=sig)
     return pdf_result
 
 
-def detection_time(patch, points, wind_dir,centre, concentrations, width_triangle):
+def detection_time(patch, points, wind_dir, centre, concentrations, width_triangle):
     """_summary_
 
     Args:
@@ -121,25 +121,21 @@ def detection_time(patch, points, wind_dir,centre, concentrations, width_triangl
     Returns:
         _type_: _description_
     """
-    arg = np.argwhere(np.array([patch.contains_point(point) for point in points])==True)
-    if len(arg) >0:
-        points = points[arg.flatten(),:]
-        distance = np.sqrt(np.sum((centre - points)**2,axis=1))
-        theta = np.deg2rad(wind_dir) - np.arctan((points - centre)[:,1]/(points - centre)[:,0])
+    arg = np.argwhere(np.array([patch.contains_point(point)
+                      for point in points]) == True)
+    if len(arg) > 0:
+        points = points[arg.flatten(), :]
+        distance = np.sqrt(np.sum((centre - points)**2, axis=1))
+        theta = np.deg2rad(wind_dir) - np.arctan((points -
+                                                  centre)[:, 1]/(points - centre)[:, 0])
         width = np.abs(distance*np.sin(theta))
         C0ppm = concentration_distr(width_triangle, width, concentrations[0])
         H2ppm = concentration_distr(width_triangle, width, concentrations[1])
         print(C0ppm[0])
-        #print(width,width_triangle/2)
-        #print(C0ppm)
-        
+        # print(width,width_triangle/2)
+        # print(C0ppm)
+
         #theta = points[arg]-centre
-        #print(theta[:,0])
+        # print(theta[:,0])
        # print(centre - points[arg])
       #  return points[arg,:]
-    
-    
-    
-    
-=======
->>>>>>> e7e9ee97a2adc88166d669f4aaab1014aba0760f
