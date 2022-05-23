@@ -93,9 +93,9 @@ def sizeControl(blimp):
         return y
     area=2*integrate.quad(func,0,1)[0]*MAC**2
     
-    volume=area*span
+    volume = area*span
     
-    return 4*volume, 4*fin_area
+    return 3 * volume
 
 
 
