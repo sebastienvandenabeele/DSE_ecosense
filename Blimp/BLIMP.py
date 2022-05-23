@@ -94,15 +94,20 @@ class Blimp:
         """
         self.name = name
 
+        # Propulsion
         self.n_engines = n_engines
         self.engine = engine
         self.mass_propulsion = self.engine.mass * n_engines
-        self.power_available = self.engine.max_power * 0.75 * self.n_engines
+        self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
+        print("Power deliverable by the engines: ", self.cruise_prop_power)
 
         # Solar cells
         self.solar_cell = solar_cell
         self.panel_angle = panel_angle
         self.length_factor = length_factor
+        self.panel_rows = -1
+        self.area_solar = 0
+        self.power_solar = 0
 
 
         # Balloon Aerodynamics
@@ -134,7 +139,7 @@ class Blimp:
         self.n_engines = n_engines
 
         self.target_speed = target_speed
-        self.setCruiseSpeed()
+        self.setCruiseSpeed(plot=True)
 
     def save(self):
         pickle(self, self.name)
@@ -145,13 +150,14 @@ class Blimp:
         """
         self.panel_angle = self.panel_rows * self.solar_cell.width / self.radius
         self.area_solar = 0.8 * 2 * self.length / 2 * self.radius * 2 * self.panel_angle
-        minimum_area = 2 * np.sin(self.panel_angle) * self.radius * self.length_factor * 2 * self.length / 2 * np.cos(avg_sun_elevation)
-        # maximum_area = (1 - np.cos(avg_sun_elevation + self.panel_angle)) * self.radius * 0.8 * 2 * self.length / 2
-        minimum_area=self.area_solar*irradiance_distribution(self, avg_sun_elevation)
-        # print(irradiance_distribution(self,avg_sun_elevation))
-        power_max = minimum_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
-        self.power_solar = power_max * self.solar_cell.efficiency * self.solar_cell.fillfac
+
+        shone_area = self.area_solar * irradiance_distribution(self, avg_sun_elevation)
+        net_power = shone_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar
+        self.power_solar = net_power * self.solar_cell.efficiency * self.solar_cell.fillfac
         self.mass_solar_cell = self.area_solar * self.solar_cell.density
+
+        if np.isnan(self.power_solar):
+            self.power_solar = 0
 
     def sizeBalloon(self):
         """
@@ -191,7 +197,7 @@ class Blimp:
         print('     Balloon mass: ', round(self.mass_balloon, 2), ' kg')
         print('     Ballonet mass: ', round(self.mass_ballonet, 2), ' kg')
         print('     Undercarriage mass: ', round(self.mass_gondola, 2), ' kg')
-        print('     Propulsion mass: ', round(self.mass_propulsion, 2), ' kg')
+        print('     Engines mass: ', round(self.mass_propulsion, 2), ' kg')
         print('     Electronics mass: ', round(self.mass_electronics, 2), ' kg')
         print('     Payload mass: ', round(self.mass_payload, 2), ' kg')
         print('     Battery mass: ', round(self.mass_battery, 2), ' kg')
@@ -206,7 +212,8 @@ class Blimp:
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
-        print('Power available: ', round(self.power_available/1000, 2), ' kW')
+        print('Power available: ', round(self.prop_power_available / 1000, 2), ' kW')
+        print('Engine max power: ', round(self.engine.max_power / 1000, 2), ' kW')
         print('Number of engines:', round(self.n_engines, 0))
         print('Power per engine: ', round(self.power_per_engine/1000, 2), ' kW')
         print()
@@ -228,7 +235,7 @@ class Blimp:
         vols = []
         masses = []
         radii = []
-        self.panel_rows = -1
+
         requirements_met = True
         print('Iteration initialised.')
         # One row of solar panels is added along the perimeter
@@ -240,16 +247,20 @@ class Blimp:
                 self.sizeSolar()
                 self.sizeBattery()
 
-                ### This overrides the set engine specs ####
-                # self.power_available = self.power_solar * motor_eff * prop_eff
-                # self.mass_propulsion = eng.weight_per_W * self.power_available
+                # Uncomment this if an engine is selected
+                self.solar_power_available = self.power_solar * self.engine.efficiency * prop_eff
+                self.prop_power_available = min([self.cruise_prop_power, self.solar_power_available])
+
+
+                # Uncomment this if no engine is selected
+                # self.prop_power_available = self.power_solar * motor_eff * prop_eff
+                # self.mass_propulsion = eng.weight_per_W * self.power_solar
                 # if np.isnan(self.mass_propulsion):
                 #     self.mass_propulsion = 0
-                #######################################
 
-                self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
+
+                self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
                 self.range = self.cruiseV * maximum_triptime
-            print(self.panel_angle)
             print('Current design velocity: ', self.cruiseV)
             if plot:
                 alphas.append(self.panel_angle)
@@ -263,6 +274,9 @@ class Blimp:
             if self.cruiseV >= self.target_speed:
                 print('Target design speed reached.')
                 break
+            if np.abs(self.prop_power_available - self.cruise_prop_power) <= 20:
+                print('Engine limit reached')
+                break
 
         if plot:
                 plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
@@ -275,7 +289,7 @@ class Blimp:
                 plt.show()
         print('Iteration done.')
         self.n_panels = 2 * self.panel_rows * round(self.length_factor * self.length / self.solar_cell.width, 0)
-        self.power_per_engine = self.power_available / self.n_engines
+        self.power_per_engine = self.prop_power_available / self.n_engines
 
     def estimateCost(self):
         """
@@ -307,7 +321,7 @@ class Blimp:
         dt = 0.1
         for t in np.arange(0, tmax, dt):
             v = np.sqrt(2 * E / self.MTOM)
-            dP = self.power_available * throttle - 0.5 * rho * v ** 3 * self.ref_area * self.CD
+            dP = self.prop_power_available * throttle - 0.5 * rho * v ** 3 * self.ref_area * self.CD
             E += dP * dt
 
             ts.append(t)
@@ -337,7 +351,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1235",
                mass_propulsion=      2,
                mass_electronics=     1,
 
-               n_engines=            2,
+               n_engines=            3,
                engine=              eng.tmt_f60prov_2020,
 
                electronics=         EL.max_consumption,
