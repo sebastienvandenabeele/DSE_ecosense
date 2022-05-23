@@ -38,7 +38,7 @@ foil_density                    = 0.01136  # [kg/m2]
 linen_light_density             = 0.030  # [kg/m2]
 linen_heavy_density             = 0.150  # [kg/m2]
 silk_density                    = 0.02165  # [kg/m2]
-fin_foam_density                = 30 # [kg/m3]
+fin_foam_density                = 15 # [kg/m3]
 fin_wood_density                = 150 # [kg/m3]
 
 prop_eff                        = 0.8
