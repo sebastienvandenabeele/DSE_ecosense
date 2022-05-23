@@ -97,6 +97,7 @@ class Blimp:
         self.n_engines = n_engines
         self.engine = engine
         self.mass_propulsion = self.engine.mass * n_engines
+        self.power_available = self.engine.max_power * 0.75 * self.n_engines
 
         # Solar cells
         self.solar_cell = solar_cell
@@ -238,10 +239,14 @@ class Blimp:
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
-                self.power_available = self.power_solar * motor_eff * prop_eff
-                self.mass_propulsion = eng.weight_per_W * self.power_available
-                if np.isnan(self.mass_propulsion):
-                    self.mass_propulsion = 0
+
+                ### This overrides the set engine specs ####
+                # self.power_available = self.power_solar * motor_eff * prop_eff
+                # self.mass_propulsion = eng.weight_per_W * self.power_available
+                # if np.isnan(self.mass_propulsion):
+                #     self.mass_propulsion = 0
+                #######################################
+
                 self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
                 self.range = self.cruiseV * maximum_triptime
             print(self.panel_angle)
@@ -324,26 +329,26 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_350km_2305_0937",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_gondola=   3,  # [kg]
-#                mass_deployment=      1,
-#                mass_propulsion=      2,
-#                mass_electronics=     1,
-#
-#                n_engines=            2,
-#                engine=              eng.tmt_2321_950,
-#
-#                electronics=         EL.max_consumption,
-#                mass_ballonet=        0.75,
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
-#
-# Shlimp.save()
-Shlimp = unpickle('Shlimp_350km_2305_0937')
+Shlimp = Blimp(name=                "Shlimp_350km_2305_1235",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_gondola=   3,  # [kg]
+               mass_deployment=      1,
+               mass_propulsion=      2,
+               mass_electronics=     1,
+
+               n_engines=            2,
+               engine=              eng.tmt_f60prov_2020,
+
+               electronics=         EL.max_consumption,
+               mass_ballonet=        0.75,
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
+
+Shlimp.save()
+# Shlimp = unpickle('Shlimp_350km_2305_0937')
 Shlimp.report()
 
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
