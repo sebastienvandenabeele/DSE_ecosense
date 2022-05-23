@@ -238,7 +238,9 @@ class Blimp:
                 self.sizeSolar()
                 self.sizeBattery()
                 self.power_available = self.power_solar * motor_eff * prop_eff# * prop_limit
-                #self.mass_propulsion = eng.weight_per_W * self.power_available
+                self.mass_propulsion = eng.weight_per_W * self.power_available
+                if np.isnan(self.mass_propulsion):
+                    self.mass_propulsion = 0
                 self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
                 self.range = self.cruiseV * maximum_triptime
             print(self.panel_angle)
