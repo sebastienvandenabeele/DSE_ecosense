@@ -4,7 +4,7 @@ from projected_panel import plot_blimp, irradiance_distribution
 from Classes import solarcells as sc, gas
 import pickle as pick
 import requirements as REQ
-from Classes import electronics as EL
+from Classes import electronics as EL, engines as eng
 
 def pickle(obj, filename):
     with open('Pickle Shelf/' + filename, 'wb') as file:
@@ -115,6 +115,7 @@ class Blimp:
 
 
         # Masses
+        mass = {}
         self.mass_payload = mass_payload
         self.mass_gondola = mass_gondola
 
@@ -193,6 +194,7 @@ class Blimp:
         print('     Propulsion mass: ', round(self.mass_propulsion, 2), ' kg')
         print('     Electronics mass: ', round(self.mass_electronics, 2), ' kg')
         print('     Payload mass: ', round(self.mass_payload, 2), ' kg')
+        print('     Battery mass: ', round(self.mass_battery, 2), ' kg')
         print()
         print('Balloon radius: ', round(self.radius, 2), ' m')
         print('Balloon length: ', round(self.length, 2), ' m')
@@ -318,7 +320,7 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_conventional",
+Shlimp = Blimp(name=                "Shlimp_350km_conventional_battery",
                mass_payload =       REQ_payload_mass,  # [kg]
                target_speed=        minimum_velocity,
                mass_gondola=   3,  # [kg]
@@ -326,6 +328,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_conventional",
                mass_propulsion=      2,
                mass_electronics=     1,
                n_engines=            2,
+               engine=              eng.tmt_2321_950,
                mass_ballonet=        0.75,
                length_factor=        0.8,
                spheroid_ratio=       3,
@@ -334,10 +337,8 @@ Shlimp = Blimp(name=                "Shlimp_350km_conventional",
 
 #Shlimp.save()
 
-#Shlimp = unpickle('Shlimp')
 Shlimp.report()
 
-# Shlimp = unpickle('Shlimp.txt')
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)

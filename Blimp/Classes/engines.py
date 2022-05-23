@@ -1,4 +1,8 @@
+import numpy as np
+from matplotlib import pyplot as plt
+
 class Engine:
+    instances = set()
     std_safe_thr = 0.55
 
     def __init__(self, mfg, name, max_power, mass, n_cells, prop_diameter, KV, cost, safe_thr=std_safe_thr, efficiency=0.55):
@@ -26,6 +30,9 @@ class Engine:
         self.cost = cost
         self.safe_thr = safe_thr
         self.efficiency = efficiency
+        print(self.max_power / self.mass)
+
+        self.__class__.instances.add(self)
 
 ##################
 # Engine Library
@@ -64,4 +71,14 @@ tmt_4130_450 = Engine(mfg="tmt", name="4130", max_power=1800, mass=408, n_cells=
 # TPPower
 tpp_3640_2080 = Engine(mfg="tmt", name="3640", max_power=2800, mass=322, n_cells=6, prop_diameter=7, KV=2080, cost=139)
 
-# Axi
+
+powers = [eng.max_power for eng in Engine.instances]
+weights = [eng.mass for eng in Engine.instances]
+plt.scatter(powers, weights)
+plt.grid()
+plt.xlabel('Power [W]')
+plt.ylabel('Weight [kg]')
+plt.show()
+
+power_to_weight = np.mean([eng.max_power / eng.mass for eng in Engine.instances])
+print(power_to_weight)
