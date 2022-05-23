@@ -70,7 +70,7 @@ def cone_params(t, u, lb):
         _type_: _description_
     """
     l = u*t
-    w = l/(2*lb)
+    w = l/(lb)
     return np.array([l, w])
 
 
