@@ -171,10 +171,10 @@ class Blimp:
         n_series=12
         
         self.power_electronics=sum([el.power_consumption for el in self.electronics])
-        self.battery_V=(2*prop_eff*motor_eff*self.power_electronics/(rho*self.ref_area*self.CD))**(1/3)
-        self.battery_P=2*self.power_electronics*REQ.range_on_battery/(self.battery_V*3.6)/dod*margin
-        self.mass_battery=self.battery_P/battery_density
-        self.battery_capacity=self.battery_P/(n_series*voltage_nominal)
+        self.battery_speed= (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3)
+        self.battery_capacity= 2 * self.power_electronics * REQ.range_on_battery / (self.battery_speed * 3.6) / dod * margin
+        self.mass_battery= self.battery_capacity / battery_density
+        self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
 
     def report(self):
         """
@@ -210,7 +210,8 @@ class Blimp:
         print('Power per engine: ', round(self.power_per_engine/1000, 2), ' kW')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
-        print('Cruise Speed: ', round(self.cruiseV, 2), ' m/s')
+        print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
+        print('Battery Speed: ', round(self.battery_speed * 3.6, 2), 'km/h')
         print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
     def setCruiseSpeed(self, plot=False):
@@ -237,7 +238,7 @@ class Blimp:
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
-                self.power_available = self.power_solar * motor_eff * prop_eff# * prop_limit
+                self.power_available = self.power_solar * motor_eff * prop_eff
                 self.mass_propulsion = eng.weight_per_W * self.power_available
                 if np.isnan(self.mass_propulsion):
                     self.mass_propulsion = 0
@@ -323,26 +324,26 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2305_0937",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_gondola=   3,  # [kg]
-               mass_deployment=      1,
-               mass_propulsion=      2,
-               mass_electronics=     1,
-
-               n_engines=            2,
-               engine=              eng.tmt_2321_950,
-
-               electronics=         EL.max_consumption,
-               mass_ballonet=        0.75,
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
-
-Shlimp.save()
-
+# Shlimp = Blimp(name=                "Shlimp_350km_2305_0937",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                mass_gondola=   3,  # [kg]
+#                mass_deployment=      1,
+#                mass_propulsion=      2,
+#                mass_electronics=     1,
+#
+#                n_engines=            2,
+#                engine=              eng.tmt_2321_950,
+#
+#                electronics=         EL.max_consumption,
+#                mass_ballonet=        0.75,
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
+#
+# Shlimp.save()
+Shlimp = unpickle('Shlimp_350km_2305_0937')
 Shlimp.report()
 
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
