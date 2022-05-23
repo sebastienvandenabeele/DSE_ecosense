@@ -4,6 +4,7 @@ from projected_panel import plot_blimp, irradiance_distribution
 from Classes import solarcells as sc, gas
 import pickle as pick
 import requirements as REQ
+import electronics as EL
 
 def pickle(obj, filename):
     with open('Pickle Shelf/' + filename, 'wb') as file:
@@ -46,7 +47,6 @@ avg_sun_elevation               = 52  # [deg]
 #tmy = read_irradiance()
 tmy = unpickle('tmy.txt')
 rho                             = 1.225  # [kg/m3]
-
 
 
 
@@ -119,7 +119,7 @@ class Blimp:
         self.mass_gondola = mass_gondola
 
 
-        self.electronics = electronics
+        self.electronics = EL.max_consumption
         self.mass_electronics = sum([el.mass for el in self.electronics])
 
         self.mass_solar_cell = mass_solar_cell
@@ -170,6 +170,7 @@ class Blimp:
         voltage_nominal=3.7 # [V]
         n_series=12
         
+        self.power_electronics=sum([el.power for el in self.electronics])
         self.battery_V=(2*self.power_electronics/(rho*self.ref_area*self.CD))**(1/3)
         self.battery_P=2*self.power_electronics*REQ.range_on_battery/self.battery_V/dod*margin
         self.mass_battery=self.battery_P/battery_density
