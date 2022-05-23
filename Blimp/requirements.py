@@ -32,8 +32,18 @@ min_yaw_rate        =        4.5     # [deg/s] REQ-VEH-CO-30
 
 
 def checkRequirements(blimp):
-    if blimp.radius > max_radius: return False
-    elif blimp.length > max_length: return False
-    elif blimp.mass_total > max_MTOM: return False
-    elif blimp.explosive_potential > explosive_potential: return False
-    else: return True
+    if blimp.radius > max_radius:
+        print("Radius too big")
+        return False
+    elif blimp.length > max_length:
+        print("Too long")
+        return False
+    elif blimp.mass_total > max_MTOM:
+        print("too heavy")
+        return False
+    elif blimp.explosive_potential > explosive_potential:
+        print("Too explosive")
+        return False
+    else:
+        print("within bounds")
+        return True
