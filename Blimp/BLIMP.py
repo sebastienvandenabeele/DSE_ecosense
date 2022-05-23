@@ -5,6 +5,7 @@ from Classes import solarcells as sc, gas
 import pickle as pick
 import requirements as REQ
 from Classes import electronics as EL, engines as eng
+from control_surface import sizeControl
 
 def pickle(obj, filename):
     with open('Pickle Shelf/' + filename, 'wb') as file:
@@ -37,6 +38,8 @@ foil_density                    = 0.01136  # [kg/m2]
 linen_light_density             = 0.030  # [kg/m2]
 linen_heavy_density             = 0.150  # [kg/m2]
 silk_density                    = 0.02165  # [kg/m2]
+fin_foam_density                = 30 # [kg/m3]
+fin_wood_density                = 150 # [kg/m3]
 
 prop_eff                        = 0.8
 motor_eff                       = 0.9
@@ -72,7 +75,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
-                 mass_solar_cell=0, mass_balloon=0, panel_angle=0):
+                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
         :param name: [str] Name of instance
@@ -124,6 +127,7 @@ class Blimp:
         self.mass = {}
         self.mass['payload'] = mass_payload
         self.mass['gondola'] = mass_gondola
+        self.mass['control'] = mass_control
 
         self.electronics = electronics
         self.mass['electronics'] = sum([el.mass for el in self.electronics])
@@ -246,6 +250,7 @@ class Blimp:
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
+                self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
 
                 # Uncomment this if an engine is selected
                 self.solar_power_available = self.power_solar * self.engine.efficiency * prop_eff
