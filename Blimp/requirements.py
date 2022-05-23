@@ -46,5 +46,5 @@ def checkRequirements(blimp):
         print('Too explosive.')
         return False
     else:
-        print('All good')
+        print('Within bounds.')
         return True

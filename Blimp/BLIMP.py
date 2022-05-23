@@ -119,8 +119,7 @@ class Blimp:
         self.mass_payload = mass_payload
         self.mass_gondola = mass_gondola
 
-
-        self.electronics = EL.max_consumption
+        self.electronics = electronics
         self.mass_electronics = sum([el.mass for el in self.electronics])
 
         self.mass_solar_cell = mass_solar_cell
@@ -171,9 +170,9 @@ class Blimp:
         voltage_nominal=3.7 # [V]
         n_series=12
         
-        self.power_electronics=sum([el.power for el in self.electronics])
-        self.battery_V=(2*self.power_electronics/(rho*self.ref_area*self.CD))**(1/3)
-        self.battery_P=2*self.power_electronics*REQ.range_on_battery/self.battery_V/dod*margin
+        self.power_electronics=sum([el.power_consumption for el in self.electronics])
+        self.battery_V=(2*prop_eff*motor_eff*self.power_electronics/(rho*self.ref_area*self.CD))**(1/3)
+        self.battery_P=2*self.power_electronics*REQ.range_on_battery/(self.battery_V*3.6)/dod*margin
         self.mass_battery=self.battery_P/battery_density
         self.battery_capacity=self.battery_P/(n_series*voltage_nominal)
 
@@ -229,20 +228,21 @@ class Blimp:
         radii = []
         self.panel_rows = -1
         requirements_met = True
+        print('Iteration initialised.')
         # One row of solar panels is added along the perimeter
         while self.panel_angle < np.radians(178) and requirements_met:
-            print(np.degrees(self.panel_angle))
             self.panel_rows += 1
-            for i in np.arange(0, 200, 1): # Iterative Calculations
+            for i in np.arange(0, 200, 1):  # Iterative Calculations
                 self.MTOM = self.mass_payload + self.mass_gondola + self.mass_propulsion + self.mass_electronics + self.mass_balloon + self.mass_solar_cell + self.mass_ballonet + self.mass_battery
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
-
-                self.power_available = self.power_solar * motor_eff * prop_eff * prop_limit
+                self.power_available = self.power_solar * motor_eff * prop_eff# * prop_limit
+                #self.mass_propulsion = eng.weight_per_W * self.power_available
                 self.cruiseV = (2 * self.power_available / rho / self.ref_area / self.CD)**(1/3)
                 self.range = self.cruiseV * maximum_triptime
-
+            print(self.panel_angle)
+            print('Current design velocity: ', self.cruiseV)
             if plot:
                 alphas.append(self.panel_angle)
                 vs.append(self.cruiseV)
@@ -253,6 +253,7 @@ class Blimp:
             # Addition of solar panels is stopped if requirements are infringed
             requirements_met = REQ.checkRequirements(self)
             if self.cruiseV >= self.target_speed:
+                print('Target design speed reached.')
                 break
 
         if plot:
@@ -264,7 +265,7 @@ class Blimp:
                 plt.grid()
                 plt.xlabel('Number of solar panels per row')
                 plt.show()
-
+        print('Iteration done.')
         self.n_panels = 2 * self.panel_rows * round(self.length_factor * self.length / self.solar_cell.width, 0)
         self.power_per_engine = self.power_available / self.n_engines
 
@@ -320,22 +321,25 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_conventional_battery",
-               mass_payload =       REQ_payload_mass,  # [kg]
+Shlimp = Blimp(name=                "Shlimp_350km_2305_0937",
+               mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_gondola=   3,  # [kg]
                mass_deployment=      1,
                mass_propulsion=      2,
                mass_electronics=     1,
+
                n_engines=            2,
                engine=              eng.tmt_2321_950,
+
+               electronics=         EL.max_consumption,
                mass_ballonet=        0.75,
                length_factor=        0.8,
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
                solar_cell=          sc.maxeon_gen3)
 
-#Shlimp.save()
+Shlimp.save()
 
 Shlimp.report()
 
