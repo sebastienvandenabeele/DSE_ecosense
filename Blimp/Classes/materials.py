@@ -48,6 +48,7 @@ class Material:
 # MATERIAL LIBRARY
 ###############################
 
+<<<<<<< HEAD
 # load carrying materials
 Kevlar_K149 = Material(
     price_kg = 203,
@@ -254,5 +255,8 @@ polyethylene_fiber = Material(
 # materials for payload bay
 
 
+=======
+# Balloon Materials
+>>>>>>> 7b3223617bfcd5d9775bd1cb0feaaf440573f9ba
 
 # Structural Materials
