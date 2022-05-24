@@ -14,11 +14,13 @@ class Gas:
         self.pres = pres
         self.dens = (self.pres * self.m_molar)/(self.temp * Gas.R)  # ideal gas law
 
-        self.spec_energy = spec_energy # [J/m3]
-        self.cost = cost # [EUR / m^3]
+        self.spec_energy = spec_energy  # [J/m3]
+        self.cost = cost  # [EUR / m^3]
+
 
 ##############
 # Gas library
 ##############
 
-hydrogen = Gas(1, 1, 1, 10800000, cost=0.66)
+hydrogen = Gas(m_molar=0.00201568, pres=Gas.pres_std, temp=Gas.temp_std, spec_energy=10800000, price=0.66)  # dens = 0.088
+air = Gas(m_molar=0.027457, pres=Gas.pres_std, temp=Gas.temp_std, spec_energy=0, price=0)  # dens = 1.225

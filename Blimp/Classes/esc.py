@@ -42,4 +42,6 @@ escs.append(ESC(mfg="tmt", name="ALPHA60A12S", mass=73, cost=105, max_amp=60, n_
 escs.append(ESC(mfg="tmt", name="ALPHA60A24S", mass=360, cost=270, max_amp=40, n_motors=1, n_cells=24))
 escs.append(ESC(mfg="tmt", name="ALPHA80A12S", mass=110, cost=120, max_amp=80, n_motors=1, n_cells=12))
 escs.append(ESC(mfg="tmt", name="ALPHA120A12S", mass=360, cost=155, max_amp=100, n_motors=1, n_cells=12))
+# FPV
+escs.append(ESC(mfg="tmt", name="UltraF55A", mass=11.6, cost=90, max_amp=55, n_motors=4, n_cells=6))
 
