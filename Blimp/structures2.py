@@ -1,12 +1,7 @@
 from BLIMP import Blimp
-from gas import Gas, air
-from materials import Material
+from Classes.gas import Gas, air
+from Classes.materials import Material
 import numpy as np
-
-
-    def volume(self):
-        return -self.m_init/(self.lifting_gas.dens - self.atm_gas.dens)
-
 
 
 def envelope_pressure(blimp, mass_dropped, atm_gas=air):
