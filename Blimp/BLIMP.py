@@ -224,7 +224,7 @@ class Blimp:
         print('Number of engines:', round(self.n_engines, 0))
         print('Actual propulsion power available: ', round(self.prop_power_available / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
-        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 2), ' %')
+        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 2), ' % (out of 55% steady-state)')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Battery Speed: ', round(self.battery_speed * 3.6, 2), ' km/h')
@@ -314,6 +314,8 @@ class Blimp:
         cost['electronics'] = sum([device.cost for device in self.electronics])
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
         #cost['envelope'] = self.surface_area * self.material['envelope'].cost
+        cost['deployment'] = 1000
+
         print()
         print('############ COST ESTIMATION ################')
         print('Total cost:', round(sum(cost.values()), 2), 'EUR')
@@ -322,37 +324,7 @@ class Blimp:
 
 
 
-    def simulateVelocity(self, v0=0, throttle=1, tmax=30):
-        """
-        :param blimp: Instance of blimp class used for acceleration simulation
-        :param v0: Initial velocity of blimp
-        :param throttle: Throttle factor multiplied with steady-state power available
-        :param tmax: simulation time
-        """
 
-        vs = [v0]
-        ts = [0]
-        v = 0
-        E = 0.5 * v0 ** 2 * self.MTOM
-        dt = 0.1
-        for t in np.arange(0, tmax, dt):
-            v = np.sqrt(2 * E / self.MTOM)
-            dP = self.prop_power_available * throttle - 0.5 * rho * v ** 3 * self.ref_area * self.CD
-            E += dP * dt
-
-            ts.append(t)
-            vs.append(v)
-
-        plt.plot(ts, vs)
-        plt.plot(ts, minimum_velocity * np.ones(len(ts)), linestyle='dashed', color='black')
-        plt.grid()
-        plt.xlim(0, tmax)
-        plt.ylim(0, 18)
-        plt.legend(['Current velocity', 'Design velocity'])
-        plt.xlabel('Time [s]')
-        plt.ylabel('Velocity [m/s]')
-        # plt.savefig('acceleration.png')
-        plt.show()
 
 ########################### END OF CLASS DEFINITION ############################### END OF CLASS DEFINTION #######################################
 
@@ -380,6 +352,7 @@ Shlimp.save()
 # Shlimp = unpickle('Shlimp_350km_2305_0937')
 Shlimp.report()
 Shlimp.estimateCost()
+
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)

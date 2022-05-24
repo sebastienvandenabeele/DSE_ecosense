@@ -29,6 +29,11 @@ deployment_accuracy =         25     # [m]   REQ-VEH-CO-15
 max_turn_radius     =        140     # [m]   REQ-VEH-CO-25
 min_pitch_rate      =        0.6     # [deg/s] REQ-VEH-CO-26
 min_yaw_rate        =        4.5     # [deg/s] REQ-VEH-CO-30
+#############################################################
+
+### Inofficial Requirements ###
+daytime = 5 * 3600  # [s]
+min_cruiseV = range / daytime
 
 
 def checkRequirements(blimp):
