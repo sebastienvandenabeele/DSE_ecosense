@@ -97,11 +97,11 @@ def sizeControl(blimp):
     # volume=integrate.quad(func2,0,span)[0]*volume_correction_factor
     
     surface=2*span*fin_tip+span*fin_tip*1.116/2*0.736*1.0145 # first coeff: surface area calculation ratio, second: ratio vs trapezoid, third: ratio vs actual airfoil
-    specific_mass_fin=surface*(1-0.276)*1.26*2.36 # first: ratio of control surfaces, second, third:coefficients from book 
+    mass_fin=0.018*surface*(1-0.276)*1.26*2.36 # first: ratio of control surfaces, second, third:coefficients from book 
     mass_control=surface*0.276*0.3*4.88 #ratio, factor from book, conversion from lb/ft2 to kg/m2
     mass_actuator=surface*0.276*0.08*4.88*1.55 #ratio, factor from book, conversion, installation factor
     
-    return sum(blimp.n_controls * specific_mass_fin, mass_control, mass_actuator)
+    return sum(blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator)
 
 
 
