@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from projected_panel import plot_blimp, irradiance_distribution
 from Classes import solarcells as sc, gas
 import pickle as pick
-import requirements as REQ
-from Classes import electronics as EL, engines as eng
+import requirements as req
+from Classes import electronics as el, engines as eng, materials as mat
 from control_surface import sizeControl
 
 def pickle(obj, filename):
@@ -59,7 +59,7 @@ rho                             = 1.225  # [kg/m3]
 ###################
 margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [s]
-minimum_velocity                = REQ.range / maximum_triptime
+minimum_velocity                = req.range / maximum_triptime
 
 REQ_n_sensors                   = 1295 / 2
 relays_per_sensor               = 25
@@ -73,7 +73,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 
 # Creation of Blimp class
 class Blimp:
-    def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
+    def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, envelope_material=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_controls=0):
         """
@@ -100,7 +100,7 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * n_engines
+        self.mass['engines'] = self.engine.mass * n_engines * 1.5 # margin for mounting and prop
         self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
         print("Power deliverable by the engines: ", self.cruise_prop_power)
 
@@ -123,6 +123,9 @@ class Blimp:
         self.liftgas = liftgas
         self.n_controls = n_controls
 
+
+        # Materials
+        #self.material['envelope'] = envelope_material
 
         # Masses
 
@@ -209,20 +212,24 @@ class Blimp:
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
+        print('Number of control surfaces: ', self.n_controls)
         print()
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
         print('On-board electronics power: ', round(self.power_electronics, 2), ' W')
+        print()
+        print('Engine type: ', self.engine.name)
         print('Single engine max power: ', round(self.engine.max_power / 1000, 2), ' kW')
         print('Number of engines:', round(self.n_engines, 0))
         print('Actual propulsion power available: ', round(self.prop_power_available / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
-        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power * 100, 2), ' %')
+        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 2), ' %')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
+        print('Battery Speed: ', round(self.battery_speed * 3.6, 2), ' km/h')
+        print('Return time on battery: ', round(self.battery_speed/3600, 1), ' h')
         print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
-        print('Battery Speed: ', round(self.battery_speed * 3.6, 2), 'km/h')
         print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
     def setCruiseSpeed(self, plot=False):
@@ -274,7 +281,7 @@ class Blimp:
                 radii.append(self.radius)
 
             # Addition of solar panels is stopped if requirements are infringed
-            requirements_met = REQ.checkRequirements(self)
+            requirements_met = req.checkRequirements(self)
             if self.cruiseV >= self.target_speed:
                 print('Target design speed reached.')
                 break
@@ -298,15 +305,19 @@ class Blimp:
     def estimateCost(self):
         """
         adds and orders all costs from used parts
-        :return:
         """
-        # TODO: basically everything, work in progress
+
 
         cost = {}
         cost['solar'] = self.n_panels * self.solar_cell.cost
-        cost['h2'] = self.volume * self.liftgas.cost
+        cost['hydrogen'] = self.volume * self.liftgas.cost
+        cost['electronics'] = sum([device.cost for device in self.electronics])
+        cost['engines'] = self.n_engines * self.engine.cost * 1.2
+        #cost['envelope'] = self.surface_area * self.material['envelope'].cost
 
-        print(cost)
+        print('Total cost: ', sum(cost.values()), ' EUR')
+        for key, value in cost.items():
+            print('Cost of ', key, ': ', value, ' EUR')
 
 
 
@@ -347,18 +358,18 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2305_1732",
+Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_gondola=   5,  # [kg]
                mass_deployment=      1,
-               n_controls=           4,
+               n_controls=           3,
 
                n_engines=            4,
-               engine=              eng.tmt_4130_230,
+               engine=              eng.tmt_4130_300,
 
-               electronics=         EL.config_max_consumption,
-               mass_ballonet=        0.75,
+               electronics=         el.config_first_order,
+               mass_ballonet=        8,
                length_factor=        0.8,
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
@@ -367,7 +378,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1732",
 Shlimp.save()
 # Shlimp = unpickle('Shlimp_350km_2305_0937')
 Shlimp.report()
-dummy = input()
+Shlimp.estimateCost()
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)

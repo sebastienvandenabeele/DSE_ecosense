@@ -48,7 +48,7 @@ class Material:
 # MATERIAL LIBRARY
 ###############################
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 # load carrying materials
 Kevlar_K149 = Material(
     price_kg = 203,
@@ -64,7 +64,7 @@ Kevlar_K149 = Material(
     water_res = "Acceptable", 
     C02_mat = 18.2, 
     C02_proc = 3.6, 
-    recycle = False
+    recycle = False,
     biodegrade = False
 )
 cotton_fiber = Material(
@@ -81,7 +81,7 @@ cotton_fiber = Material(
     water_res = "Acceptable", 
     C02_mat = 0.94, 
     C02_proc = 0.218, 
-    recycle = False
+    recycle = False,
     biodegrade = True
 )
 
@@ -99,7 +99,7 @@ jute_fiber = Material(
     water_res = "Acceptable", 
     C02_mat = 2.96, 
     C02_proc = 0.218, 
-    recycle = False
+    recycle = False,
     biodegrade = True
 )
 
@@ -117,7 +117,7 @@ Kenaf_fiber = Material(
     water_res = "Acceptable", 
     C02_mat = 0.218, 
     C02_proc = 1.46, 
-    recycle = False
+    recycle = False,
     biodegrade = True
 )
 
@@ -156,7 +156,7 @@ PBO_fiber = Material(
     water_res = "", #?
     C02_mat = 20.2, 
     C02_proc = 0.218, 
-    recycle = False
+    recycle = False,
     biodegrade = False
 
 )
@@ -175,7 +175,7 @@ polyamide_fiber = Material(
     water_res = "Excellent", 
     C02_mat = 8.1, 
     C02_proc = 0.218, 
-    recycle = True
+    recycle = True,
     biodegrade = False
 
 )
@@ -194,7 +194,7 @@ polyarylate_fiber = Material(
     water_res = "Excellent", 
     C02_mat = 8.1, 
     C02_proc = 0.218, 
-    recycle = True
+    recycle = True,
     biodegrade = False
 )
 
@@ -212,7 +212,7 @@ Dacron = Material(
     water_res = "Excellent", 
     C02_mat = 4.7, 
     C02_proc = 0.218, 
-    recycle = True
+    recycle = True,
     biodegrade = False
 )
 
@@ -231,7 +231,7 @@ polyethylene_fiber = Material(
     water_res = "Excellent", 
     C02_mat = 23.5, 
     C02_proc = 0.218, 
-    recycle = False
+    recycle = False,
     biodegrade = False
 )
 
@@ -255,8 +255,8 @@ polyethylene_fiber = Material(
 # materials for payload bay
 
 
-=======
+#=======
 # Balloon Materials
->>>>>>> 7b3223617bfcd5d9775bd1cb0feaaf440573f9ba
+#>>>>>>> 7b3223617bfcd5d9775bd1cb0feaaf440573f9ba
 
 # Structural Materials

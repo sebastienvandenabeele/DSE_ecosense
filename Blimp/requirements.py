@@ -7,15 +7,15 @@ lifetime            =         10     # [yr]  REQ-VEH-4
 explosive_potential =       6575 *10**6    # [J]  REQ-VEH-5
 
 ### STRUCTURAL REQUIREMENTS ###
-gust_at_maxcruise   =         10.6   # [m/s] REQ-VEH-STR-5
-gust_at_typcruise   =          7.6   # [m/s] REQ-VEH-STR-6
-n_cycles            =       4000     # [-]   REQ-VEH-STR-7
-load_factor_ult     =          2.1   # [-]   REQ-VEH-STR-11
-load_factor_limit   =          1.4   # [-]   REQ-VEH-STR-12
-sf_envelope         =          5     # [-]   REQ-VEH-STR-13
-sf_susp_non_metal   =          2.25  # [-]   REQ-VEH-STR-13
-sf_general          =          1.5   # [-]   REQ-VEH-STR-13
-payload_mass        =         44     # [kg]  REQ-VEH-STR-15
+gust_at_maxcruise       =         10.6          # [m/s]         REQ-VEH-STR-5
+gust_at_typcruise       =          7.6          # [m/s]         REQ-VEH-STR-6
+n_cycles                =       4000            # [-]           REQ-VEH-STR-7
+load_factor_ult         =          2.1          # [-]           REQ-VEH-STR-11
+load_factor_limit       =          1.4          # [-]           REQ-VEH-STR-12
+sf_envelope             =          5            # [-]           REQ-VEH-STR-13
+sf_susp_non_metal       =          2.25         # [-]           REQ-VEH-STR-13
+sf_general              =          1.5          # [-]           REQ-VEH-STR-13
+payload_mass            =         44            # [kg]          REQ-VEH-STR-15
 
 
 ### PROPULSION AND POWER ###
