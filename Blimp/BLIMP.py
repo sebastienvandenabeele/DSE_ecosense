@@ -128,6 +128,7 @@ class Blimp:
         #self.material['envelope'] = envelope_material
 
         # Masses
+
         self.mass['payload'] = mass_payload
         self.mass['gondola'] = mass_gondola
         self.mass['control'] = mass_control
@@ -188,10 +189,9 @@ class Blimp:
 
         self.battery_speed = (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (
                     1 / 3)
-        self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / (self.battery_speed * 3.6) / dod * margin
+        self.battery_capacity= 2 * self.power_electronics * REQ.range_on_battery / (self.battery_speed * 3.6) / dod * margin
         self.mass['battery'] = self.battery_capacity / battery_density
-        self.battery_charge= self.battery_capacity / (n_series * voltage_nominal)
-        self.battery_return_time = req.range_on_battery / self.battery_speed
+        self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
 
     def report(self):
         """

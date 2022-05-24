@@ -59,6 +59,20 @@ def ellips_params(t, R, lb):
 
 
 def cone_params(t, u, lb):
+<<<<<<< HEAD
+    """_summary_
+
+    Args:
+        t (_type_): _description_
+        u (_type_): _description_
+        lb (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    l = u*t
+    w = l/lb
+=======
     """Defines cone length and width
 
     Args:
@@ -71,10 +85,24 @@ def cone_params(t, u, lb):
     """
     l = u*t
     w = l/(lb)
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
     return np.array([l, w])
 
 
 def triangle_points(l, w, centre, wind_dir, i):
+<<<<<<< HEAD
+    """_summary_
+
+    Args:
+        l (_type_): _description_
+        w (_type_): _description_
+        centre (_type_): _description_
+        wind_dir (_type_): _description_
+        i (_type_): _description_
+
+    Returns:
+        _type_: _description_
+=======
     """Gets the point location of the cone based on length, width and wind direction
 
     Args:
@@ -86,6 +114,7 @@ def triangle_points(l, w, centre, wind_dir, i):
 
     Returns:
         1darray: contains the three points rotated according to the wind [m]
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
     """
     T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
                   [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
@@ -93,22 +122,8 @@ def triangle_points(l, w, centre, wind_dir, i):
     x2 = x1 + (T@(np.array([l[i], w[i]/2]).reshape((2, 1)))).flatten()
     x3 = x1 + (T@(np.array([l[i], -w[i]/2]).reshape((2, 1)))).flatten()
     return np.array([x1, x2, x3])
-
-
-def concentration_distr(w, c0):
-    """_summary_
-
-    Args:
-        w (_type_): _description_
-        c0 (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    mu, sig = w/2, (w/2)/(2.576)
-    x = np.linspace(-w/2, w/2, 1000)
-    pdf_result = c0*stats.norm.pdf(x, loc=mu, scale=sig)
-    return pdf_result
+<<<<<<< HEAD
+=======
 
 
 def detection_time(patch, points, wind_dir, centre, concentrations, width_triangle):
@@ -129,9 +144,9 @@ def detection_time(patch, points, wind_dir, centre, concentrations, width_triang
         theta = np.deg2rad(wind_dir) - np.arctan((points -
                                                   centre)[:, 1]/(points - centre)[:, 0])
         width = np.abs(distance*np.sin(theta))
-        C0ppm = concentration_distr(width_triangle, width, concentrations[0])
-        H2ppm = concentration_distr(width_triangle, width, concentrations[1])
-        print(C0ppm[0])
+        # C0ppm = concentration_distr(width_triangle, width, concentrations[0])
+        # H2ppm = concentration_distr(width_triangle, width, concentrations[1])
+        # print(C0ppm[0])
         # print(width,width_triangle/2)
         # print(C0ppm)
 
@@ -141,15 +156,30 @@ def detection_time(patch, points, wind_dir, centre, concentrations, width_triang
       #  return points[arg,:]
 
 
-def initial_concentrations(t):
-    return C0_concentration_function(t/60), H2_concentration_function(t/60)
-
-
 def concentration_distribution(x):
+    """Determines the normal distribution based where 95.5% of values are located between the first and last x array value
+
+    Args:
+        x (1darray): x (width) array
+
+    Returns:
+        1darray: array containing the average and standard deviation of the computed normal distribution
+    """
     mu = (x[-1]-x[0])/2
     sigs = x/4
     return np.array([[mu, sig] for sig in sigs])
 
 
 def density_plot(x, mu, sig):
+    """Plots the normal desnity function based on x and its parameters
+
+    Args:
+        x (1darray): x (width) array
+        mu (float): average 
+        sig (float): standard deviation
+
+    Returns:
+        1darray: array containing the normal distribution 
+    """
     return stats.norm.pdf(x, loc=mu, scale=sig)
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
