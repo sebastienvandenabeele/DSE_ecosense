@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from projected_panel import plot_blimp, irradiance_distribution
 from Classes import solarcells as sc, gas
 import pickle as pick
-import requirements as REQ
-from Classes import electronics as EL, engines as eng
+import requirements as req
+from Classes import electronics as el, engines as eng
 from control_surface import sizeControl
 
 def pickle(obj, filename):
@@ -59,7 +59,7 @@ rho                             = 1.225  # [kg/m3]
 ###################
 margin                          = 1.2
 maximum_triptime                = 5 * 3600  # [s]
-minimum_velocity                = REQ.range / maximum_triptime
+minimum_velocity                = req.range / maximum_triptime
 
 REQ_n_sensors                   = 1295 / 2
 relays_per_sensor               = 25
@@ -186,7 +186,7 @@ class Blimp:
 
         self.battery_speed = (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (
                     1 / 3)
-        self.battery_capacity= 2 * self.power_electronics * REQ.range_on_battery / (self.battery_speed * 3.6) / dod * margin
+        self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / (self.battery_speed * 3.6) / dod * margin
         self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
 
@@ -277,7 +277,7 @@ class Blimp:
                 radii.append(self.radius)
 
             # Addition of solar panels is stopped if requirements are infringed
-            requirements_met = REQ.checkRequirements(self)
+            requirements_met = req.checkRequirements(self)
             if self.cruiseV >= self.target_speed:
                 print('Target design speed reached.')
                 break
@@ -360,7 +360,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
                n_engines=            4,
                engine=              eng.tmt_4130_300,
 
-               electronics=         EL.config_max_consumption,
+               electronics=         el.config_max_consumption,
                mass_ballonet=        0.75,
                length_factor=        0.8,
                spheroid_ratio=       3,
