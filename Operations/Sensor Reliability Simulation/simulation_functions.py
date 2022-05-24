@@ -52,6 +52,8 @@ def ellips_params(t, R, lb):
     Returns:
         ndarray: length, width and focal point position [m]
     """
+    if lb < 1:
+        lb = 1.1
     l = R*t
     w = l/lb
     c = np.sqrt((l/2)**2 - (w/2)**2)
@@ -69,6 +71,8 @@ def cone_params(t, u, lb):
     Returns:
         _type_: _description_
     """
+    if lb < 1:
+        lb = 1.1
     l = u*t
     w = l/lb
     return np.array([l, w])
@@ -93,36 +97,6 @@ def triangle_points(l, w, centre, wind_dir, i):
     x2 = x1 + (T@(np.array([l[i], w[i]/2]).reshape((2, 1)))).flatten()
     x3 = x1 + (T@(np.array([l[i], -w[i]/2]).reshape((2, 1)))).flatten()
     return np.array([x1, x2, x3])
-
-
-def detection_time(patch, points, wind_dir, centre, concentrations, width_triangle):
-    """_summary_
-
-    Args:
-        patch (_type_): _description_
-        points (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    arg = np.argwhere(np.array([patch.contains_point(point)
-                      for point in points]) == True)
-    if len(arg) > 0:
-        points = points[arg.flatten(), :]
-        distance = np.sqrt(np.sum((centre - points)**2, axis=1))
-        theta = np.deg2rad(wind_dir) - np.arctan((points -
-                                                  centre)[:, 1]/(points - centre)[:, 0])
-        width = np.abs(distance*np.sin(theta))
-        # C0ppm = concentration_distr(width_triangle, width, concentrations[0])
-        # H2ppm = concentration_distr(width_triangle, width, concentrations[1])
-        # print(C0ppm[0])
-        # print(width,width_triangle/2)
-        # print(C0ppm)
-
-        #theta = points[arg]-centre
-        # print(theta[:,0])
-       # print(centre - points[arg])
-      #  return points[arg,:]
 
 
 def concentration_distribution(x):
