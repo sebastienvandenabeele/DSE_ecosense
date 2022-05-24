@@ -179,7 +179,6 @@ class Blimp:
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
-        self.balloon_thickness = 0.0003
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
         self.ref_area = self.volume ** (2 / 3)
@@ -193,7 +192,7 @@ class Blimp:
 
         self.battery_speed = (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (
                     1 / 3)
-        self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / (self.battery_speed * 3.6) / dod * margin
+        self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / 1000 / (self.battery_speed * 3.6) / dod * margin
         self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
 
@@ -213,7 +212,7 @@ class Blimp:
         print('Balloon radius: ', round(self.radius, 2), ' m')
         print('Balloon length: ', round(self.length, 2), ' m')
         print('Balloon volume: ', round(self.volume, 2), ' m^3')
-        print('Balloon thickness: ', round(self.balloon_thickness*1000, 2), ' mm')
+        print('Balloon thickness: ', round(self.balloon_thickness*1000, 3), ' mm')
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
@@ -229,7 +228,7 @@ class Blimp:
         print('Number of engines:', round(self.n_engines, 0))
         print('Actual propulsion power available: ', round(self.prop_power_available / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
-        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 2), ' % (out of 55% steady-state)')
+        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 1), ' % (out of 55% steady-state)')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Battery Speed: ', round(self.battery_speed * 3.6, 2), ' km/h')
@@ -337,7 +336,7 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2405_1208",
+Shlimp = Blimp(name=                "Shlimp_350km_2405_1603",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_deployment=      1,
@@ -354,12 +353,13 @@ Shlimp = Blimp(name=                "Shlimp_350km_2405_1208",
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
                solar_cell=          sc.maxeon_gen3)
-
+#
 Shlimp.save()
-#Shlimp = unpickle('Shlimp_350km_2305_1836')
+#Shlimp = unpickle('Shlimp_350km_2405_1208')
 Shlimp.report()
+simulateAltitudeGain(Shlimp)
 Shlimp.estimateCost()
-simulateCruiseAcceleration(Shlimp)
+#simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)

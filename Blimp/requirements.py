@@ -19,7 +19,7 @@ payload_mass            =         44            # [kg]          REQ-VEH-STR-15
 
 
 ### PROPULSION AND POWER ###
-range_on_battery    =        100    # [km]  REQ-VEH-POW-2
+range_on_battery    =        100*1000    # [m]  REQ-VEH-POW-2
 
 ### CONTROL AND OPERATIONS ###
 range               =        350*10**3     # [m]  REQ-VEH-CO-12
