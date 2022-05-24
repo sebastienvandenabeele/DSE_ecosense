@@ -1,10 +1,10 @@
-from BLIMP import Blimp
+
 from Classes.gas import Gas, air
 from Classes.materials import Material
 import numpy as np
 
 
-def envelope_pressure(blimp, mass_dropped, atm_gas=air):
+def envelope_pressure(blimp, atm_gas=air):
     """
     Calculate the pressure inside the envelope due to ballonets
     :param blimp: [Blimp] Blimp object to be investigated [-]
@@ -12,7 +12,7 @@ def envelope_pressure(blimp, mass_dropped, atm_gas=air):
     :param atm_gas: [Gas] The atmospheric surrounding gas [-]
     :return: [float] Max. pressure difference between envelope and atmosphere [Pa]
     """
-    m_final = blimp.MTOM - mass_dropped
+    m_final = blimp.MTOM - blimp.mass['payload']
     density_final = -m_final / blimp.volume + atm_gas.dens
     m_final_air = (density_final - blimp.liftgas.dens) * blimp.volume
     m_lifting_gas = blimp.liftgas.dens * blimp.volume
@@ -23,7 +23,7 @@ def envelope_pressure(blimp, mass_dropped, atm_gas=air):
     return p_diff
 
 
-def envelope_thickness(blimp, p_diff, env_material, safety_factor = 5):
+def envelope_thickness(blimp, p_diff, safety_factor = 5):
     """
     Through calculating critical von Mises stress for the envelope of the blimp,
     calculates the required material thickness.
@@ -36,7 +36,7 @@ def envelope_thickness(blimp, p_diff, env_material, safety_factor = 5):
     sigma_xx = (p_diff * blimp.radius) / 2  # Longit. stress. Assuming 1m thickness for now.
     sigma_yy = (p_diff * blimp.radius)  # Hoop stress. Assuming 1m thickness for now.
     sigma_vm = von_mises_stress(sigma_xx, sigma_yy, sigma_zz)  # Eq. von Mises stress
-    t_req = sigma_vm / env_material.tensile_strength
+    t_req = sigma_vm / blimp.material['envelope'].tensile_strength
     safe_t_req = t_req * safety_factor
     return safe_t_req
 

@@ -6,7 +6,7 @@ import pickle as pick
 import requirements as req
 from Classes import electronics as el, engines as eng, materials as mat
 from control_surface import sizeControl
-from structures2 import *
+import structures2 as struc
 from simulator import *
 
 def pickle(obj, filename):
@@ -127,7 +127,7 @@ class Blimp:
 
 
         # Materials
-        self.material['envelope'] = envelope_material
+        self.material = {'envelope': envelope_material}
 
         # Masses
 
@@ -178,8 +178,9 @@ class Blimp:
         self.explosive_potential = self.volume * self.liftgas.spec_energy
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
+        self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
-        self.mass['envelope'] = self.surface_area * (silk_density + foil_density) * 3
+        self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
         self.ref_area = self.volume ** (2 / 3)
         
     def sizeBattery(self):
@@ -211,6 +212,7 @@ class Blimp:
         print('Balloon radius: ', round(self.radius, 2), ' m')
         print('Balloon length: ', round(self.length, 2), ' m')
         print('Balloon volume: ', round(self.volume, 2), ' m^3')
+        print('Balloon thickness: ', round(self.balloon_thickness*1000, 2), ' mm')
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))

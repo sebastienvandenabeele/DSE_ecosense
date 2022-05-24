@@ -3,11 +3,11 @@ from re import M
 
 class Material:
 
-    def __init__(self, vol_density=0, price_kg = 0, E=0, tensile_strength=0, elongation = 0,shear_mod = 0,fatigue = 0,
-     hard = 0, rup_mod = 0, UV = 0, water_res = 0, C02_mat = 0, C02_proc = 0, recycle = 0,biodegrade = 0):
+    def __init__(self, density=0, price_kg = 0, E=0, tensile_strength=0, elongation = 0, shear_mod = 0, fatigue = 0,
+                 hard = 0, rup_mod = 0, UV = 0, water_res = 0, C02_mat = 0, C02_proc = 0, recycle = 0, biodegrade = 0):
         """
         A class defining materials 
-        :param vol_density: [float] Volumetric density of material [kg/m^3]
+        :param density: [float] Volumetric density of material [kg/m^3]
         :param price_kg: [float] price in euros per kg of material
         :param E: [float] Young's modulus of material [GPA]
         :param Y: [float] yield strength in [GPA]
@@ -25,7 +25,7 @@ class Material:
         :param biodegrade: [Bool] material biodegradable 
         
         """
-        self.vol_density = vol_density # max density kg/m^3
+        self.density = density # max density kg/m^3
         self.price_kg = price_kg       # max price in Euro/kg
         self.E = E             # min E in Pa
         self.tensile_strength = tensile_strength / 10**6   # min tensile strength in MPa
@@ -52,7 +52,7 @@ class Material:
 # load carrying materials
 Kevlar_K149 = Material(
     price_kg = 203,
-    vol_density= 1480, 
+    density= 1480,
     E= 170, 
     tensile_strength= 3200, 
     elongation = 1.3,
@@ -69,7 +69,7 @@ Kevlar_K149 = Material(
 )
 cotton_fiber = Material(
     price_kg = 4.72,
-    vol_density= 1560, 
+    density= 1560,
     E= 7, 
     tensile_strength= 360, 
     elongation = 11,
@@ -87,7 +87,7 @@ cotton_fiber = Material(
 
 jute_fiber = Material(
     price_kg = 0.308,
-    vol_density= 1520, 
+    density= 1520,
     E= 17, 
     tensile_strength= 400, 
     elongation = 1.7,
@@ -105,7 +105,7 @@ jute_fiber = Material(
 
 Kenaf_fiber = Material(
     price_kg = 0.507,
-    vol_density= 980, 
+    density= 980,
     E= 35, 
     tensile_strength= 390, 
     elongation = 2,
@@ -144,7 +144,7 @@ Kenaf_fiber = Material(
 
 PBO_fiber = Material(
     price_kg = 162,
-    vol_density= 1560, 
+    density= 1560,
     E= 180, 
     tensile_strength= 5680, 
     elongation = 2.5,
@@ -163,7 +163,7 @@ PBO_fiber = Material(
 
 polyamide_fiber = Material(
     price_kg = 2.84,
-    vol_density= 1150, 
+    density= 1150,
     E= 4, 
     tensile_strength= 600, 
     elongation = 16,
@@ -182,7 +182,7 @@ polyamide_fiber = Material(
 
 polyarylate_fiber = Material(
     price_kg = 33.5,
-    vol_density= 1400, 
+    density= 1400,
     E= 55, 
     tensile_strength= 2900, 
     elongation = 2.8,
@@ -200,7 +200,7 @@ polyarylate_fiber = Material(
 
 Dacron = Material(
     price_kg = 1.32,
-    vol_density= 1390, 
+    density= 1390,
     E= 3, 
     tensile_strength= 573, 
     elongation = 18,
@@ -219,7 +219,7 @@ Dacron = Material(
 # Dyneema
 polyethylene_fiber = Material(
     price_kg = 110,
-    vol_density= 975, 
+    density= 975,
     E= 120, 
     tensile_strength= 2900, 
     elongation = 2.9,
