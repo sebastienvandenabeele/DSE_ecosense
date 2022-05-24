@@ -41,6 +41,10 @@ H2_concentration_function = spinter.interp1d(
     time_concentrations, H2_concentrations)
 
 
+def initial_concentrations(t):
+    return C0_concentration_function(t/60), H2_concentration_function(t/60)
+
+
 run = True
 if run:
     for index, t in enumerate(time):
@@ -56,7 +60,7 @@ if run:
             centre = [x_f+centre*np.cos(np.deg2rad(wind_dir)),
                       y_f + centre*np.sin(np.deg2rad(wind_dir))]
 
-            C0_init_ppm = simfunc.initial_concentrations(t)[0]
+            C0_init_ppm = initial_concentrations(t)[0]
 
             fig = plt.figure()
             data = np.random.rand(10, 10)
