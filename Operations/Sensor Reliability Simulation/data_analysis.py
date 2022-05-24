@@ -30,7 +30,7 @@ def normal_distr_params(x):
 
 data_distribution = pd.DataFrame([])
 samples = pd.DataFrame([])
-N = 100000
+N = 10000
 parameters = ["RH", "wind_dir", "wind_spd"]
 for parameter in parameters:
     mu, sig = normal_distr_params(data[parameter].values)
