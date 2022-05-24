@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import scipy.interpolate as spinter
 import matplotlib.animation as animation
 import seaborn as sns
+import mesh_types
 
 df = pd.read_csv(r"./data/samples.csv")
 df["wind_spd"] = df["wind_spd"]*0.2
@@ -22,13 +23,8 @@ t_max = 8*60
 threshold = 0.05
 N, M = 100, len(df)
 size = 10000
-x_spacing, y_spacing = 280, 280
-x_sensor = np.arange(0, size+x_spacing, x_spacing)
-y_sensor = np.arange(0, size+y_spacing, y_spacing)
-mesh_points = np.vstack(
-    map(np.ravel, np.meshgrid(x_sensor, y_sensor))).transpose()
+mesh_points = mesh_types.mesh1(size, 280, 280)
 time = np.linspace(0, t_max, N)*np.ones((M, 1))
-
 C0_concentrations = np.array(
     [0, 0.85, 4.55, 6.75, 10.6, 14.25, 17.9, 23.3, 28.5, 31.2, 34.55, 39.1, 42.7, 48.2])
 H2_concentrations = 0.1 * \
@@ -58,7 +54,7 @@ if run:
             length_triangle, width_triangle = simfunc.cone_params(
                 t, wind_spd/3.6, lb)
             centre = [x_f+centre_ellipse*np.cos(np.deg2rad(wind_dir)),
-                    y_f + centre_ellipse*np.sin(np.deg2rad(wind_dir))]
+                      y_f + centre_ellipse*np.sin(np.deg2rad(wind_dir))]
 
             x0, y0, radius = centre[0][0], centre[1][0], 500
             relevant_arg = np.argwhere(
@@ -80,7 +76,8 @@ if run:
                     if sensor_concentration_temp > threshold and (sensor_additional_time+t[item]) < t_max:
                         sensor_reliability_value = np.random.uniform(0, 1)
                         if sensor_reliability_value <= 0.92:
-                            detection_times.append(sensor_additional_time+t[item])
+                            detection_times.append(
+                                sensor_additional_time+t[item])
                 if len(detection_times) != 0:
                     detection_time = np.min(detection_times)
                     print(f"Fire Detected!!! in {detection_time} [s]")
@@ -110,7 +107,7 @@ if run:
 
                     plt.show()
 
-                plotting = True
+                plotting = False
                 if plotting:
                     fig, ax = plt.subplots(figsize=(8, 8))
                     ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
