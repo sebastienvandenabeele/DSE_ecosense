@@ -3,11 +3,6 @@ import pandas as pd
 import simulation_functions as simfunc
 from matplotlib.patches import Ellipse, Polygon
 import matplotlib.pyplot as plt
-<<<<<<< HEAD
-
-df = pd.read_csv(r"./data/samples.csv")
-
-=======
 import scipy.interpolate as spinter
 import scipy.stats as stats
 from matplotlib import cm
@@ -15,7 +10,6 @@ import matplotlib.animation as animation
 import seaborn as sns
 
 df = pd.read_csv(r"./data/samples.csv")
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
 df["MC"] = simfunc.MC(df["RH"].values, df["temp"].values)
 df["FFDI"] = simfunc.FFDI(df["MC"].values, df["wind_spd"].values)
 df["R"] = simfunc.R(df["FFDI"].values, 23.57)/3.6
@@ -24,10 +18,6 @@ df = df[df.FFDI > 11]
 df["wind_dir"] = 270-df["wind_dir"]
 df = df[df.temp > 22]
 df.index = np.arange(len(df))
-<<<<<<< HEAD
-print(df)
-=======
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
 
 t_max = 8*60
 N, M = 100, len(df)
@@ -37,71 +27,6 @@ x_sensor = np.arange(0, size+x_spacing, x_spacing)
 y_sensor = np.arange(0, size+y_spacing, y_spacing)
 mesh_points = np.vstack(
     map(np.ravel, np.meshgrid(x_sensor, y_sensor))).transpose()
-<<<<<<< HEAD
-
-time = np.linspace(0, t_max, N)*np.ones((M, 1))
-
-
-def detection_time(patch, points):
-    arg = np.array([patch.contains_point(point) for point in points])
-    if any(arg) == True:
-        return True
-    else:
-        return False
-
-
-for index, t in enumerate(time):
-    print(f"Running try no. {index+1}")
-    x_f, y_f = np.random.uniform(0, size, 2)
-    R, lb, wind_dir, wind_spd, temp = df.iloc[index]["R"], df.iloc[index][
-        "LB"], df.iloc[index]["wind_dir"], df.iloc[index]["wind_spd"], df.iloc[index]["temp"]
-    length, width, centre = simfunc.ellips_params(t, R, lb)
-    length_triangle, width_triangle = simfunc.cone_params(
-        t, wind_spd/3.6, lb)
-    centre = [x_f+centre*np.cos(np.deg2rad(wind_dir)),
-              y_f + centre*np.sin(np.deg2rad(wind_dir))]
-
-    for i in range(N):
-
-        ellipse_patches = Ellipse((centre[0][i], centre[1][i]), length[i], width[i],
-                                  wind_dir, facecolor="none", edgecolor="orange", linewidth="0.2")
-
-        triangle_points = simfunc.triangle_points(
-            length_triangle, width_triangle, centre, wind_dir, i)
-
-        triangle_patches = Polygon(
-            triangle_points, closed=True, facecolor="none", edgecolor="grey", linewidth="0.2")
-
-        detection_gas = detection_time(triangle_patches, mesh_points)
-        if detection_gas == True:
-            detection_time_gas = time[0][i]
-            df.loc[index, "detection_time_gas"] = detection_time_gas
-            break
-
-    #
-    # try:
-    #    detection = time[0][np.argwhere(np.array(detection) == True)[0][0]]
-    # except:
-    #    detection = np.nan
-
-    #df.loc[index, "detection_time"] = detection
-
-    plotting = False
-    if plotting:
-        fig, ax = plt.subplots(figsize=(8, 8))
-        for i, ellipse in enumerate(ellipse_patches):
-            ax.add_patch(ellipse)
-            ax.add_patch(triangle_patches[i])
-        ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
-        plt.scatter(x_f, y_f, color='red')
-        plt.xlim(0, size)
-        plt.ylim(0, size)
-        plt.title(
-            f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Direction: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
-        plt.show()
-
-print(df)
-=======
 time = np.linspace(0, t_max, N)*np.ones((M, 1))
 
 C0_concentrations = np.array(
@@ -118,6 +43,30 @@ H2_concentration_function = spinter.interp1d(
 
 def initial_concentrations(t):
     return C0_concentration_function(t/60), H2_concentration_function(t/60)
+
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+
+def get_concentration(xy, centre, wind_dir, i, width_triangle, t):
+    coord_diff = np.array([[xy[0] - centre[0]],
+                           [xy[1] - centre[1]]])
+    T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
+                  [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
+    coord = T@coord_diff + np.array([[width_triangle[-1]/2],
+                                     [0]])
+    x_arr = np.linspace(
+        width_triangle[0], width_triangle[-1], len(t))
+    data = simfunc.concentration_distribution(x_arr[1:])
+    Z = np.array([C0_init_ppm[i+1]*simfunc.density_plot(x_arr[1:],
+                                                        params[0], params[1]) for params in data])
+    idx = np.array([np.round(coord[0][0]/width_triangle[-1] * len(t)),
+                    np.round(coord[1][0]/width_triangle[-1] * len(t))], dtype=int)
+    concentration = Z[idx[0]][idx[1]]
+    return concentration
 
 
 run = True
@@ -137,28 +86,32 @@ if run:
 
             C0_init_ppm = initial_concentrations(t)[0]
 
-            fig = plt.figure()
-            data = np.random.rand(10, 10)
-            sns.heatmap(data, vmax=.8, square=True)
+            print(get_concentration(
+                (centre[0][index]+100, centre[1][index]+100), (centre[0][index], centre[1][index]), wind_dir, 50, width_triangle, t))
 
-            def init():
-                sns.heatmap(np.zeros((10, 10)), vmax=.8,
-                            square=True, cbar=False)
+            plotting = False
+            if plotting:
+                fig = plt.figure()
 
-            def animate(i):
-                plt.clf()
-                x = np.linspace(width_triangle[0], width_triangle[-1], len(t))
-                begin_N = 4
-                data = simfunc.concentration_distribution(x[begin_N:])
-                X, T = np.meshgrid(x[begin_N:], t[begin_N:])
-                Z = np.array([C0_init_ppm[i+1]*simfunc.density_plot(x[begin_N:],
-                             params[0], params[1]) for params in data])
-                sns.heatmap(Z, vmin=0.0, vmax=0.050, cmap="Greys")
+                def init():
+                    sns.heatmap(np.zeros((10, 10)), vmax=.8,
+                                square=True, cbar=False)
 
-            anim = animation.FuncAnimation(
-                fig, animate, init_func=init, frames=20, repeat=False)
+                def animate(i):
+                    plt.clf()
+                    x = np.linspace(
+                        width_triangle[0], width_triangle[-1], len(t))
+                    begin_N = 1
+                    data = simfunc.concentration_distribution(x[begin_N:])
+                    X, T = np.meshgrid(x[begin_N:], t[begin_N:])
+                    Z = np.array([C0_init_ppm[i+1]*simfunc.density_plot(x[begin_N:],
+                                                                        params[0], params[1]) for params in data])
+                    sns.heatmap(Z, vmin=0.0, vmax=0.050, cmap="Greys")
 
-            plt.show()
+                anim = animation.FuncAnimation(
+                    fig, animate, init_func=init, frames=20, repeat=False)
+
+                plt.show()
 
     #     for i in range(N):
     #         print(f"Running time step no. {i+1}")
@@ -196,4 +149,3 @@ if run:
 
     # print(df)
     # df.to_csv(r"./data/fire_detection_time.csv")
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
