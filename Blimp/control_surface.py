@@ -1,13 +1,12 @@
-import numpy as np
-import matplotlib.pyplot as plt
+# import numpy as np
+# import matplotlib.pyplot as plt
 import scipy.integrate as integrate
 
-def computeArea(pos):
-    x, y = (zip(*pos))
-    return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
+# def computeArea(pos):
+#     x, y = (zip(*pos))
+#     return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
 def sizeControl(blimp):
-    plt.ioff()
     
     baseline_diameter=1.64
     
@@ -40,7 +39,7 @@ def sizeControl(blimp):
 # polygon = plt.fill([x[0],x[4],x[5],x[3]], [y[0],y[4],y[5],y[3]])
 # area2 = computeArea(polygon[0].xy)
 
-    MAC=2/3*fin_root*(1+(fin_tip/fin_root)+(fin_tip/fin_root)**2)/(1+(fin_tip/fin_root))
+    # MAC=2/3*fin_root*(1+(fin_tip/fin_root)+(fin_tip/fin_root)**2)/(1+(fin_tip/fin_root))
     
     # naca=np.array([[1.0000,     0.00084],
     #                 [0.9500,     0.00537],
@@ -87,13 +86,15 @@ def sizeControl(blimp):
     # polygon = plt.fill(naca[0],naca[1])
     # area = computeArea(polygon[0].xy)
     # plt.close()
+    volume_correction_factor=0.82157407407
     T=0.08
     def func(x):
         y=T/0.2*(0.2969*x**0.5+-0.126*x+-0.3516*x**2+0.2843*x**3+-0.1015*x**4)
         return y
-    area=2*integrate.quad(func,0,1)[0]*MAC**2
-    
-    volume = area*span
+    area=2*integrate.quad(func,0,1)[0]
+    def func2(x):
+        return area*(((fin_root-fin_tip)/span)*x+fin_tip)**2
+    volume=integrate.quad(func2,0,span)[0]*volume_correction_factor
     
     return blimp.n_controls * volume
 
