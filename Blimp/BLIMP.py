@@ -179,6 +179,7 @@ class Blimp:
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
+        self.balloon_thickness = 0.0003
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
         self.ref_area = self.volume ** (2 / 3)
@@ -339,7 +340,6 @@ class Blimp:
 Shlimp = Blimp(name=                "Shlimp_350km_2405_1208",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
-               mass_gondola=   5,  # [kg]
                mass_deployment=      1,
                n_controls=           3,
 
