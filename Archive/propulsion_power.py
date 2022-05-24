@@ -25,7 +25,10 @@ def read_irradiance():
     df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
     return df_tmy
 
-
+    # Old model for shone area
+    minimum_area = 2 * np.sin(self.panel_angle) * self.radius * self.length_factor * 2 * self.length / 2 * np.cos(
+        avg_sun_elevation)
+    # maximum_area = (1 - np.cos(avg_sun_elevation + self.panel_angle)) * self.radius * 0.8 * 2 * self.length / 2
     
     # print(np.mean(df_tmy["GHI"]))
     # print(np.mean(df_tmy["DNI"]))

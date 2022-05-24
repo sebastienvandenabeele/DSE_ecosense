@@ -19,7 +19,10 @@ class ESC:
         self.n_motors = n_motors
         self.n_cells = n_cells
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
 escs = []
 # escs.append(ESC(mfg=, name=, mass=, cost=, max_amp=, n_motors=, n_cells=))
 

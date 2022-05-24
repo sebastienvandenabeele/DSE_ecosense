@@ -1,10 +1,19 @@
 ### VEHICLE REQUIREMENTS ###
+<<<<<<< HEAD
 max_MTOM                =        150            # [kg]          REQ-VEH-1
 max_length              =        200            # [m]           REQ-VEH-2
 max_radius              =         40            # [m]           REQ-VEH-2
 n_sensors               =        100            # [-]           REQ-VEH-3
 lifetime                =         10            # [yr]          REQ-VEH-4
 explosive_potential     =       6575 * 10**6    # [J]           REQ-VEH-5
+=======
+max_MTOM            =        150     # [kg]  REQ-VEH-1
+max_length          =        200     # [m]   REQ-VEH-2
+max_radius          =         40     # [m]   REQ-VEH-2
+n_sensors           =        100     # [-]   REQ-VEH-3
+lifetime            =         10     # [yr]  REQ-VEH-4
+explosive_potential =       6575 *10**6    # [J]  REQ-VEH-5
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
 
 ### STRUCTURAL REQUIREMENTS ###
 gust_at_maxcruise       =         10.6          # [m/s]         REQ-VEH-STR-5
@@ -19,6 +28,7 @@ payload_mass            =         44            # [kg]          REQ-VEH-STR-15
 
 
 ### PROPULSION AND POWER ###
+<<<<<<< HEAD
 range_on_battery        =        100    # [km]          REQ-VEH-POW-2
 
 ### CONTROL AND OPERATIONS ###
@@ -29,10 +39,23 @@ deployment_accuracy     =         25            # [m]           REQ-VEH-CO-15
 max_turn_radius         =        140            # [m]           REQ-VEH-CO-25
 min_pitch_rate          =        0.6            # [deg/s]       REQ-VEH-CO-26
 min_yaw_rate            =        4.5            # [deg/s]       REQ-VEH-CO-30
+=======
+range_on_battery    =        100    # [km]  REQ-VEH-POW-2
+
+### CONTROL AND OPERATIONS ###
+range               =        350*10**3     # [m]  REQ-VEH-CO-12
+path_accuracy       =         25     # [m]   REQ-VEH-CO-13
+max_ground_alt      =        500     # [m]   REQ-VEH-CO-14
+deployment_accuracy =         25     # [m]   REQ-VEH-CO-15
+max_turn_radius     =        140     # [m]   REQ-VEH-CO-25
+min_pitch_rate      =        0.6     # [deg/s] REQ-VEH-CO-26
+min_yaw_rate        =        4.5     # [deg/s] REQ-VEH-CO-30
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
 
 
 def checkRequirements(blimp):
     if blimp.radius > max_radius:
+<<<<<<< HEAD
         print('Radius too large.')
         return False
     elif blimp.length > max_length:
@@ -47,4 +70,19 @@ def checkRequirements(blimp):
         return False
     else:
         print('Within bounds.')
+=======
+        print("Radius too big")
+        return False
+    elif blimp.length > max_length:
+        print("Too long")
+        return False
+    # elif blimp.MTOM > max_MTOM:
+    #     print("too heavy")
+    #     return False
+    elif blimp.explosive_potential > explosive_potential:
+        print("Too explosive")
+        return False
+    else:
+        print("within bounds")
+>>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
         return True
