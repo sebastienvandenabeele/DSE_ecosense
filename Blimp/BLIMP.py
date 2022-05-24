@@ -189,7 +189,7 @@ class Blimp:
 
         self.battery_speed = (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (
                     1 / 3)
-        self.battery_capacity= 2 * self.power_electronics * REQ.range_on_battery / (self.battery_speed * 3.6) / dod * margin
+        self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / (self.battery_speed * 3.6) / dod * margin
         self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
 
@@ -204,7 +204,7 @@ class Blimp:
         print()
         print('MTOM: ', round(self.MTOM, 2), ' kg')
         for key, value in self.mass.items():
-            print('Mass of ', key, ': ', round(value, 2), " kg")
+            print('Mass of', key, ':', round(value, 2), "kg")
         print()
         print('Balloon radius: ', round(self.radius, 2), ' m')
         print('Balloon length: ', round(self.length, 2), ' m')
@@ -228,7 +228,7 @@ class Blimp:
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Battery Speed: ', round(self.battery_speed * 3.6, 2), ' km/h')
-        print('Return time on battery: ', round(self.battery_speed/3600, 1), ' h')
+        print('Return time on battery: ', round(req.range_on_battery/self.battery_speed/3600, 1), ' h')
         print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
         print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
@@ -314,10 +314,11 @@ class Blimp:
         cost['electronics'] = sum([device.cost for device in self.electronics])
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
         #cost['envelope'] = self.surface_area * self.material['envelope'].cost
-
-        print('Total cost: ', sum(cost.values()), ' EUR')
+        print()
+        print('############ COST ESTIMATION ################')
+        print('Total cost:', round(sum(cost.values()), 2), 'EUR')
         for key, value in cost.items():
-            print('Cost of ', key, ': ', value, ' EUR')
+            print('Cost of', key, ':', round(value, 2), 'EUR')
 
 
 
