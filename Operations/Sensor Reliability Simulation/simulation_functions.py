@@ -38,3 +38,57 @@ def R(ffdi, w):
         float: fire rate of spread in the direction of the wind
     """
     return 0.0012*ffdi*w
+
+
+def ellips_params(t, R, lb):
+    """Determines main parameters of an ellipse (major/minor axis and focal point position)
+
+    Args:
+        t (float): time [s]
+        R (float): fire rate of spread [m/s]
+        lb (float): length to width ratio of ellipse [-]
+
+    Returns:
+        ndarray: length, width and focal point position [m]
+    """
+    l = R*t
+    w = l/lb
+    c = np.sqrt((l/2)**2 - (w/2)**2)
+    return np.array([l, w, c])
+
+
+def cone_params(t, u, lb):
+    """_summary_
+
+    Args:
+        t (_type_): _description_
+        u (_type_): _description_
+        lb (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    l = u*t
+    w = l/lb
+    return np.array([l, w])
+
+
+def triangle_points(l, w, centre, wind_dir, i):
+    """_summary_
+
+    Args:
+        l (_type_): _description_
+        w (_type_): _description_
+        centre (_type_): _description_
+        wind_dir (_type_): _description_
+        i (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
+                  [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
+    x1 = np.array([centre[0][i], centre[1][i]])
+    x2 = x1 + (T@(np.array([l[i], w[i]/2]).reshape((2, 1)))).flatten()
+    x3 = x1 + (T@(np.array([l[i], -w[i]/2]).reshape((2, 1)))).flatten()
+    return np.array([x1, x2, x3])
