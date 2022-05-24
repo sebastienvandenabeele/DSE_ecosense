@@ -1,6 +1,4 @@
-
 from Classes.gas import Gas, air
-from Classes.materials import Material
 import numpy as np
 
 
@@ -23,13 +21,12 @@ def envelope_pressure(blimp, atm_gas=air):
     return p_diff
 
 
-def envelope_thickness(blimp, p_diff, safety_factor = 5):
+def envelope_thickness(blimp, p_diff, safety_factor=5):
     """
     Through calculating critical von Mises stress for the envelope of the blimp,
     calculates the required material thickness.
+    :param blimp: [Blimp] Blimp object to be investigated [-]
     :param p_diff: [float] Max. pressure difference between the envelope [Pa]
-    :param max_radius: [float] Max. local radius of the blimp envelope [m]
-    :param env_material: [Material] Material used for the envelope [-]
     :return: [float] Thickness of material required for the envelope [m]
     """
     sigma_zz = 0  # Principal stress is 0 in z direction
@@ -39,6 +36,7 @@ def envelope_thickness(blimp, p_diff, safety_factor = 5):
     t_req = sigma_vm / blimp.material['envelope'].tensile_strength
     safe_t_req = t_req * safety_factor
     return safe_t_req
+
 
 def von_mises_stress(sigma_a, sigma_b, sigma_c):
     """

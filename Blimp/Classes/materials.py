@@ -28,7 +28,8 @@ class Material:
         self.density = density # max density kg/m^3
         self.price_kg = price_kg       # max price in Euro/kg
         self.E = E             # min E in Pa
-        self.tensile_strength = tensile_strength / 10**6   # min tensile strength in MPa
+        self.tensile_strength = tensile_strength * 10**6 / 4 # min tensile strength from MPa to Pa
+        # TODO: all the material definitiions are UD. For now, the strength is divided by 4 but this is not sufficient.
         self.elongation = elongation   # maximum elongation in %
         self.shear_mod = shear_mod    # min shear modulus in GPA
         self.fatigue = fatigue        # min fatigue in MPA
@@ -221,7 +222,7 @@ polyethylene_fiber = Material(
     price_kg = 110,
     density= 975,
     E= 120, 
-    tensile_strength= 2900, 
+    tensile_strength= 2900,
     elongation = 2.9,
     shear_mod = 0.3,
     fatigue = 2500,
