@@ -22,5 +22,5 @@ class Gas:
 # Gas library
 ##############
 
-hydrogen = Gas(m_molar=0.00201568, pres=Gas.pres_std, temp=Gas.temp_std, spec_energy=10800000, price=0.66)  # dens = 0.088
-air = Gas(m_molar=0.027457, pres=Gas.pres_std, temp=Gas.temp_std, spec_energy=0, price=0)  # dens = 1.225
+hydrogen = Gas(m_molar=0.00201568, pres=Gas.pres_std, temp=Gas.temp_std, spec_energy=10800000, cost=0.66)  # dens = 0.088
+air = Gas(m_molar=0.027457, pres=Gas.pres_std, temp=Gas.temp_std, spec_energy=0, cost=0)  # dens = 1.225

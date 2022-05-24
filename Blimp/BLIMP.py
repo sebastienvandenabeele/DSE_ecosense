@@ -6,6 +6,7 @@ import pickle as pick
 import requirements as req
 from Classes import electronics as el, engines as eng, materials as mat
 from control_surface import sizeControl
+from simulator import *
 
 def pickle(obj, filename):
     with open('Pickle Shelf/' + filename, 'wb') as file:
@@ -64,7 +65,7 @@ minimum_velocity                = req.range / maximum_triptime
 REQ_n_sensors                   = 1295 / 2
 relays_per_sensor               = 25
 n_relays                        = int(round(REQ_n_sensors / relays_per_sensor, 0))
-m_sensor                        = 0.05      # [kg]
+m_sensor                        = 0.052      # [kg]
 m_relay                         = 0.338     # [kg]
 m_deployment_system             = 2         # [kg]
 REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor + m_deployment_system
@@ -331,28 +332,28 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_gondola=   5,  # [kg]
-               mass_deployment=      1,
-               n_controls=           3,
+# Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                mass_gondola=   5,  # [kg]
+#                mass_deployment=      1,
+#                n_controls=           3,
+#
+#                n_engines=            4,
+#                engine=              eng.tmt_4130_300,
+#
+#                electronics=         el.config_first_order,
+#                mass_ballonet=        8,
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
 
-               n_engines=            4,
-               engine=              eng.tmt_4130_300,
-
-               electronics=         el.config_first_order,
-               mass_ballonet=        8,
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
-
-Shlimp.save()
-# Shlimp = unpickle('Shlimp_350km_2305_0937')
+#Shlimp.save()
+Shlimp = unpickle('Shlimp_350km_2305_1836')
 Shlimp.report()
 Shlimp.estimateCost()
-
+simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)

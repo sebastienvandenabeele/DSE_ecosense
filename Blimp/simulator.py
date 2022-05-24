@@ -26,10 +26,10 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
         vs.append(v)
 
     plt.plot(ts, vs)
-    plt.plot(ts, req.min_cruiseV * np.ones(len(ts)), linestyle='dashed', color='black')
+    plt.plot(ts, blimp.cruiseV * np.ones(len(ts)), linestyle='dashed', color='black')
     plt.grid()
     plt.xlim(0, tmax)
-    plt.ylim(0, 18)
+    plt.ylim(0, req.min_cruiseV * 1.2)
     plt.legend(['Current velocity', 'Design velocity'])
     plt.xlabel('Time [s]')
     plt.ylabel('Velocity [m/s]')
@@ -39,3 +39,27 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
 
 def simulateTurn(blimp):
     print()
+
+def simulateAltitudeGain():
+    lapse_rate = -0.0065  # K\m
+    R = 287
+    p = 101325  # Pa
+    g = 9.81
+    V = 136.36  # m3
+
+    m_sensor = 0.052  # kg
+    delta_m = -m_sensor
+    delta_rho_atm = delta_m / g / V
+    rho0 = 1.225
+    rho1 = rho0 + delta_rho_atm
+    e = -g/lapse_rate/R - 1
+    T0 = 288.15
+
+    T1 = T0 * (rho1/rho0)**(1/e)
+    delta_T = T1 - T0
+    delta_h = delta_T / lapse_rate
+    print(delta_h)
+
+
+    delta_h = p / R / lapse_rate / delta_rho_atm
+
