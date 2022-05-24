@@ -25,10 +25,10 @@ ultrasonic = Electronic("HC-SR04", 0.0085, 0.075, 4.5, "Ultrasonic Module")
 lidar = Electronic ("LiDAR", 0.011, 0.55, 50,"LiDAR")
 HGLRC_M80= Electronic("HGLRC_M80", 0.0094, 0.0825, 20, "GPS Module")
 Honeywell_SATCOM = Electronic("Honeywell SATCOM", 0.994, 44, 2800, "TX/RX")
-pixhawk = Electronic("Pixhawk 4", 0.0158, 2, 180, "FC")
+pixhawk = Electronic("Pixhawk 4", 0.0158, 2, 180, "Flight Controller")
 
 
 ############################################
 # List of possible electronic configurations
 ############################################
-config_max_consumption=[ZED_F9P, lidar, Honeywell_SATCOM, pixhawk]
+config_first_order = [NEO_M9N, lidar, Honeywell_SATCOM, pixhawk]

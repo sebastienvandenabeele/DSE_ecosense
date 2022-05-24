@@ -1,8 +1,8 @@
 
-initial_volume_Hyd = 38.9 # m^3
-m_take_off = 45.9 # kg
-m_payload = 25 # kg
-(38.9, 45.9, 25)
+# initial_volume_Hyd = 50.89 # m^3
+# m_take_off = 58.078 # kg
+# m_payload = 43.16 # kg
+
 def required_density_gas(initial_volume_H,m_take_off,m_payload):
     """
     This definition calculates the required density of the gas 
@@ -15,17 +15,15 @@ def required_density_gas(initial_volume_H,m_take_off,m_payload):
     final_density_gas = (density_air*initial_volume_H-(m_take_off-m_payload))/initial_volume_H
     return final_density_gas
 
-print(required_density_gas(initial_volume_Hyd,m_take_off,m_payload))
-
-initial_volume_Hyd = 38.9 # m^3
-density_gas_final = 0.6877 # kg/m^3
+#print(required_density_gas(initial_volume_Hyd,m_take_off,m_payload))
+#density_gas_final = required_density_gas(initial_volume_Hyd,m_take_off,m_payload)
 
 def volume_ballonets(initial_volume_H,final_density_gas):
     """
     This def calculates volume of the ballonets   
     to lower the vehicle              
     """
-    density_H = 0.082 # kg/m^3
+    density_H = 0.088 # kg/m^3
     mass_H = density_H*initial_volume_H
     density_air = 1.225 # kg/m^3
 
@@ -67,16 +65,14 @@ def volume_ballonets(initial_volume_H,final_density_gas):
     return volume_air_added 
 
 #print(volume_ballonets(initial_volume_Hyd,density_gas_final))
+#new_volume_H = initial_volume_Hyd - volume_ballonets(initial_volume_Hyd,density_gas_final)
 
-T = 273.15 # K
-new_volume_H = 2.807 # m^3
-initial_volume_Hyd = 38.9 # m^3
-
-def pressure_blimp_gas(initial_volume_H,new_volume_H,T):
+def pressure_blimp_gas(initial_volume_H,new_volume_H):
     """
     def returns the pressure (relative to surrounding pressure) 
     required to be carried by the envelope 
     """
+    T = 273.15 # K
     R = 8.314  # JK^-1 mol^-1
     p_atm = 101325 # pa
 
@@ -95,14 +91,14 @@ def pressure_blimp_gas(initial_volume_H,new_volume_H,T):
     p_gas = ((n_H+n_air)*R*T)/initial_volume_H
     rel_p_gas = p_gas - p_atm
 
-    return (p_gas,rel_p_gas)
+    return rel_p_gas
 
-#print(pressure_blimp_gas(initial_volume_Hyd,new_volume_H,T))
+#print(pressure_blimp_gas(initial_volume_Hyd,new_volume_H))
 
-rel_p_gas = 112526 #pa
-Diameter_blimp = 6.3 #m
-wall_thickness = 0.0003 #m
-6.3,112526,0.0003
+#rel_p_gas = pressure_blimp_gas(initial_volume_Hyd,new_volume_H)
+# Diameter_blimp = 6.3 #m
+# wall_thickness = 0.0003 #m
+
 def stress_blimp(diameter, inside_pressure, wall_thickness):
     """
     hoop stress for blimp
@@ -112,3 +108,15 @@ def stress_blimp(diameter, inside_pressure, wall_thickness):
     return ss*10**(-6)
 
 
+initial_volume_Hyd = 50.89 # m^3
+m_take_off = 58.078 # kg
+m_payload = 43.16 # kg
+Diameter_blimp = 2.36 #m
+wall_thickness = 0.0006 #m
+
+density_gas_final = required_density_gas(initial_volume_Hyd,m_take_off,m_payload)
+new_volume_H = initial_volume_Hyd - volume_ballonets(initial_volume_Hyd,density_gas_final)
+rel_p_gas = pressure_blimp_gas(initial_volume_Hyd,new_volume_H)
+print(rel_p_gas)
+hoop_stress = stress_blimp(Diameter_blimp,rel_p_gas,wall_thickness)
+print(hoop_stress)
