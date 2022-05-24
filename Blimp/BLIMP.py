@@ -4,7 +4,7 @@ from projected_panel import plot_blimp, irradiance_distribution
 from Classes import solarcells as sc, gas
 import pickle as pick
 import requirements as req
-from Classes import electronics as el, engines as eng
+from Classes import electronics as el, engines as eng, materials as mat
 from control_surface import sizeControl
 
 def pickle(obj, filename):
@@ -73,7 +73,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 
 # Creation of Blimp class
 class Blimp:
-    def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, mass_propulsion=0, liftgas=0, mass_deployment=0,
+    def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, envelope_material=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_controls=0):
         """
@@ -100,7 +100,7 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * n_engines
+        self.mass['engines'] = self.engine.mass * n_engines * 1.5 # margin for mounting and prop
         self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
         print("Power deliverable by the engines: ", self.cruise_prop_power)
 
@@ -124,8 +124,10 @@ class Blimp:
         self.n_controls = n_controls
 
 
-        # Masses
+        # Materials
+        #self.material['envelope'] = envelope_material
 
+        # Masses
         self.mass['payload'] = mass_payload
         self.mass['gondola'] = mass_gondola
         self.mass['control'] = mass_control
@@ -188,7 +190,8 @@ class Blimp:
                     1 / 3)
         self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / (self.battery_speed * 3.6) / dod * margin
         self.mass['battery'] = self.battery_capacity / battery_density
-        self.battery_capacity= self.battery_capacity / (n_series * voltage_nominal)
+        self.battery_charge= self.battery_capacity / (n_series * voltage_nominal)
+        self.battery_return_time = req.range_on_battery / self.battery_speed
 
     def report(self):
         """
@@ -224,8 +227,9 @@ class Blimp:
         print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 2), ' %')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
+        print('Battery Speed: ', round(self.battery_speed * 3.6, 2), ' km/h')
+        print('Return time on battery: ', round(self.battery_speed/3600, 1), ' h')
         print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
-        print('Battery Speed: ', round(self.battery_speed * 3.6, 2), 'km/h')
         print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
     def setCruiseSpeed(self, plot=False):
@@ -301,15 +305,19 @@ class Blimp:
     def estimateCost(self):
         """
         adds and orders all costs from used parts
-        :return:
         """
-        # TODO: basically everything, work in progress
+
 
         cost = {}
         cost['solar'] = self.n_panels * self.solar_cell.cost
-        cost['h2'] = self.volume * self.liftgas.cost
+        cost['hydrogen'] = self.volume * self.liftgas.cost
+        cost['electronics'] = sum([device.cost for device in self.electronics])
+        cost['engines'] = self.n_engines * self.engine.cost * 1.2
+        #cost['envelope'] = self.surface_area * self.material['envelope'].cost
 
-        print(cost)
+        print('Total cost: ', sum(cost.values()), ' EUR')
+        for key, value in cost.items():
+            print('Cost of ', key, ': ', value, ' EUR')
 
 
 
@@ -360,8 +368,8 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
                n_engines=            4,
                engine=              eng.tmt_4130_300,
 
-               electronics=         el.config_max_consumption,
-               mass_ballonet=        0.75,
+               electronics=         el.config_first_order,
+               mass_ballonet=        8,
                length_factor=        0.8,
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
@@ -370,7 +378,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
 Shlimp.save()
 # Shlimp = unpickle('Shlimp_350km_2305_0937')
 Shlimp.report()
-dummy = input()
+Shlimp.estimateCost()
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
 #plot_blimp(Shlimp)

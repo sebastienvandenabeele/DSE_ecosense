@@ -3,7 +3,7 @@ class Gas:
     pres_std = 101325  # Pa
     temp_std = 273.15  # K
 
-    def __init__(self, m_molar, temp, pres, spec_energy, price):
+    def __init__(self, m_molar, temp, pres, spec_energy, cost):
         """
         :param m_molar: Molar mass [kg/mol]
         :param temp: Temperature [K]
@@ -15,10 +15,10 @@ class Gas:
         self.dens = (self.pres * self.m_molar)/(self.temp * Gas.R)  # ideal gas law
 
         self.spec_energy = spec_energy # [J/m3]
-        self.price = price # [EUR / m^3]
+        self.cost = cost # [EUR / m^3]
 
 ##############
 # Gas library
 ##############
 
-hydrogen = Gas(1, 1, 1, 10800000, 0.66)
+hydrogen = Gas(1, 1, 1, 10800000, cost=0.66)
