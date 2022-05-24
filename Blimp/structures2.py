@@ -23,7 +23,7 @@ def envelope_pressure(blimp, mass_dropped, atm_gas=air):
     return p_diff
 
 
-def envelope_thickness(blimp, p_diff, max_radius, env_material, safety_factor = 5):
+def envelope_thickness(blimp, p_diff, env_material, safety_factor = 5):
     """
     Through calculating critical von Mises stress for the envelope of the blimp,
     calculates the required material thickness.
@@ -33,8 +33,8 @@ def envelope_thickness(blimp, p_diff, max_radius, env_material, safety_factor = 
     :return: [float] Thickness of material required for the envelope [m]
     """
     sigma_zz = 0  # Principal stress is 0 in z direction
-    sigma_xx = (p_diff * max_radius) / 2  # Longit. stress. Assuming 1m thickness for now.
-    sigma_yy = (p_diff * max_radius)  # Hoop stress. Assuming 1m thickness for now.
+    sigma_xx = (p_diff * blimp.radius) / 2  # Longit. stress. Assuming 1m thickness for now.
+    sigma_yy = (p_diff * blimp.radius)  # Hoop stress. Assuming 1m thickness for now.
     sigma_vm = von_mises_stress(sigma_xx, sigma_yy, sigma_zz)  # Eq. von Mises stress
     t_req = sigma_vm / env_material.tensile_strength
     safe_t_req = t_req * safety_factor

@@ -6,6 +6,7 @@ import pickle as pick
 import requirements as req
 from Classes import electronics as el, engines as eng, materials as mat
 from control_surface import sizeControl
+from structures2 import *
 from simulator import *
 
 def pickle(obj, filename):
@@ -126,7 +127,7 @@ class Blimp:
 
 
         # Materials
-        #self.material['envelope'] = envelope_material
+        self.material['envelope'] = envelope_material
 
         # Masses
 
@@ -338,6 +339,8 @@ Shlimp = Blimp(name=                "Shlimp_350km_2405_1208",
                mass_gondola=   5,  # [kg]
                mass_deployment=      1,
                n_controls=           3,
+
+               envelope_material=mat.polyethylene_fiber,
 
                n_engines=            4,
                engine=              eng.tmt_4130_300,
