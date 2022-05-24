@@ -86,17 +86,22 @@ def sizeControl(blimp):
     # polygon = plt.fill(naca[0],naca[1])
     # area = computeArea(polygon[0].xy)
     # plt.close()
-    volume_correction_factor=0.82157407407
-    T=0.08
-    def func(x):
-        y=T/0.2*(0.2969*x**0.5+-0.126*x+-0.3516*x**2+0.2843*x**3+-0.1015*x**4)
-        return y
-    area=2*integrate.quad(func,0,1)[0]
-    def func2(x):
-        return area*(((fin_root-fin_tip)/span)*x+fin_tip)**2
-    volume=integrate.quad(func2,0,span)[0]*volume_correction_factor
+    # volume_correction_factor=0.82157407407
+    # T=0.08
+    # def func(x):
+        # y=T/0.2*(0.2969*x**0.5+-0.126*x+-0.3516*x**2+0.2843*x**3+-0.1015*x**4)
+        # return y
+    # area=2*integrate.quad(func,0,1)[0]
+    # def func2(x):
+        # return area*(((fin_root-fin_tip)/span)*x+fin_tip)**2
+    # volume=integrate.quad(func2,0,span)[0]*volume_correction_factor
     
-    return blimp.n_controls * volume
+    surface=2*span*fin_tip+span*fin_tip*1.116/2*0.736*1.0145 # first coeff: surface area calculation ratio, second: ratio vs trapezoid, third: ratio vs actual airfoil
+    mass_fin=0.018*surface*(1-0.276)*1.26*2.36 # first: ratio of control surfaces, second, third:coefficients from book 
+    mass_control=surface*0.276*0.3*4.88 #ratio, factor from book, conversion from lb/ft2 to kg/m2
+    mass_actuator=surface*0.276*0.08*4.88*1.55 #ratio, factor from book, conversion, installation factor
+    
+    return sum(blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator)
 
 
 

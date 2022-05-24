@@ -260,7 +260,8 @@ class Blimp:
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
-                self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
+                self.mass['control']=sizeControl(self)
+                # self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
 
                 # Uncomment this if an engine is selected
                 self.solar_power_available = (self.power_solar - self.power_electronics) * self.engine.efficiency * prop_eff
