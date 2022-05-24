@@ -39,8 +39,4 @@ pixhawk = Electronic("Pixhawk 4", 0.0158, 2, 180, "FC")
 ############################################
 # List of possible electronic configurations
 ############################################
-<<<<<<< HEAD
-max_consumption=[ZED_F9P, lidar, Honeywell_SATCOM, pixhawk]
-=======
 config_max_consumption=[ZED_F9P, lidar, Honeywell_SATCOM, pixhawk]
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
