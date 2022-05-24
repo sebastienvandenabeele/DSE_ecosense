@@ -59,15 +59,15 @@ def ellips_params(t, R, lb):
 
 
 def cone_params(t, u, lb):
-    """_summary_
+    """Defines cone length and width
 
     Args:
-        t (_type_): _description_
-        u (_type_): _description_
-        lb (_type_): _description_
+        t (float): time [s]
+        u (float): wind speed [m/s]
+        lb (float): Cone slenderness ratio [-]
 
     Returns:
-        _type_: _description_
+        1darray: Array containing length and width of the cone [m]
     """
     l = u*t
     w = l/(lb)
@@ -75,17 +75,17 @@ def cone_params(t, u, lb):
 
 
 def triangle_points(l, w, centre, wind_dir, i):
-    """_summary_
+    """Gets the point location of the cone based on length, width and wind direction
 
     Args:
-        l (_type_): _description_
-        w (_type_): _description_
-        centre (_type_): _description_
-        wind_dir (_type_): _description_
-        i (_type_): _description_
+        l (float): length [m]
+        w (float): width [m]
+        centre (tuple): contains x and y position of the ellipse centre [m]
+        wind_dir (float): wind angle from horizontal (ccw) [deg]
+        i (int): iteration
 
     Returns:
-        _type_: _description_
+        1darray: contains the three points rotated according to the wind [m]
     """
     T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
                   [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
@@ -139,3 +139,17 @@ def detection_time(patch, points, wind_dir, centre, concentrations, width_triang
         # print(theta[:,0])
        # print(centre - points[arg])
       #  return points[arg,:]
+
+
+def initial_concentrations(t):
+    return C0_concentration_function(t/60), H2_concentration_function(t/60)
+
+
+def concentration_distribution(x):
+    mu = (x[-1]-x[0])/2
+    sigs = x/4
+    return np.array([[mu, sig] for sig in sigs])
+
+
+def density_plot(x, mu, sig):
+    return stats.norm.pdf(x, loc=mu, scale=sig)

@@ -41,20 +41,6 @@ H2_concentration_function = spinter.interp1d(
     time_concentrations, H2_concentrations)
 
 
-def initial_concentrations(t):
-    return C0_concentration_function(t/60), H2_concentration_function(t/60)
-
-
-def concentration_distribution(x):
-    mu = (x[-1]-x[0])/2
-    sigs = x/4
-    return np.array([[mu, sig] for sig in sigs])
-
-
-def density_plot(x, mu, sig):
-    return stats.norm.pdf(x, loc=mu, scale=sig)
-
-
 run = True
 if run:
     for index, t in enumerate(time):
@@ -70,32 +56,7 @@ if run:
             centre = [x_f+centre*np.cos(np.deg2rad(wind_dir)),
                       y_f + centre*np.sin(np.deg2rad(wind_dir))]
 
-            C0_init_ppm = initial_concentrations(t)[0]
-
-            # fig, ax = plt.subplots()
-
-            # def init():
-            #     x = np.linspace(width_triangle[0], width_triangle[-1], len(t))
-            #     begin_N = 4
-            #     data = concentration_distribution(x[begin_N:])
-            #     X, T = np.meshgrid(x[begin_N:], t[begin_N:])
-            #     Z = np.array([C0_init_ppm[1]*density_plot(x[begin_N:], params[0], params[1])
-            #                   for params in data])
-            #     c = ax.pcolormesh(X, T, Z, cmap='RdBu_r')
-
-            # def animate(i):
-            #     x = np.linspace(width_triangle[0], width_triangle[-1], len(t))
-            #     begin_N = 4
-            #     data = concentration_distribution(x[begin_N:])
-            #     X, T = np.meshgrid(x[begin_N:], t[begin_N:])
-            #     Z = np.array([C0_init_ppm[i+1]*density_plot(x[begin_N:], params[0], params[1])
-            #                   for params in data])
-            #     c = ax.pcolormesh(X, T, Z, cmap='RdBu_r')
-
-            # anim = animation.FuncAnimation(
-            #     fig, animate, init_func=init, frames=20, repeat=False)
-
-            # plt.show()
+            C0_init_ppm = simfunc.initial_concentrations(t)[0]
 
             fig = plt.figure()
             data = np.random.rand(10, 10)
@@ -109,9 +70,9 @@ if run:
                 plt.clf()
                 x = np.linspace(width_triangle[0], width_triangle[-1], len(t))
                 begin_N = 4
-                data = concentration_distribution(x[begin_N:])
+                data = simfunc.concentration_distribution(x[begin_N:])
                 X, T = np.meshgrid(x[begin_N:], t[begin_N:])
-                Z = np.array([C0_init_ppm[i+1]*density_plot(x[begin_N:],
+                Z = np.array([C0_init_ppm[i+1]*simfunc.density_plot(x[begin_N:],
                              params[0], params[1]) for params in data])
                 sns.heatmap(Z, vmin=0.0, vmax=0.050, cmap="Greys")
 
