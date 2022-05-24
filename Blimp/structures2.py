@@ -32,11 +32,11 @@ def envelope_thickness(blimp, p_diff, max_radius, env_material, safety_factor = 
     :param env_material: [Material] Material used for the envelope [-]
     :return: [float] Thickness of material required for the envelope [m]
     """
-    sigma_zz = 0 # Principal stress is 0 in z direction
+    sigma_zz = 0  # Principal stress is 0 in z direction
     sigma_xx = (p_diff * max_radius) / 2  # Longit. stress. Assuming 1m thickness for now.
     sigma_yy = (p_diff * max_radius)  # Hoop stress. Assuming 1m thickness for now.
     sigma_vm = von_mises_stress(sigma_xx, sigma_yy, sigma_zz)  # Eq. von Mises stress
-    t_req = sigma_vm / (env_material.tensile_strength * 1000000)
+    t_req = sigma_vm / env_material.tensile_strength
     safe_t_req = t_req * safety_factor
     return safe_t_req
 
