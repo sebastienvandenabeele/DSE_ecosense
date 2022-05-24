@@ -59,7 +59,6 @@ def ellips_params(t, R, lb):
 
 
 def cone_params(t, u, lb):
-<<<<<<< HEAD
     """_summary_
 
     Args:
@@ -72,37 +71,10 @@ def cone_params(t, u, lb):
     """
     l = u*t
     w = l/lb
-=======
-    """Defines cone length and width
-
-    Args:
-        t (float): time [s]
-        u (float): wind speed [m/s]
-        lb (float): Cone slenderness ratio [-]
-
-    Returns:
-        1darray: Array containing length and width of the cone [m]
-    """
-    l = u*t
-    w = l/(lb)
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
     return np.array([l, w])
 
 
 def triangle_points(l, w, centre, wind_dir, i):
-<<<<<<< HEAD
-    """_summary_
-
-    Args:
-        l (_type_): _description_
-        w (_type_): _description_
-        centre (_type_): _description_
-        wind_dir (_type_): _description_
-        i (_type_): _description_
-
-    Returns:
-        _type_: _description_
-=======
     """Gets the point location of the cone based on length, width and wind direction
 
     Args:
@@ -114,7 +86,6 @@ def triangle_points(l, w, centre, wind_dir, i):
 
     Returns:
         1darray: contains the three points rotated according to the wind [m]
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b
     """
     T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
                   [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
@@ -122,8 +93,6 @@ def triangle_points(l, w, centre, wind_dir, i):
     x2 = x1 + (T@(np.array([l[i], w[i]/2]).reshape((2, 1)))).flatten()
     x3 = x1 + (T@(np.array([l[i], -w[i]/2]).reshape((2, 1)))).flatten()
     return np.array([x1, x2, x3])
-<<<<<<< HEAD
-=======
 
 
 def detection_time(patch, points, wind_dir, centre, concentrations, width_triangle):
@@ -182,4 +151,3 @@ def density_plot(x, mu, sig):
         1darray: array containing the normal distribution 
     """
     return stats.norm.pdf(x, loc=mu, scale=sig)
->>>>>>> efb7ed74149ce48a918178f728bb3da6670cf48b

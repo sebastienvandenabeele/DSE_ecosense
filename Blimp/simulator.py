@@ -40,14 +40,15 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
 def simulateTurn(blimp):
     print()
 
-def simulateAltitudeGain():
+def simulateAltitudeGain(blimp):
     lapse_rate = -0.0065  # K\m
     R = 287
     p = 101325  # Pa
     g = 9.81
-    V = 136.36  # m3
+    V = blimp.volume  # m3
 
     m_sensor = 0.052  # kg
+    m_relay = 0.338
     delta_m = -m_sensor
     delta_rho_atm = delta_m / g / V
     rho0 = 1.225
