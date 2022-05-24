@@ -151,3 +151,38 @@ def density_plot(x, mu, sig):
         1darray: array containing the normal distribution 
     """
     return stats.norm.pdf(x, loc=mu, scale=sig)
+
+
+def get_concentration(xy, centre, wind_dir, i, width_triangle, time_arr, C0_init_ppm):
+    """_summary_
+
+    Args:
+        xy (_type_): _description_
+        centre (_type_): _description_
+        wind_dir (_type_): _description_
+        i (_type_): _description_
+        width_triangle (_type_): _description_
+        time_arr (_type_): _description_
+        C0_init_ppm (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    coord_diff = np.array([[xy[0] - centre[0]],
+                           [xy[1] - centre[1]]])
+    T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
+                  [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
+    coord = T@coord_diff + np.array([[width_triangle[-1]/2],
+                                     [0]])
+    x_arr = np.linspace(
+        width_triangle[0], width_triangle[-1], len(time_arr))
+    data = concentration_distribution(x_arr[1:])
+    Z = np.array([C0_init_ppm[i]*density_plot(x_arr[1:],
+                                              params[0], params[1]) for params in data])
+    idx = np.array([np.round(coord[0][0]/width_triangle[-1] * len(time_arr)),
+                    np.round(coord[1][0]/width_triangle[-1] * len(time_arr))], dtype=int)
+    try:
+        concentration = Z[idx[0]][idx[1]]
+    except:
+        concentration = 0
+    return concentration
