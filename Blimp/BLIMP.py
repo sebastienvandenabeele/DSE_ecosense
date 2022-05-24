@@ -209,16 +209,19 @@ class Blimp:
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
+        print('Number of control surfaces: ', self.n_controls)
         print()
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
         print('On-board electronics power: ', round(self.power_electronics, 2), ' W')
+        print()
+        print('Engine type: ', self.engine.name)
         print('Single engine max power: ', round(self.engine.max_power / 1000, 2), ' kW')
         print('Number of engines:', round(self.n_engines, 0))
         print('Actual propulsion power available: ', round(self.prop_power_available / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
-        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power * 100, 2), ' %')
+        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 2), ' %')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
@@ -347,15 +350,15 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2305_1732",
+Shlimp = Blimp(name=                "Shlimp_350km_2305_1836",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_gondola=   5,  # [kg]
                mass_deployment=      1,
-               n_controls=           4,
+               n_controls=           3,
 
                n_engines=            4,
-               engine=              eng.tmt_4130_230,
+               engine=              eng.tmt_4130_300,
 
                electronics=         EL.config_max_consumption,
                mass_ballonet=        0.75,
