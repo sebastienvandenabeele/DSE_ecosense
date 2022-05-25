@@ -1,12 +1,9 @@
 import numpy as np
 import pandas as pd
 import simulation_functions as simfunc
-from matplotlib.patches import Ellipse, Polygon
-import matplotlib.pyplot as plt
 import scipy.interpolate as spinter
-import matplotlib.animation as animation
-import seaborn as sns
 import mesh_types
+import gui_functions as plotting
 
 df = pd.read_csv(r"./data/samples.csv")
 df["wind_spd"] = df["wind_spd"]*0.2
@@ -41,8 +38,7 @@ def initial_concentrations(t):
     return C0_concentration_function(t/60), H2_concentration_function(t/60)
 
 
-run = True
-if run:
+if __name__ == "__main__":
     for index, t in enumerate(time):
         print(f"Running try no. {index+1}...")
         x_f, y_f = np.random.uniform(0, size, 2)
@@ -82,40 +78,6 @@ if run:
                 print(f"Fire Detected!!! in {detection_time} [s]")
                 df.loc[index, "detection_time_gas"] = detection_time
                 upper_break = True
-
-            animation_plotting = False
-            if animation_plotting:
-                fig = plt.figure()
-
-                def init():
-                    sns.heatmap(np.zeros((10, 10)), vmax=.8,
-                                square=True, cbar=False)
-
-                def animate(i):
-                    plt.clf()
-                    x = np.linspace(
-                        width_triangle[0], width_triangle[-1], len(t))
-                    begin_N = 1
-                    data = simfunc.concentration_distribution(x[begin_N:])
-                    Z = np.array([C0_init_ppm[i+1]*simfunc.density_plot(x[begin_N:],
-                                                                        params[0], params[1]) for params in data])
-                    sns.heatmap(Z, vmin=0.0, vmax=0.05, cmap="Greys")
-
-                anim = animation.FuncAnimation(
-                    fig, animate, init_func=init, frames=N-1, interval=10, repeat=False)
-
-                plt.show()
-
-            plotting = False
-            if plotting:
-                fig, ax = plt.subplots(figsize=(8, 8))
-                ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
-                plt.scatter(x_f, y_f, color='red')
-                plt.xlim(0, size)
-                plt.ylim(0, size)
-                plt.title(
-                    f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Speed: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
-                plt.show()
 
     print("Saving to CSV...")
     df.to_csv(r"./data/fire_detection_time.csv")
