@@ -101,7 +101,7 @@ def sizeControl(blimp):
     mass_control=surface*0.276*0.3*4.88 #ratio, factor from book, conversion from lb/ft2 to kg/m2
     mass_actuator=surface*0.276*0.08*4.88*1.55 #ratio, factor from book, conversion, installation factor
     
-    return sum([blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator])
+    return sum([blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator]),surface,(fin_tip+fin_root)/2
 
 
 

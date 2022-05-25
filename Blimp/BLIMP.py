@@ -6,6 +6,7 @@ import pickle as pick
 import requirements as req
 from Classes import electronics as el, engines as eng, materials as mat
 from control_surface import sizeControl
+from drag_coefficient import calculateCD
 import structures2 as struc
 from simulator import *
 
@@ -260,7 +261,7 @@ class Blimp:
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
-                self.mass['control']=sizeControl(self)
+                self.mass['control'], self.control_surface, self.control_chord=sizeControl(self)
                 # self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
 
                 # Uncomment this if an engine is selected
@@ -276,6 +277,7 @@ class Blimp:
 
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
+                self.CD = calculateCD(self, rho)
                 self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
             if plot:
