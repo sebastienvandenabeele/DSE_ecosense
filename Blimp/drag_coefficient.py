@@ -15,7 +15,7 @@ def calculateCD(Shlimp,rho):
     #tail
     FF_tail=1+1.2*0.08+100*0.08**4
     Re_tail=rho*Shlimp.cruiseV/3.6*Shlimp.control_chord/mu
-    S_tail=Shlimp.n_controls*Shlimp.control_surface
+    S_tail= Shlimp.n_fins * Shlimp.control_surface
     Cf_tail=0.455/(np.log10(Re_tail)**2.58)
     
     Cd0_tail=FF_tail*Cf_tail*S_tail/(V**(2/3))

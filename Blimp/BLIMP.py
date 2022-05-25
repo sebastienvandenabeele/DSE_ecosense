@@ -78,7 +78,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, envelope_material=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
-                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_controls=0):
+                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
         :param name: [str] Name of instance
@@ -124,7 +124,7 @@ class Blimp:
         re = dl_re[np.where(dl_re[:, 0] == list_element), 1][0][0]
         self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6)) * margin
         self.liftgas = liftgas
-        self.n_controls = n_controls
+        self.n_fins = n_fins
 
 
         # Materials
@@ -133,8 +133,8 @@ class Blimp:
         # Masses
 
         self.mass['payload'] = mass_payload
-        self.mass['gondola'] = 0.15 * mass_payload
-        self.mass['control'] = mass_control
+        self.mass['gondola structure'] = 0.15 * mass_payload
+        self.mass['controls'] = mass_control
 
         self.electronics = electronics
         self.power_electronics = sum([el.power_consumption for el in self.electronics])
@@ -223,7 +223,7 @@ class Blimp:
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
-        print('Number of control surfaces: ', self.n_controls)
+        print('Number of fins: ', self.n_fins)
         print()
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
@@ -267,7 +267,7 @@ class Blimp:
                 self.sizeBalloon()
                 self.sizeSolar()
                 self.sizeBattery()
-                self.mass['control'], self.control_surface, self.control_chord=sizeControl(self)
+                self.mass['controls'], self.control_surface, self.control_chord = sizeControl(self)
                 # self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
 
                 # Uncomment this if an engine is selected
@@ -336,13 +336,19 @@ class Blimp:
         for key, value in cost.items():
             print('Cost of', key, ':', round(value, 2), 'EUR')
 
-def getCG():
-    '''
-    Estimation of Blimp c.g. in the plane of symmetry.
-    :return:
-    '''
-    #Balloon
-    x
+    def getCG(self):
+        '''
+        Estimation of Blimp c.g. in the plane of symmetry. Datum is the front tip of the envelope. Positive z up, positive x along longitudinal.
+        :return:
+        '''
+        x = {}
+        z = {}
+        volume = {}
+        #Balloon
+        x['balloon'] = self.length / 2
+        z['balloon'] = 0
+
+
 
 
 
@@ -355,7 +361,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2505_1459",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_deployment=      1,
-               n_controls=           4,
+               n_fins=           4,
 
                envelope_material=    mat.polyethylene_fiber,
 

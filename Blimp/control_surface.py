@@ -97,7 +97,7 @@ def sizeControl(blimp):
         # return area*(((fin_root-fin_tip)/span)*x+fin_tip)**2
     # volume=integrate.quad(func2,0,span)[0]*volume_correction_factor
     aspect_ratio=0.5
-    surface=0.03265958005/blimp.n_controls*blimp.volume
+    surface= 0.03265958005 / blimp.n_fins * blimp.volume
     fin_root=np.sqrt((2*surface*(1+aspect_ratio))/(1+aspect_ratio+aspect_ratio**2))
     fin_tip=fin_root*aspect_ratio
     control_root=0.1978*fin_root
@@ -110,7 +110,7 @@ def sizeControl(blimp):
     mass_control=surface*surface_ratio*0.3*4.88 #ratio, factor from book, conversion from lb/ft2 to kg/m2
     mass_actuator=surface*0.276*0.08*4.88*1.55 #ratio, factor from book, conversion, installation factor
     
-    return sum([blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator]),surface,fin_root
+    return sum([blimp.n_fins * mass_fin, blimp.n_fins * mass_control, blimp.n_fins * mass_actuator]), surface, fin_root
 
 
 
