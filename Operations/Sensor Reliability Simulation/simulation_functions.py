@@ -46,6 +46,24 @@ def initial_gas_concentration(gas_type, t):
     return concentration_function(t/60)
 
 
+def get_relevant_detection_nodes(centre, radius, mesh_points):
+    """Gets the nodes within a circle (given a radius) centred at the fire ellipse center
+
+    Args:
+        centre (ndarray): array containing all the centre points of the fires throughout time
+        radius (float): radius around the fire centre [m]
+        mesh_points (ndarray): array containing all the sensor nodes [m, m]
+        i (int): time index [-]
+
+    Returns:
+        ndarray: mesh array containing the relevant poins [m, m]
+    """
+    x0, y0, radius = centre[0], centre[1], radius
+    relevant_arg = np.argwhere(
+        np.sqrt((mesh_points[:, 0]-x0)**2 + (mesh_points[:, 1]-y0)**2) < radius)
+    return mesh_points[relevant_arg][:, 0, :]
+
+
 def MC(rh, t):
     """Calculates moisture contents of a eucalypt forest wildfire
 
@@ -96,12 +114,15 @@ def ellips_params(t, R, lb):
     Returns:
         ndarray: length, width and focal point position [m]
     """
-    if lb < 1:
-        lb = 1.1
+    if type(lb) == "numpy.ndarray":
+        if len(lb.to_list()) > 1:
+            for i in range(len(lb)):
+                if lb[i] < 1:
+                    lb[i] = 1.1
     l = R*t
     w = l/lb
     c = np.sqrt((l/2)**2 - (w/2)**2)
-    return np.array([l, w, c])
+    return l, w, c
 
 
 def cone_params(t, u, lb):
@@ -115,14 +136,12 @@ def cone_params(t, u, lb):
     Returns:
         ndarray: array containing the lengths and widths of the triangle at the given time (from start of the cone, thus t=0 should yield l=w=0)
     """
-    if lb < 1:
-        lb = 1.1
     l = u*t
     w = l/lb
     return np.array([l, w])
 
 
-def triangle_points(l, w, centre, wind_dir, i):
+def triangle_points(l, w, centre, wind_dir):
     """Gets the point location of the cone based on length, width and wind direction
 
     Args:
@@ -137,9 +156,9 @@ def triangle_points(l, w, centre, wind_dir, i):
     """
     T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
                   [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
-    x1 = np.array([centre[0][i], centre[1][i]])
-    x2 = x1 + (T@(np.array([l[i], w[i]/2]).reshape((2, 1)))).flatten()
-    x3 = x1 + (T@(np.array([l[i], -w[i]/2]).reshape((2, 1)))).flatten()
+    x1 = np.array([centre[0], centre[1]])
+    x2 = x1 + (T@(np.array([l, w/2]).reshape((2, 1)))).flatten()
+    x3 = x1 + (T@(np.array([l, -w/2]).reshape((2, 1)))).flatten()
     return np.array([x1, x2, x3])
 
 
@@ -207,4 +226,4 @@ def get_concentration(xy, centre, wind_dir, i, width_triangle, time_arr, C0_init
 
 
 if __name__ == "__main__":
-    print(initial_gas_concentration("CO", 60))
+    print(initial_gas_concentration("H2", 60))
