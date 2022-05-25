@@ -180,8 +180,14 @@ class Blimp:
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
+
+        ballonet_surface_frac = 1
+        self.mass['ballonet'] = 2 * ballonet_surface_frac * np.pi * (self.mass['payload']/self.MTOM * self.volume * 3/np.pi)**(2/3) * 0.176
+
+
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
-        self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
+        #self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
+        self.mass['envelope'] = self.surface_area * 0.176
         self.ref_area = self.volume ** (2 / 3)
         
     def sizeBattery(self):
@@ -330,7 +336,13 @@ class Blimp:
         for key, value in cost.items():
             print('Cost of', key, ':', round(value, 2), 'EUR')
 
-
+def getCG():
+    '''
+    Estimation of Blimp c.g. in the plane of symmetry.
+    :return:
+    '''
+    #Balloon
+    x
 
 
 
@@ -339,26 +351,26 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_350km_2405_1603",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_deployment=      1,
-#                n_controls=           3,
+Shlimp = Blimp(name=                "Shlimp_350km_2505_1459",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_deployment=      1,
+               n_controls=           4,
+
+               envelope_material=    mat.polyethylene_fiber,
+
+               n_engines=            4,
+               engine=              eng.tmt_4130_300,
+
+               electronics=         el.config_option_1,
+               mass_ballonet=        8,
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
 #
-#                envelope_material=    mat.polyethylene_fiber,
-#
-#                n_engines=            4,
-#                engine=              eng.tmt_4130_300,
-#
-#                electronics=         el.config_first_order,
-#                mass_ballonet=        8,
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
-# #
-# Shlimp.save()
-Shlimp = unpickle('Shlimp_350km_2405_1208')
+Shlimp.save()
+#Shlimp = unpickle('Shlimp_350km_2405_1208')
 Shlimp.report()
 
 # Control Simulation
@@ -366,8 +378,8 @@ Shlimp.report()
 # ref_path = 10 * np.sin(0.01* xs) + 300
 # simulateFlightpath(Shlimp, ref_path, 300)
 
-#calculateAltitudeGain(Shlimp)
-#Shlimp.estimateCost()
+calculateAltitudeGain(Shlimp)
+Shlimp.estimateCost()
 #simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
