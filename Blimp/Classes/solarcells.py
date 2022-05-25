@@ -25,7 +25,7 @@ class Solarcell:
 # Solar Cell library
 #####################
 
-maxeon_gen3 = Solarcell(0.0425, 0.231, 0.125, 0.125, 0.0153, 0.8, 3.33) #Ultra High Performance variant (conservative)
+maxeon_gen3 = Solarcell(density=0.0425, efficiency=0.231, width=0.125, length=0.125, area=0.0153, fillfac=0.8, cost=3.33) #Ultra High Performance variant (conservative)
 
 
 solarcells = [maxeon_gen3]
