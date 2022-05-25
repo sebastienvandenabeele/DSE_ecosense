@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def mesh1(size, x_spacing, y_spacing):
@@ -15,3 +16,14 @@ def mesh1(size, x_spacing, y_spacing):
     x_sensor = np.arange(0, size+x_spacing, x_spacing)
     y_sensor = np.arange(0, size+y_spacing, y_spacing)
     return np.vstack(map(np.ravel, np.meshgrid(x_sensor, y_sensor))).transpose()
+
+
+if __name__ == "__main__":
+    size = 10000
+    mesh_points = mesh1(size, 350, 250)
+    print(np.shape(mesh_points)[0])
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
+    plt.xlim(0, size)
+    plt.ylim(0, size)
+    plt.show()

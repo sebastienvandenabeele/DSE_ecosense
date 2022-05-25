@@ -13,7 +13,7 @@ print(
 print(
     f"\nDetection time standard deviation: {np.round(df['detection_time_gas'].std()/60, 2)} [min]\n")
 
-plotting = True
+plotting = False
 if plotting:
     df["detection_time_gas"].plot.hist()
     plt.xlabel("fire detection time")
