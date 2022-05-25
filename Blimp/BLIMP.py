@@ -131,7 +131,8 @@ class Blimp:
         self.material = {'envelope': envelope_material}
 
         # Masses
-
+        self.x_bar = 0
+        self.z_bar = 0
         self.mass['payload'] = mass_payload
         self.mass['gondola structure'] = 0.15 * mass_payload
         self.mass['controls'] = mass_control
@@ -143,7 +144,7 @@ class Blimp:
         self.mass['solar'] = mass_solar_cell
         self.mass['envelope'] = mass_balloon
         self.mass['deployment'] = mass_deployment
-        self.mass['ballonet'] = mass_ballonet
+        self.mass['ballonets'] = mass_ballonet
         self.mass['battery'] = 0
 
         self.MTOM = sum(self.mass.values())
@@ -182,8 +183,8 @@ class Blimp:
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
 
         ballonet_surface_frac = 1
-        self.mass['ballonet'] = 2 * ballonet_surface_frac * np.pi * (self.mass['payload']/self.MTOM * self.volume * 3/np.pi)**(2/3) * 0.176
-
+        self.radius_ballonet = (self.mass['payload'] / self.MTOM * self.volume * 3 / 8 / np.pi)**(1/3)
+        self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * ballonet_surface_frac * 0.176
 
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         #self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
@@ -224,6 +225,7 @@ class Blimp:
         print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print('Number of fins: ', self.n_fins)
+        print('C.g. located at ', self.estimateCG())
         print()
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
@@ -330,7 +332,7 @@ class Blimp:
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
         cost['envelope'] = self.mass['envelope'] * self.material['envelope'].cost
         cost['deployment'] = 1000
-        cost['fins'] = self.n_fins * 100
+        cost['fins'] = self.n_fins * (100 + 30)
 
         print()
         print('############ COST ESTIMATION ################')
@@ -338,17 +340,49 @@ class Blimp:
         for key, value in cost.items():
             print('Cost of', key, ':', round(value, 2), 'EUR')
 
-    def getCG(self):
-        '''
+    def estimateCG(self):
+        """
         Estimation of Blimp c.g. in the plane of symmetry. Datum is the front tip of the envelope. Positive z up, positive x along longitudinal.
-        :return:
-        '''
+        :return: x_bar: x-coordinate of c.g. [m]
+        :return: z_bar: z-coordinate of c.g. [m]
+        """
+
         x = {}
         z = {}
-        volume = {}
-        #Balloon
+        mass = {}
+
         x['balloon'] = self.length / 2
         z['balloon'] = 0
+        mass['balloon'] = self.mass['envelope']
+
+        x['gondola'] = self.length / 2
+        z['gondola'] = -self.radius - 0.5
+        mass['gondola'] = self.mass['gondola structure'] + self.mass['electronics'] + self.mass['payload'] + self.mass['engines'] + self.mass['battery'] + self.mass['deployment']
+
+        x['controls'] = 0.9 * self.length
+        z['controls'] = 0
+        mass['controls'] = self.mass['controls']
+
+        x['ballonets'] = self.length / 2
+        z['ballonets'] = - self.radius + self.radius_ballonet
+        mass['ballonets'] = self.mass['ballonets']
+
+        x['solar'] = self.length / 2
+        if self.panel_angle <= np.pi / 2:
+            z['solar'] = self.radius * (self.panel_angle + np.cos(self.panel_angle) * np.sin(self.panel_angle)/(2*np.sin(self.panel_angle)) )
+        else:
+            print('Solar panel c.g. estimation incomplete!')
+            z['solar'] = 0.5 * self.radius
+        mass['solar'] = self.mass['solar']
+
+        self.x_bar = sum([x[key] * mass[key] for key in x.keys()]) / sum(mass.values())
+        self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
+
+        print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
+        return 'x: ' + str(round(self.x_bar / self.length * 100, 2)) + ' % length, z: ' + str(round(self.z_bar, 2)) + ' m'
+
+
+
 
 
 
