@@ -1,3 +1,6 @@
+from pyrsistent import T
+
+
 class Electronic:
     def __init__(self, name, mass, power_consumption, cost, type):
         """
@@ -41,10 +44,25 @@ skynode = Electronic(name="'Auterion Skynode", mass=0.188, power_consumption=11,
 
 
 # Batteries
+lion_battery = Electronic(name="Li-ion battery", mass=0.0485, power_consumption=0, cost=4.35, type="Battery") # Capacity: 3450mAh, Volume: 3.6V - 3.7V
 
+
+# Solar Charge Controllers
+custom_scc = Electronic(name="Arduino MPPT Solar Charge Controller", mass=0.1, power_consumption=0, cost=100, type="Solar Charge Controller") # 1kW
+smart_solar_1 = Electronic(name="SmartSolar Laadcontroller MPPT 150/45", mass=1.25, power_consumption=0, cost=472, type="Solar charger") # 2.6kW
+smart_solar_2 = Electronic(name="SmartSolar Laadcontroller MPPT 250/70", mass=3, power_consumption=0, cost=907, type="Solar charger") # 4kW
+smart_solar_3 = Electronic(name="SmartSolar Laadcontroller MPPT 100/20", mass=0.65, power_consumption=0, cost=160, type="Solar charger") # 1.16kW
+
+# Fin and propulsion actuators
+# Altitude Control actuators
+
+
+# Valve actuators for venting system
+air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, power_consumption=0, cost=8.85, type="Air Value")
 
 
 ############################################
 # List of possible electronic configurations
 ############################################
+
 config_first_order = [NEO_M9N, lidar, Honeywell_SATCOM, pixhawk]
