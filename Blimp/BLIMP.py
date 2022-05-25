@@ -339,29 +339,35 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2405_1603",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_deployment=      1,
-               n_controls=           3,
-
-               envelope_material=mat.polyethylene_fiber,
-
-               n_engines=            4,
-               engine=              eng.tmt_4130_300,
-
-               electronics=         el.config_first_order,
-               mass_ballonet=        8,
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
+# Shlimp = Blimp(name=                "Shlimp_350km_2405_1603",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                mass_deployment=      1,
+#                n_controls=           3,
 #
-Shlimp.save()
-#Shlimp = unpickle('Shlimp_350km_2405_1208')
+#                envelope_material=    mat.polyethylene_fiber,
+#
+#                n_engines=            4,
+#                engine=              eng.tmt_4130_300,
+#
+#                electronics=         el.config_first_order,
+#                mass_ballonet=        8,
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
+# #
+# Shlimp.save()
+Shlimp = unpickle('Shlimp_350km_2405_1208')
 Shlimp.report()
+
+# Control Simulation
+# xs = np.arange(5000)
+# ref_path = 10 * np.sin(0.01* xs) + 300
+# simulateFlightpath(Shlimp, ref_path, 300)
+
 #calculateAltitudeGain(Shlimp)
-Shlimp.estimateCost()
+#Shlimp.estimateCost()
 #simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
