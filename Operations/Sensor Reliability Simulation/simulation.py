@@ -1,20 +1,10 @@
 import numpy as np
 import pandas as pd
 import simulation_functions as simfunc
-import scipy.interpolate as spinter
 import mesh_types
 import gui_functions as plotting
 
-df = pd.read_csv(r"./data/samples.csv")
-df["wind_spd"] = df["wind_spd"]*0.2
-df["MC"] = simfunc.MC(df["RH"].values, df["temp"].values)
-df["FFDI"] = simfunc.FFDI(df["MC"].values, df["wind_spd"].values)
-df["R"] = simfunc.R(df["FFDI"].values, 23.57)/3.6
-df["LB"] = 1+10*(1-np.exp(-0.06*(1/3.6)*df["wind_spd"].values))
-df = df[df.FFDI > 11]
-df["wind_dir"] = 270-df["wind_dir"]
-df = df[df.temp > 22]
-df.index = np.arange(len(df))
+df = simfunc.read_and_edit_samples("./data/samples.csv")
 
 t_max = 8*60
 threshold = 0.05
@@ -22,20 +12,6 @@ N, M = 100, len(df)
 size = 10000
 mesh_points = mesh_types.mesh1(size, 250, 350)
 time = np.linspace(0, t_max, N)*np.ones((M, 1))
-C0_concentrations = np.array(
-    [0, 0.85, 4.55, 6.75, 10.6, 14.25, 17.9, 23.3, 28.5, 31.2, 34.55, 39.1, 42.7, 48.2])
-H2_concentrations = 0.1 * \
-    np.array([0, 3, 4, 5, 5, 4, 4, 5, 5, 7, 15, 30, 40, 45])
-time_concentrations = np.arange(0, 14, 1)
-
-C0_concentration_function = spinter.interp1d(
-    time_concentrations, C0_concentrations)
-H2_concentration_function = spinter.interp1d(
-    time_concentrations, H2_concentrations)
-
-
-def initial_concentrations(t):
-    return C0_concentration_function(t/60), H2_concentration_function(t/60)
 
 
 if __name__ == "__main__":
@@ -58,7 +34,7 @@ if __name__ == "__main__":
 
         upper_break = False
         for item in range(N):
-            C0_init_ppm = initial_concentrations(t)[0]
+            C0_init_ppm = simfunc.initial_gas_concentration("CO", t)
 
             if upper_break:
                 break
