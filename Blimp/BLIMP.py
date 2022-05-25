@@ -277,7 +277,8 @@ class Blimp:
 
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
-                self.CD = calculateCD(self, rho)
+                if not np.isnan(calculateCD(self, rho)): 
+                    self.CD = calculateCD(self, rho)
                 self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
             if plot:
@@ -359,7 +360,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2405_1603",
 Shlimp.save()
 #Shlimp = unpickle('Shlimp_350km_2405_1208')
 Shlimp.report()
-calculateAltitudeGain(Shlimp)
+#calculateAltitudeGain(Shlimp)
 Shlimp.estimateCost()
 #simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
