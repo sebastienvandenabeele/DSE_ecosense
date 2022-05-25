@@ -41,7 +41,7 @@ def simulateTurn(blimp):
 
     print()
 
-def simulateAltitudeGain(blimp):
+def calculateAltitudeGain(blimp):
     lapse_rate = -0.0065  # K/m
     R = 287
     g = 9.81

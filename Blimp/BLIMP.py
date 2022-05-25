@@ -357,7 +357,7 @@ Shlimp = Blimp(name=                "Shlimp_350km_2405_1603",
 Shlimp.save()
 #Shlimp = unpickle('Shlimp_350km_2405_1208')
 Shlimp.report()
-simulateAltitudeGain(Shlimp)
+calculateAltitudeGain(Shlimp)
 Shlimp.estimateCost()
 #simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
