@@ -1,6 +1,7 @@
 # import numpy as np
 # import matplotlib.pyplot as plt
 import scipy.integrate as integrate
+import numpy as np
 
 # def computeArea(pos):
 #     x, y = (zip(*pos))
@@ -8,19 +9,19 @@ import scipy.integrate as integrate
 
 def sizeControl(blimp):
     
-    baseline_diameter=1.64
+    # baseline_diameter=1.64
     
-    dia_ratio=2*blimp.radius/baseline_diameter
+    # dia_ratio=2*blimp.radius/baseline_diameter
     
-    fin_area=0.24*dia_ratio**2
-    fin_tip=0.54*dia_ratio
-    fin_root=0.91*dia_ratio
+    # fin_area=0.24*dia_ratio**2
+    # fin_tip=0.54*dia_ratio
+    # fin_root=0.91*dia_ratio
     
-    control_area=0.08*dia_ratio
-    control_tip=0.17*dia_ratio
-    control_root=0.19*dia_ratio
+    # control_area=0.08*dia_ratio
+    # control_tip=0.17*dia_ratio
+    # control_root=0.19*dia_ratio
     
-    span=0.54*dia_ratio
+    # span=0.54*dia_ratio
     # mean=0.43*dia_ratio
     
     
@@ -95,13 +96,21 @@ def sizeControl(blimp):
     # def func2(x):
         # return area*(((fin_root-fin_tip)/span)*x+fin_tip)**2
     # volume=integrate.quad(func2,0,span)[0]*volume_correction_factor
+    aspect_ratio=0.5
+    surface=0.03265958005/blimp.n_controls*blimp.volume
+    fin_root=np.sqrt((2*surface*(1+aspect_ratio))/(1+aspect_ratio+aspect_ratio**2))
+    fin_tip=fin_root*aspect_ratio
+    control_root=0.1978*fin_root
+    control_tip=control_root
+    span=1.5*fin_root/2
+    surface_ratio=(control_root*span)/surface
     
-    surface=2*span*fin_tip+span*fin_tip*1.116/2*0.736*1.0145 # first coeff: surface area calculation ratio, second: ratio vs trapezoid, third: ratio vs actual airfoil
-    mass_fin=0.018*surface*(1-0.276)*1.26*2.36 # first: ratio of control surfaces, second, third:coefficients from book 
-    mass_control=surface*0.276*0.3*4.88 #ratio, factor from book, conversion from lb/ft2 to kg/m2
+    # surface=2*span*fin_tip+span*fin_tip*1.116/2*0.736*1.0145 # first coeff: surface area calculation ratio, second: ratio vs trapezoid, third: ratio vs actual airfoil
+    mass_fin=0.018*surface*(1-surface_ratio)*1.26*2.36 # first: ratio of control surfaces, second, third:coefficients from book 
+    mass_control=surface*surface_ratio*0.3*4.88 #ratio, factor from book, conversion from lb/ft2 to kg/m2
     mass_actuator=surface*0.276*0.08*4.88*1.55 #ratio, factor from book, conversion, installation factor
     
-    return sum([blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator])
+    return sum([blimp.n_controls * mass_fin, blimp.n_controls * mass_control,  blimp.n_controls *mass_actuator]),surface,fin_root
 
 
 

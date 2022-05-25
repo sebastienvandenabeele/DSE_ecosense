@@ -74,4 +74,3 @@ air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, power_con
 config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, solar_pack_2, air_valve, battery_pack] # Costas favourite one
 config_option_2 = [NEO_M9N, ultrasonic, Honeywell_SATCOM, skynode, solar_pack_1, air_valve, battery_pack]
 config_option_3 = [NEO_M9N, lidar, Honeywell_SATCOM, skynode, solar_pack_3, air_valve, battery_pack]
-

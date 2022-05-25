@@ -38,29 +38,27 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
 
 
 def simulateTurn(blimp):
+
     print()
 
-def simulateAltitudeGain(blimp):
-    lapse_rate = -0.0065  # K\m
+def calculateAltitudeGain(blimp):
+    lapse_rate = -0.0065  # K/m
     R = 287
-    p = 101325  # Pa
     g = 9.81
-    V = blimp.volume  # m3
+    e = -g / lapse_rate / R - 1
 
-    m_sensor = 0.052  # kg
-    m_relay = 0.338
-    delta_m = -m_sensor
-    delta_rho_atm = delta_m / g / V
-    rho0 = 1.225
+    # Starting conditions (300m above SL)
+    rho0 = 1.19  # kg/m^3
+    T0 = 286.2  # K
+
+    V = blimp.volume
+    delta_m = -blimp.mass['payload']
+    delta_rho_atm = delta_m / V
     rho1 = rho0 + delta_rho_atm
-    e = -g/lapse_rate/R - 1
-    T0 = 288.15
 
     T1 = T0 * (rho1/rho0)**(1/e)
     delta_T = T1 - T0
     delta_h = delta_T / lapse_rate
-    print(delta_h)
+    print('Required altitude gain to maintain equilibrium after dropping all payload: ', int(round(delta_h, 0)), ' m')
 
-
-    delta_h = p / R / lapse_rate / delta_rho_atm
 

@@ -1,5 +1,49 @@
 import numpy as np
 import scipy.stats as stats
+import pandas as pd
+import scipy.interpolate as spinter
+
+
+def read_and_edit_samples(filepath):
+    """Reads the samples and creates a corresponding df. Also adds some necessary values for the simulation.
+
+    Args:
+        filepath (str): path of the samples CSV file
+
+    Returns:
+        DataFrame: pandas dataframe containing all the information necessary to the simulation
+    """
+    df = pd.read_csv(filepath)
+    df["wind_spd"] = df["wind_spd"]*0.2
+    df["MC"] = MC(df["RH"].values, df["temp"].values)
+    df["FFDI"] = FFDI(df["MC"].values, df["wind_spd"].values)
+    df["R"] = R(df["FFDI"].values, 23.57)/3.6
+    df["LB"] = 1+10*(1-np.exp(-0.06*(1/3.6)*df["wind_spd"].values))
+    df = df[df.FFDI > 11]
+    df["wind_dir"] = 270-df["wind_dir"]
+    df = df[df.temp > 22]
+    df.index = np.arange(len(df))
+    return df
+
+
+def initial_gas_concentration(gas_type, t):
+    """Gets the gas concentration emitted from a fire t seconds after ignition
+
+    Args:
+        gas_type (str): currently supports "CO" and "H2"
+        t (float): time after wildfire starts [s]
+
+    Returns:
+        float: concentration pf the gas emitted from the wildfire at that time [ppm]
+    """
+    concentration_arr = pd.read_csv(
+        "./data/gas_concentrations.csv", usecols=[gas_type]).to_numpy().flatten()
+    time_concentrations = np.arange(0, 14, 1)
+
+    concentration_function = spinter.interp1d(
+        time_concentrations, concentration_arr)
+
+    return concentration_function(t/60)
 
 
 def MC(rh, t):
@@ -52,6 +96,8 @@ def ellips_params(t, R, lb):
     Returns:
         ndarray: length, width and focal point position [m]
     """
+    if lb < 1:
+        lb = 1.1
     l = R*t
     w = l/lb
     c = np.sqrt((l/2)**2 - (w/2)**2)
@@ -59,16 +105,18 @@ def ellips_params(t, R, lb):
 
 
 def cone_params(t, u, lb):
-    """_summary_
+    """Gets the cone paramaters corresponding to the smoke emitted from a wildfire
 
     Args:
-        t (_type_): _description_
-        u (_type_): _description_
-        lb (_type_): _description_
+        t (float): time from cone start [s]
+        u (float): wind speed [m/s]
+        lb (float): cone slenderness ratio [-]
 
     Returns:
-        _type_: _description_
+        ndarray: array containing the lengths and widths of the triangle at the given time (from start of the cone, thus t=0 should yield l=w=0)
     """
+    if lb < 1:
+        lb = 1.1
     l = u*t
     w = l/lb
     return np.array([l, w])
@@ -93,36 +141,6 @@ def triangle_points(l, w, centre, wind_dir, i):
     x2 = x1 + (T@(np.array([l[i], w[i]/2]).reshape((2, 1)))).flatten()
     x3 = x1 + (T@(np.array([l[i], -w[i]/2]).reshape((2, 1)))).flatten()
     return np.array([x1, x2, x3])
-
-
-def detection_time(patch, points, wind_dir, centre, concentrations, width_triangle):
-    """_summary_
-
-    Args:
-        patch (_type_): _description_
-        points (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    arg = np.argwhere(np.array([patch.contains_point(point)
-                      for point in points]) == True)
-    if len(arg) > 0:
-        points = points[arg.flatten(), :]
-        distance = np.sqrt(np.sum((centre - points)**2, axis=1))
-        theta = np.deg2rad(wind_dir) - np.arctan((points -
-                                                  centre)[:, 1]/(points - centre)[:, 0])
-        width = np.abs(distance*np.sin(theta))
-        # C0ppm = concentration_distr(width_triangle, width, concentrations[0])
-        # H2ppm = concentration_distr(width_triangle, width, concentrations[1])
-        # print(C0ppm[0])
-        # print(width,width_triangle/2)
-        # print(C0ppm)
-
-        #theta = points[arg]-centre
-        # print(theta[:,0])
-       # print(centre - points[arg])
-      #  return points[arg,:]
 
 
 def concentration_distribution(x):
@@ -186,3 +204,7 @@ def get_concentration(xy, centre, wind_dir, i, width_triangle, time_arr, C0_init
     except:
         concentration = 0
     return concentration
+
+
+if __name__ == "__main__":
+    print(initial_gas_concentration("CO", 60))
