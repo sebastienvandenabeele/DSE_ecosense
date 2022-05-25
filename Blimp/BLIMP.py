@@ -227,6 +227,7 @@ class Blimp:
         print()
         print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
+        print('Solar panel coverage angle: ', round(self.panel_angle * 57.3, 0), ' degrees')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
         print('On-board electronics power: ', round(self.power_electronics, 2), ' W')
         print()
@@ -327,8 +328,9 @@ class Blimp:
         cost['hydrogen'] = self.volume * self.liftgas.cost
         cost['electronics'] = sum([device.cost for device in self.electronics])
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
-        #cost['envelope'] = self.surface_area * self.material['envelope'].cost
+        cost['envelope'] = self.mass['envelope'] * self.material['envelope'].cost
         cost['deployment'] = 1000
+        cost['fins'] = self.n_fins * 100
 
         print()
         print('############ COST ESTIMATION ################')
