@@ -9,6 +9,7 @@ from control_surface import sizeControl
 from drag_coefficient import calculateCD
 import structures2 as struc
 from simulator import *
+from altitude_control import *
 
 def pickle(obj, filename):
     with open('Pickle Shelf/' + filename, 'wb') as file:
@@ -78,7 +79,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, envelope_material=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
-                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0):
+                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
         :param name: [str] Name of instance
@@ -125,6 +126,7 @@ class Blimp:
         self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6)) * margin
         self.liftgas = liftgas
         self.n_fins = n_fins
+        self.h_trim = h_trim
 
 
         # Materials
@@ -394,40 +396,48 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_350km_2505_1459",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_deployment=      1,
-#                n_fins=           4,
-#
-#                envelope_material=    mat.polyethylene_fiber,
-#
-#                n_engines=            4,
-#                engine=              eng.tmt_4130_300,
-#
-#                electronics=         el.config_option_1,
-#                mass_ballonet=        8,
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
-#
-# Shlimp.save()
-Shlimp = unpickle('Shlimp_350km_2405_1208')
+Shlimp = Blimp(name=                "Shlimp_350km_2605_2325",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_deployment=      1,
+               n_fins=           4,
+               h_trim= 0,
+
+               envelope_material=    mat.polyethylene_fiber,
+
+               n_engines=            4,
+               engine=              eng.tmt_4130_300,
+
+               electronics=         el.config_option_1,
+               mass_ballonet=        8,
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
+
+Shlimp.save()
+#Shlimp = unpickle('Shlimp_350km_2605_2325')
 #Shlimp.report()
 
-hs = np.arange(-3000, 3000, 1)
-fs = calculateLiftDifference(hs, Shlimp)
-plt.plot(hs, fs)
+hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
+fs = [getRestoringForce(h, Shlimp) for h in hs]
+fs_linearised = getK(Shlimp) * hs
+plt.plot(hs, fs, linestyle='dashed')
+plt.plot(hs, fs_linearised)
+plt.xlim(Shlimp.h_trim-3000,Shlimp.h_trim+ 3000)
+plt.xlabel('Deviation from Trim Altitude [m]')
+plt.ylabel('Buoyancy Restoring Force [N]')
+plt.legend(['ISA Model', 'ISA Model (linearised)'])
 plt.grid()
 plt.show()
+
 
 # Control Simulation
 # xs = np.arange(5000)
 # ref_path = 10 * np.sin(0.01* xs) + 300
 # simulateFlightpath(Shlimp, ref_path, 300)
 
-# calculateAltitudeGain(Shlimp)
+
 # Shlimp.estimateCost()
 #simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)

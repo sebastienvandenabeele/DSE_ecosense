@@ -3,6 +3,13 @@ import numpy as np
 import requirements as req
 
 rho = 1.225
+T0 = 288.15             # [K]
+p0 = 103125             # [Pa]
+rho0 = 1.225            # [kg/m^3]
+g = 9.81                # [m/s^2]
+R = 287                 # [J/kg/K]
+lapse_rate = -0.0065    # [K/m]
+e = - g / lapse_rate / R
 
 def getISA(key, h):
     """
@@ -11,16 +18,8 @@ def getISA(key, h):
     :param h: [float] altitude from 0 to 11000 [m]
     :return: [float] altitude parameter chosen by :param: key
     """
-    if h > 0: print('WARNING: Altitude outside of troposphere entered!')
-    h = max(h, 11000)
-
-    T0 = 288.15             # [K]
-    p0 = 103125             # [Pa]
-    rho0 = 1.225            # [kg/m^3]
-    g = 9.81                # [m/s^2]
-    R = 287                 # [J/kg/K]
-    lapse_rate = -0.0065    # [K/m]
-    e = - g / lapse_rate / R
+    if h > 11000: print('WARNING: Altitude outside of troposphere entered!')
+    h = min(h, 11000)
 
     ISA = {}
     ISA['T'] = T0 + lapse_rate * h                  # [K]
@@ -66,73 +65,9 @@ def simulateTurn(blimp):
 
     print()
 
-def calculateAltitudeGain(blimp):
-    lapse_rate = -0.0065  # K/m
-    R = 287
-    g = 9.81
-    e = -g / lapse_rate / R - 1
 
-    # Starting conditions (300m above SL)
-    rho0 = 1.19  # kg/m^3
-    T0 = 286.2  # K
 
-    V = blimp.volume
-    delta_m = -blimp.mass['payload']
-    delta_rho_atm = delta_m / V
-    rho1 = rho0 + delta_rho_atm
 
-    T1 = T0 * (rho1/rho0)**(1/e)
-    delta_T = T1 - T0
-    delta_h = delta_T / lapse_rate
-    print('Required altitude gain to maintain equilibrium after dropping all payload: ', int(round(delta_h, 0)), ' m')
-
-def calculateLiftDifference(delta_h, blimp):
-    lapse_rate = -0.0065  # K/m
-    R = 287
-    g = 9.81
-    e = -g / lapse_rate / R - 1
-
-    # Starting conditions (300m above SL)
-    rho0 = 1.19  # kg/m^3
-    T0 = 286.2  # K
-
-    delta_T = delta_h * lapse_rate
-    T1 = T0 + delta_T
-    rho1 = rho0 * (T1/T0)**e
-
-    delta_rho = rho1 - rho0
-    lift = -delta_rho * blimp.volume * g
-    return lift
-
-def simulateFlightpath(blimp, ref_path, h_trim):
-
-    k = 20
-    dt = 0.05
-    ts = np.arange(0, len(ref_path), dt)
-
-    xs = range(len(ref_path))
-    hs = []
-    h = 299
-    v_y = 0
-    for i in range(len(xs)):
-        delta_h = h - h_trim # Deviation from trim
-        vertical_thrust_req = calculateLiftDifference(delta_h, blimp)
-        vertical_thrust = k * (ref_path[i] - h)
-
-        a_y = (vertical_thrust - vertical_thrust_req) / blimp.MTOM
-        v_y += a_y * dt
-        h += v_y * dt
-
-        hs.append(h)
-
-    plt.plot(xs, h_trim*np.ones(len(ref_path)), linestyle='dashed', color='black')
-    plt.plot(xs, ref_path)
-    plt.plot(xs, hs)
-    plt.grid
-    plt.xlabel('Distance [m]')
-    plt.ylabel('Altitude [m]')
-    plt.legend(['Trim Altitude', 'Reference Path', 'Actual Path'])
-    plt.show()
 
 
 
