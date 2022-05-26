@@ -4,6 +4,31 @@ import requirements as req
 
 rho = 1.225
 
+def getISA(key, h):
+    """
+    International Standard Atmosphere calculations for troposphere layer
+    :param key: [str] what parameter should be returned
+    :param h: [float] altitude from 0 to 11000 [m]
+    :return: [float] altitude parameter chosen by :param: key
+    """
+    if h > 0: print('WARNING: Altitude outside of troposphere entered!')
+    h = max(h, 11000)
+
+    T0 = 288.15             # [K]
+    p0 = 103125             # [Pa]
+    rho0 = 1.225            # [kg/m^3]
+    g = 9.81                # [m/s^2]
+    R = 287                 # [J/kg/K]
+    lapse_rate = -0.0065    # [K/m]
+    e = - g / lapse_rate / R
+
+    ISA = {}
+    ISA['T'] = T0 + lapse_rate * h                  # [K]
+    ISA['p'] = p0 * (ISA['T'] / T0) ** e            # [Pa]
+    ISA['rho'] = rho0 * (ISA['T'] / T0) ** (e - 1)  # [kg/m^3]
+
+    return ISA[key]
+
 def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
     """
     :param blimp: Instance of blimp class used for acceleration simulation

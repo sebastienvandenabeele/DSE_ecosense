@@ -373,6 +373,7 @@ class Blimp:
         else:
             print('Solar panel c.g. estimation incomplete!')
             z['solar'] = 0.5 * self.radius
+            # TODO: implement accurate estimation for angles larger than 90 deg
         mass['solar'] = self.mass['solar']
 
         self.x_bar = sum([x[key] * mass[key] for key in x.keys()]) / sum(mass.values())
@@ -393,35 +394,41 @@ class Blimp:
 
 
 # Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_2505_1459",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_deployment=      1,
-               n_fins=           4,
-
-               envelope_material=    mat.polyethylene_fiber,
-
-               n_engines=            4,
-               engine=              eng.tmt_4130_300,
-
-               electronics=         el.config_option_1,
-               mass_ballonet=        8,
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
+# Shlimp = Blimp(name=                "Shlimp_350km_2505_1459",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                mass_deployment=      1,
+#                n_fins=           4,
 #
-Shlimp.save()
-#Shlimp = unpickle('Shlimp_350km_2405_1208')
-Shlimp.report()
+#                envelope_material=    mat.polyethylene_fiber,
+#
+#                n_engines=            4,
+#                engine=              eng.tmt_4130_300,
+#
+#                electronics=         el.config_option_1,
+#                mass_ballonet=        8,
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
+#
+# Shlimp.save()
+Shlimp = unpickle('Shlimp_350km_2405_1208')
+#Shlimp.report()
+
+hs = np.arange(-3000, 3000, 1)
+fs = calculateLiftDifference(hs, Shlimp)
+plt.plot(hs, fs)
+plt.grid()
+plt.show()
 
 # Control Simulation
 # xs = np.arange(5000)
 # ref_path = 10 * np.sin(0.01* xs) + 300
 # simulateFlightpath(Shlimp, ref_path, 300)
 
-calculateAltitudeGain(Shlimp)
-Shlimp.estimateCost()
+# calculateAltitudeGain(Shlimp)
+# Shlimp.estimateCost()
 #simulateCruiseAcceleration(Shlimp)
 #simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
 #Shlimp.report()
