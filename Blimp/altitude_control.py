@@ -11,8 +11,8 @@ def getK(blimp):
     h1 = blimp.h_trim - 1
     h2 = blimp.h_trim + 1
 
-    k = getRestoringForce(h2, blimp) - getRestoringForce(h1, blimp) / (h1 - h2)
-    return k*2
+    k = (getRestoringForce(h2, blimp) - getRestoringForce(h1, blimp)) / (h2 - h1)
+    return k
 
 
 
@@ -28,7 +28,7 @@ def simulateFlightpath(blimp, ref_path):
     v_y = 0
     for i in range(len(xs)):
 
-        vertical_thrust_req = calculateRestoringForce(h, blimp)
+        vertical_thrust_req = getRestoringForce(h, blimp)
         vertical_thrust = k * (ref_path[i] - h)
 
         a_y = (vertical_thrust - vertical_thrust_req) / blimp.MTOM
