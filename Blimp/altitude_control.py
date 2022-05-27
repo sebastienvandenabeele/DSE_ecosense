@@ -45,3 +45,40 @@ def simulateFlightpath(blimp, ref_path):
     plt.ylabel('Altitude [m]')
     plt.legend(['Trim Altitude', 'Reference Path', 'Actual Path'])
     plt.show()
+
+def ddx(list):
+    return [list[i] - list[i-1] for i in np.arange(1, len(list))]
+
+def getModelSpeed(blimp, cruisepath):
+    slope = ddx(cruisepath)
+    v_y = np.array([s * (70 / 3.6) for s in slope])
+    v_model = np.mean(v_y)
+
+
+
+    return v_model
+    # diffs = []
+    # vs = np.arange(min(v_y), max(v_y), 0.001)
+    # for v in vs:
+    #     diffs.append(sum(np.abs(v_y - v)))
+    # v_model = vs[np.argwhere(diffs == min(diffs))][0][0]
+    # return v_model
+
+
+
+
+# v_avg = np.mean(v_y)
+# print(v_model)
+# print(v_avg)
+
+
+
+#plt.plot(np.arange(len(cruisepath)), cruisepath)
+# plt.plot(np.arange(len(v_y)), v_y)
+# plt.plot(np.arange(len(v_y)), np.ones(len(v_y)) * v_model)
+# plt.legend(['Vertical Velocities', 'Chosen Model Speed'])
+# # plt.plot(np.arange(len(elevation)), elevation)
+# # plt.plot(np.arange(len(elevation_ma)), elevation_ma)
+# plt.grid()
+# # plt.legend(['Height', 'Elevation', 'Elevation MA'])
+# plt.show()
