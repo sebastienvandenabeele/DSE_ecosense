@@ -248,6 +248,10 @@ class Blimp:
         print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
         print('Range on 1 day: ', round(self.range/1000, 1), ' km')
 
+    def trim(self, cruisepath):
+        self.h_trim = np.mean(cruisepath)
+
+
     def setCruiseSpeed(self, plot=False):
         """
         :param v_target: target cruise speed, blimp should be sized for
@@ -418,9 +422,9 @@ flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
 path = flightdata[:, 0]
 cruisepath = path[194:-194]
 
-Shlimp.h_trim = np.mean(cruisepath)
+Shlimp.trim(cruisepath)
 Shlimp.save()
-print(getModelSpeed(Shlimp, cruisepath))
+tuneAltitudeDynamics(Shlimp, cruisepath)
 #Shlimp = unpickle('Shlimp_350km_2605_2325')
 #Shlimp.report()
 

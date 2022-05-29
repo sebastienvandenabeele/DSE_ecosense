@@ -1,6 +1,9 @@
 from simulator import *
 import numpy as np
 from matplotlib import pyplot as plt
+import control.matlab as ml
+
+def trim(cruisepath)
 
 def getRestoringForce(h, blimp):
     delta_rho = getISA('rho', h) - getISA('rho', blimp.h_trim)
@@ -14,6 +17,22 @@ def getK(blimp):
     k = (getRestoringForce(h2, blimp) - getRestoringForce(h1, blimp)) / (h2 - h1)
     return k
 
+def tuneAltitudeDynamics(blimp, cruisepath):
+    m = blimp.MTOM
+    c = getC(blimp, cruisepath)
+    k = getK(blimp)
+    s = ml.tf('s')
+
+    H = 1 / (m * s**2 + c*s + k)    # Blimp Altitude Dynamics TF
+    ml.sisotool(H)
+
+def setTF(blimp):
+    m = blimp.MTOM
+    c = getC(blimp, cruisepath)
+    k = getK(blimp)
+    s = ml.tf('s')
+
+    H = 1 / (m * s ** 2 + c * s + k)  # Blimp Altitude Dynamics TF
 
 
 def simulateFlightpath(blimp, ref_path):
@@ -49,14 +68,14 @@ def simulateFlightpath(blimp, ref_path):
 def ddx(list):
     return [list[i] - list[i-1] for i in np.arange(1, len(list))]
 
-def getModelSpeed(blimp, cruisepath):
+def getC(blimp, cruisepath):
     slope = ddx(cruisepath)
-    v_y = np.array([s * (70 / 3.6) for s in slope])
+    v_y = np.array([s * blimp.cruiseV for s in slope])
     v_model = np.mean(v_y)
 
+    c = getISA('rho', blimp.h_trim) * blimp.ref_area * v_model * 0.06
 
-
-    return v_model
+    return c
     # diffs = []
     # vs = np.arange(min(v_y), max(v_y), 0.001)
     # for v in vs:
