@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 import control.matlab as ml
 
-def trim(cruisepath)
 
 def getRestoringForce(h, blimp):
     delta_rho = getISA('rho', h) - getISA('rho', blimp.h_trim)
@@ -17,35 +16,43 @@ def getK(blimp):
     k = (getRestoringForce(h2, blimp) - getRestoringForce(h1, blimp)) / (h2 - h1)
     return k
 
-def tuneAltitudeDynamics(blimp, cruisepath):
+def simAltitudeDynamics(blimp, cruisepath):
     m = blimp.MTOM
     c = getC(blimp, cruisepath)
     k = getK(blimp)
     s = ml.tf('s')
 
-    H = 1 / (m * s**2 + c*s + k)    # Blimp Altitude Dynamics TF
-    ml.sisotool(H)
+    kp = 1 # Proportional Control Gain
 
-def setTF(blimp):
-    m = blimp.MTOM
-    c = getC(blimp, cruisepath)
-    k = getK(blimp)
-    s = ml.tf('s')
+    ref_signal = cruisepath - blimp.h_trim
 
-    H = 1 / (m * s ** 2 + c * s + k)  # Blimp Altitude Dynamics TF
+    OLTF = kp / (m * s**2 + c*s + k)    # Blimp Altitude Dynamics TF
+    CLTF = OLTF / (1 + OLTF)           # Unit feedback closed-loop TF
+    sys = ml.ss(CLTF)
+    ts = np.arange(0, len(cruisepath) / blimp.cruiseV, 1 / blimp.cruiseV)
 
+    ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts)
 
-def simulateFlightpath(blimp, ref_path):
+    plt.plot(ts, ys + blimp.h_trim)
+    plt.plot(ts, ref_signal + blimp.h_trim)
+    plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Altitude [m]')
+    plt.legend(['Actual Flightpath', 'Reference Flightpath', 'Trim Altitude'])
+    plt.show()
+
+def simulateFlightpath(blimp, ref_path, ts, kp):
 
     k = 20
     dt = 0.05
-    ts = np.arange(0, len(ref_path), dt)
+
 
     xs = range(len(ref_path))
     hs = []
-    h = 299
+    h = blimp.h_trim
     v_y = 0
-    for i in range(len(xs)):
+    for t in ts:
 
         vertical_thrust_req = getRestoringForce(h, blimp)
         vertical_thrust = k * (ref_path[i] - h)
