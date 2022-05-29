@@ -33,44 +33,63 @@ def simAltitudeDynamics(blimp, cruisepath):
 
     ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts)
 
+    y_nonlin = simNonLinear(blimp, ref_signal, ts, kp)
+
+    plt.plot(ts, y_nonlin + blimp.h_trim)
     plt.plot(ts, ys + blimp.h_trim)
     plt.plot(ts, ref_signal + blimp.h_trim)
     plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
+
     plt.grid()
     plt.xlabel('Time [s]')
     plt.ylabel('Altitude [m]')
-    plt.legend(['Actual Flightpath', 'Reference Flightpath', 'Trim Altitude'])
+    plt.legend(['Actual Flightpath', 'Linearised Flightpath', 'Reference Flightpath', 'Trim Altitude'])
     plt.show()
 
-def simulateFlightpath(blimp, ref_path, ts, kp):
+def simNonLinear(blimp, ref_path, ts, kp):
 
-    k = 20
-    dt = 0.05
-
-
-    xs = range(len(ref_path))
     hs = []
-    h = blimp.h_trim
-    v_y = 0
-    for t in ts:
+    h = 0
+    v = 0
+    a = 0
+    dt = ts[1] - ts[0]
+    for i in range(len(ts)):
+        e = ref_path[i] - h
+        u = kp * e
 
-        vertical_thrust_req = getRestoringForce(h, blimp)
-        vertical_thrust = k * (ref_path[i] - h)
+        v_vec = np.sqrt(v**2 + blimp.cruiseV**2)
+        drag_vec = 0.5 * getISA('rho', h) * v_vec**2 * blimp.ref_area * 0.06
+        drag_vert = drag_vec * v / v_vec
 
-        a_y = (vertical_thrust - vertical_thrust_req) / blimp.MTOM
-        v_y += a_y * dt
-        h += v_y * dt
+        Fnet = u + getRestoringForce(h + blimp.h_trim, blimp) - drag_vert
+        print(u, getRestoringForce(h + blimp.h_trim, blimp), drag_vert)
+        a = Fnet / blimp.MTOM
+
+        v += a * dt
+        h += v * dt
 
         hs.append(h)
+    return hs
 
-    plt.plot(xs, blimp.h_trim * np.ones(len(ref_path)), linestyle='dashed', color='black')
-    plt.plot(xs, ref_path)
-    plt.plot(xs, hs)
-    plt.grid
-    plt.xlabel('Distance [m]')
-    plt.ylabel('Altitude [m]')
-    plt.legend(['Trim Altitude', 'Reference Path', 'Actual Path'])
-    plt.show()
+
+
+    #     vertical_thrust_req = getRestoringForce(h, blimp)
+    #     vertical_thrust = k * (ref_path[i] - h)
+    #
+    #     a_y = (vertical_thrust - vertical_thrust_req) / blimp.MTOM
+    #     v_y += a_y * dt
+    #     h += v_y * dt
+    #
+    #     hs.append(h)
+    #
+    # plt.plot(xs, blimp.h_trim * np.ones(len(ref_path)), linestyle='dashed', color='black')
+    # plt.plot(xs, ref_path)
+    # plt.plot(xs, hs)
+    # plt.grid
+    # plt.xlabel('Distance [m]')
+    # plt.ylabel('Altitude [m]')
+    # plt.legend(['Trim Altitude', 'Reference Path', 'Actual Path'])
+    # plt.show()
 
 def ddx(list):
     return [list[i] - list[i-1] for i in np.arange(1, len(list))]
