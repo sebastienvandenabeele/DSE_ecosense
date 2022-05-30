@@ -180,7 +180,7 @@ class Blimp:
         """
         self.volume = self.MTOM / lift_h2
         self.explosive_potential = self.volume * self.liftgas.spec_energy
-        self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
+        self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio * np.pi)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
 
