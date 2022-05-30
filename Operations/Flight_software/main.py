@@ -62,10 +62,6 @@ topography1= clip_raster(file)
 topography2 = clip_raster(file2)
 topography = np.array([np.hstack((topography2[0],topography1[0]))])
 
-topography_data = pd.DataFrame(topography[0])
-topography_data.to_csv("./data/topography.csv")
-
-
 #------------------------------
 #RISK ANALYSIS OF AREA
 #------------------------------
@@ -91,17 +87,17 @@ print("sensor spacing = ",spacing," m")
 print("\nPerforming sensor placement...")
 from sensor_placement import sensor_locating
 sensor_map,corner_points,sensor_points = sensor_locating(location,dX,dY,dLat,dLong,spacing)
-webbrowser.open_new_tab('sensor_locations.html')
-print("check if sensors are placed correctly, press enter to continue")
+#webbrowser.open_new_tab('sensor_locations.html')
+print("check if sensors are placed correctly")
+input("Press Enter to continue...")
 
 #-------------------------------
 #FLIGHT MAP
 #-------------------------------
-from flight_path import flight_analysis, flight_map, flight_analysis
+from flight_path import flight_map
 print("\nPerforming flight planning...")
-map,flight_points = flight_map(location,sensor_map,corner_points,sensor_points,spacing/1000)
-webbrowser.open_new_tab('flight_path.html')
 cruise_alt = 300    #m
-V = 60/3.6          #m/s
-flight_analysis(flight_points,topography[0],dX,dY,dL,cruise_alt,V,True)
-
+cruise_spd = 60/3.6  #m/s
+wind_dir = -180
+flight_map(True,location,topography[0],sensor_map,corner_points,sensor_points,spacing/1000,cruise_alt,cruise_spd,wind_dir,dL,dX,dY)
+#webbrowser.open_new_tab('flight_path.html')

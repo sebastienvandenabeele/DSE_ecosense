@@ -3,6 +3,7 @@ import folium
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from math import atan2
 
 def nearest_point(x,arr):
     LSE = np.sum((arr-x)**2,axis=1)
@@ -37,7 +38,7 @@ def flight_path_point(location,sensor_points,start_point,spacing,lat_or,lon_or):
         
     return flight_points
 
-def flight_map(location,map,outer_points,sensor_points,spacing):
+def flight_map(plot,location,topography,map,outer_points,sensor_points,spacing,cruise_alt,cruise_spd,wind_dir,dL,dX,dY):
     park_perimeter = pd.read_excel(r"./data/park_perimeter.xlsx")
     park_perimeter.set_index("loc",inplace=True)
     ground_station = list(park_perimeter.loc["Launch site"].values)
@@ -56,14 +57,18 @@ def flight_map(location,map,outer_points,sensor_points,spacing):
     flight_path_points = flight_path_point(location,sensor_points,nearest_corner,spacing,lat_or,lon_or)
     flight_path_points = np.vstack((ground_station,flight_path_points))
     flight_path_points = np.vstack((flight_path_points,ground_station))
+    climb_angle = np.deg2rad(10)
+    climb_distance = (cruise_alt/np.tan(climb_angle))/1000 #km
+
+    climb_point = [flight_path_points[0][0] + climb_distance*np.sin(np.deg2rad(wind_dir))/(dL*np.cos(np.deg2rad(30))),
+                    flight_path_points[0][1] + climb_distance*np.cos(np.deg2rad(wind_dir))/dL]
+    
+    flight_path_points = np.vstack((flight_path_points[0],np.vstack((climb_point,flight_path_points[1:,:]))))
+
     flight_path_ = folium.PolyLine(flight_path_points, color="yellow", weight=2.5, opacity=1).add_to(map)
     map.save("flight_path.html")
-    print(flight_path_points)
-    return map,flight_path_points
 
-def flight_analysis(flight_points,topography,dX,dY,dL,cruise_alt,cruise_V,plot):
-    h,V = cruise_alt,cruise_V
-    lat,long = lat_long_to_scale(flight_points[:,0], flight_points[:,1],dX,dY)
+    lat,long = lat_long_to_scale(flight_path_points[:,0], flight_path_points[:,1],dX,dY)
     scaled_coordinates = np.hstack((lat.reshape((len(lat),1)),long.reshape((len(long),1))))
     all_points = np.array([0,0])
     for index,coord in enumerate(scaled_coordinates):
@@ -78,39 +83,47 @@ def flight_analysis(flight_points,topography,dX,dY,dL,cruise_alt,cruise_V,plot):
     
     index_points = np.array(pd.DataFrame(all_points[1:,:],columns = ["X","Y"]),dtype=int)
     elevation = topography[index_points[:,1],index_points[:,0]]
-    elevation_ma = moving_average(elevation,100)
+    elevation_ma = moving_average(elevation,80)
+
+    #altitude path
     flight = 1000*(dL/dX)*np.arange(len(elevation))
-    print(np.shape(flight),np.shape(elevation_ma))
-
     climb_angle = (10/180)*np.pi
-    top = np.arctan(climb_angle)*flight[int(len(elevation)/2)]
-    ac_flight = np.linspace(0,top,int(len(elevation)/2)+1)
-    desc_flight = np.linspace(top,0,int(len(elevation)/2))
-    ac_arg = np.argwhere(ac_flight>cruise_alt)[0][0]
-    desc_arg = np.argwhere(desc_flight<cruise_alt)[0][0]+len(ac_flight)
-    elevation_ma[:ac_arg] = elevation[0]
-    elevation_ma[desc_arg:] = elevation[-1]
-    flight = np.append(ac_flight,desc_flight)
-    flight = elevation_ma + np.minimum(flight,cruise_alt*np.ones(len(flight)))[1:]
-    flight = np.append(elevation[0]*np.ones(4),flight)
-    flight = np.append(flight,elevation[0]*np.ones(4))
-    
-    flight_angle = np.arctan((flight[1:]-flight[:-1])/(1000*(dL/dX)))
-    d_flight_angle_dx = (flight_angle[1:]-flight_angle[:-1])/(1000*(dL/dX))
-    pitch_rate = V*d_flight_angle_dx 
+    flight[:int(len(flight)/2)] = np.arctan(climb_angle)*flight[:int(len(flight)/2)]
+    flight[int(len(flight)/2):] = flight[int(len(flight)/2)-1] - np.arctan(climb_angle)*(flight[int(len(flight)/2):]-flight[int(len(flight)/2)])
+    flight = np.minimum(flight,cruise_alt*np.ones(len(flight)))
+    altitude = flight + np.maximum(elevation_ma,elevation[0]*np.ones(len(flight)))
+
+    #velocity path
+    velocity = np.minimum(flight,cruise_spd)
+    time = np.arange(len(flight)-2)/ (velocity[1:-1])
+    time = np.append([0.],np.append(time,time[-1]+time[1]-time[0]))
+
+    #heading path
+    diff = all_points[1:] - all_points[:-1]
+    diff[:,1] = -diff[:,1]
+    arg = np.argwhere((diff[:,0] == 0.) & (diff[:,1]== 0.))
+    diff[arg.flatten(),:] = diff[arg.flatten()-1,:]
+    heading = np.rad2deg(np.array([atan2(dS[1],dS[0]) for dS in diff]))
+
     if plot:
-        fig,ax = plt.subplots(3,1,sharex=True)
-        ax[0].plot(1000*(dL/dX)*np.arange(len(elevation)),elevation,c="tab:brown")
-        ax[0].fill_between(1000*(dL/dX)*np.arange(len(elevation)), elevation, np.zeros(len(elevation)),color="tab:brown")
-        ax[0].plot(1000*(dL/dX)*np.arange(-4,len(elevation)+4,1),flight,c="green")
-        ax[0].set_ylim(0,4000)
-        ax[0].set_facecolor('skyblue')
+        fig,ax = plt.subplots()
+        ax.plot(np.arange(len(flight)),altitude,c="tab:orange",label="flight path",linewidth = 2)
+        ax.fill_between(np.arange(len(flight)),np.zeros(len(flight)),elevation,color = "tab:brown")
+        ax.patch.set_facecolor('skyblue') 
+        ax.patch.set_alpha(0.5)
+        ax.set_ylim(0,5000)
+        plt.legend()
 
-        ax[1].plot(1000*(dL/dX)*np.arange(len(elevation)),flight[4:-4]-elevation)
-        ax[1].set_ylabel("ground clearance (m)")
-        ax[1].grid()
+        fig,ax = plt.subplots(4,1)
+        ax[0].plot(time,velocity)
+        ax[0].set_ylabel("velocity")
 
-        ax[2].plot(1000*(dL/dX)*np.arange(len(pitch_rate)),(180/np.pi)*pitch_rate)
-        ax[2].set_ylabel("pitch rate (deg/s)")
-        ax[2].grid()
+        ax[1].plot(time,altitude-elevation)
+        ax[1].set_ylabel("ground clearance")
+
+        ax[2].plot(time,heading)
+        ax[2].set_ylabel("heading")
+
+        plt.legend()
         plt.show()
+    
