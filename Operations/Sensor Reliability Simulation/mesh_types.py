@@ -28,7 +28,7 @@ def mesh1(size, x_spacing, y_spacing, shift_perc=0):
 
 if __name__ == "__main__":
     size = 10
-    mesh_points = mesh1(size, 2, 2, shift_perc=0.4)
+    mesh_points = mesh1(size, 2, 2, shift_perc=0.75)
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
     plt.xlim(0, size)
