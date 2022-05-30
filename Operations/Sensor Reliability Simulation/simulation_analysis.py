@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 import gui_functions as gui
-from simulation import mesh_points
+import mesh_types
 
 if __name__ == "__main__":
     df = pd.read_csv(r"./data/fire_detection_time.csv")
+
+    mesh_points = mesh_types.mesh1(
+        10000, 280, 280, 0)
+
     df.loc[df['detection_time_gas'] < 8*60, "detection_time_good"] = 1
     df.loc[df['detection_time_gas'] > 8*60, "detection_time_good"] = 0
 

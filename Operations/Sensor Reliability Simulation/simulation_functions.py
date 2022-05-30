@@ -14,7 +14,7 @@ def read_and_edit_samples(filepath):
         DataFrame: pandas dataframe containing all the information necessary to the simulation
     """
     df = pd.read_csv(filepath)
-    df["wind_spd"] = df["wind_spd"]*0.2
+    df["wind_spd"] = df["wind_spd"]*0.5
     df["MC"] = MC(df["RH"].values, df["temp"].values)
     df["FFDI"] = FFDI(df["MC"].values, df["wind_spd"].values)
     df["R"] = R(df["FFDI"].values, 23.57)/3.6
@@ -46,7 +46,7 @@ def initial_gas_concentration(gas_type, t):
     return concentration_function(t/60)
 
 
-def get_relevant_detection_nodes(centre, radius, mesh_points):
+def get_relevant_detection_nodes(centre, mesh_points, wind_dir, length_triangle):
     """Gets the nodes within a circle (given a radius) centred at the fire ellipse center
 
     Args:
@@ -58,7 +58,8 @@ def get_relevant_detection_nodes(centre, radius, mesh_points):
     Returns:
         ndarray: mesh array containing the relevant poins [m, m]
     """
-    x0, y0, radius = centre[0], centre[1], radius
+    x0, y0, radius = (centre[0]+length_triangle/2 * np.cos(np.deg2rad(wind_dir))
+                      ), (centre[1]+length_triangle/2 * np.sin(np.deg2rad(wind_dir))), length_triangle/2
     relevant_arg = np.argwhere(
         np.sqrt((mesh_points[:, 0]-x0)**2 + (mesh_points[:, 1]-y0)**2) < radius)
     return mesh_points[relevant_arg][:, 0, :]
@@ -85,7 +86,7 @@ def FFDI(mc, u):
         U (float): Wind Speed in km/h
 
     Returns:
-        float: FFDI 
+        float: FFDI
     """
     return (34.81*np.exp(0.987*np.log(10))*(mc)**(-2.1))*(np.exp(0.0234*u))
 
@@ -181,16 +182,16 @@ def density_plot(x, mu, sig):
 
     Args:
         x (1darray): x (width) array
-        mu (float): average 
+        mu (float): average
         sig (float): standard deviation
 
     Returns:
-        1darray: array containing the normal distribution 
+        1darray: array containing the normal distribution
     """
     return stats.norm.pdf(x, loc=mu, scale=sig)
 
 
-def get_concentration(xy, centre, wind_dir, i, width_triangle, time_arr, C0_init_ppm):
+def get_concentration(xy, centre, wind_dir, i, width_triangle, length_triangle, time_arr, C0_init_ppm):
     """_summary_
 
     Args:
@@ -207,20 +208,23 @@ def get_concentration(xy, centre, wind_dir, i, width_triangle, time_arr, C0_init
     """
     coord_diff = np.array([[xy[0] - centre[0]],
                            [xy[1] - centre[1]]])
-    T = np.array([[np.cos(np.deg2rad(wind_dir)), -np.sin(np.deg2rad(wind_dir))],
-                  [np.sin(np.deg2rad(wind_dir)), np.cos(np.deg2rad(wind_dir))]])
-    coord = T@coord_diff + np.array([[width_triangle[-1]/2],
-                                     [0]])
+    T = np.array([[np.cos(np.deg2rad(-wind_dir)), -np.sin(np.deg2rad(-wind_dir))],
+                  [np.sin(np.deg2rad(-wind_dir)), np.cos(np.deg2rad(-wind_dir))]])
+    coord = np.flip(T@coord_diff, axis=None) + \
+        np.array([[width_triangle[-1]/2], [0]])
     x_arr = np.linspace(
         width_triangle[0], width_triangle[-1], len(time_arr))
     data = concentration_distribution(x_arr[1:])
     Z = np.array([C0_init_ppm[i]*density_plot(x_arr[1:],
                                               params[0], params[1]) for params in data])
     idx = np.array([np.round(coord[0][0]/width_triangle[-1] * len(time_arr)),
-                    np.round(coord[1][0]/width_triangle[-1] * len(time_arr))], dtype=int)
-    try:
-        concentration = Z[idx[0]][idx[1]]
-    except:
+                    np.round(coord[1][0]/length_triangle[-1] * len(time_arr))], dtype=int)
+    if idx[0] >= 0 and idx[1] >= 0:
+        try:
+            concentration = Z[idx[0]][idx[1]]
+        except:
+            concentration = 0
+    else:
         concentration = 0
     return concentration
 

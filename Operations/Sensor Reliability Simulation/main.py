@@ -16,11 +16,12 @@ size = 10000
 gas = "CO"
 
 if __name__ == "__main__":
-    iteration_list = list(itertools.product(
-        x_spacing_range, y_spacing_range, shift_range))
-    for i, iteration in enumerate(iteration_list):
-        mesh_points = mesh_types.mesh1(
-            size, iteration[0], iteration[1], iteration[2])
-        time = np.linspace(0, t_max, N)*np.ones((M, 1))
-        simulation.simulate(mesh_points, time, i, df,
-                            threshold, N, size, gas, t_max)
+    iteration_list = [list(itertools.product(
+        x_spacing_range, y_spacing_range, shift_range))[0]]
+    # for i, iteration in enumerate(iteration_list):
+    iteration = [300, 300, 0]
+    mesh_points = mesh_types.mesh1(
+        size, iteration[0], iteration[1], iteration[2])
+    time = np.linspace(0, t_max, N)*np.ones((M, 1))
+    simulation.simulate(mesh_points, time, 0, df,
+                        threshold, N, size, gas, t_max, plotting=True)
