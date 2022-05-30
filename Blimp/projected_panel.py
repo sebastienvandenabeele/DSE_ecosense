@@ -77,6 +77,9 @@ def irradiance_distribution(blimp, angle_sun):
     # generate the ellipsoid coefficient and radii
     coefs = (blimp.spheroid_ratio**2, blimp.spheroid_ratio**2, 1)
     rx, ry, rz = 1/np.sqrt(coefs)
+    rx=rx*blimp.length/2
+    ry=ry*blimp.length/2
+    rz=rz*blimp.length/2
 
     # calculate total surface area of the generated ellipsoid
     surface_total = surface_area(rx, ry, rz)
@@ -84,29 +87,36 @@ def irradiance_distribution(blimp, angle_sun):
     # calculate solar panel surface area
     length_factor = blimp.length_factor
     alpha = blimp.panel_angle/2
-    surface = alpha/np.pi*surface_total*length_factor
-
     # generate angle values for the polar solar panel coordinates
-    v = np.linspace(0, np.pi, 10)
+    v = np.linspace(0, np.pi, 100)
     corr = 0
-    u = np.linspace(-alpha, alpha, 10)
+    u = np.linspace(-alpha, alpha, 100)
+    x_sample=rx * np.outer(np.cos(u), np.sin(v))
     # correct in case angle goes behind visual line
     if (beta_vec+np.pi/2) < alpha or (beta_vec-np.pi/2) < -alpha:
         corr = alpha-(np.pi/2-abs(beta_vec))
         if beta_vec > 0:
-            u = np.linspace(-alpha+corr, alpha, 10)
+            u = np.linspace(-alpha+corr, alpha, 100)
         elif beta_vec < 0:
-            u = np.linspace(-alpha, alpha-corr, 10)
+            u = np.linspace(-alpha, alpha-corr, 100)
         elif (beta_vec+np.pi/2) < alpha and (beta_vec-np.pi/2) < -alpha:
-            u = np.linspace(beta_vec-np.pi/2, beta_vec+np.pi/2, 10)
-
+            u = np.linspace(beta_vec-np.pi/2, beta_vec+np.pi/2, 100)
+    radius_dist=np.array([])
+    for i in x_sample:
+        radius_dist=np.append(radius_dist,max(i))
     # generate x,y,z coordinates
     x = rx * np.outer(np.cos(u), np.sin(v))
     y = ry * np.outer(np.sin(u), np.sin(v))
     z = rz * np.outer(np.ones_like(u), np.cos(v))
     z[z <= (length_factor*np.amin(z))] = 0
     z[z >= (length_factor*np.amax(z))] = 0
-
+    
+    arc_len=radius_dist[z[0]!=0]*blimp.panel_angle
+    dist=[]
+    for i in range(len(z[0][z[0]!=0])-1):
+        dist.append(z[0][z[0]!=0][i]-z[0][z[0]!=0][i+1])
+        
+    surface=sum(arc_len[:-1]*dist)
     # create solar incidence vector
     vector = np.array([np.cos(alpha_vec) * np.cos(beta_vec),
                       np.sin(beta_vec), np.sin(alpha_vec) * np.cos(beta_vec)])
@@ -136,13 +146,13 @@ def irradiance_distribution(blimp, angle_sun):
         twod_coords.append([np.cos(ang)*l, np.sin(ang)*l])
 
     twod_coords_temp = np.transpose(twod_coords)
-
+    
     twod_coords = []
-    ind1 = np.arange(0, 10, 1)
-    ind2 = np.arange(19, len(twod_coords_temp[0]), 10)
+    ind1 = np.arange(0, len(z[0][z[0] != 0]), 1)
+    ind2 = np.arange(2*len(z[0][z[0] != 0])-1, len(twod_coords_temp[0]), len(z[0][z[0] != 0]))
     ind3 = np.arange(
-        len(twod_coords_temp[0])-2, len(twod_coords_temp[0])-11, -1)
-    ind4 = np.arange(len(twod_coords_temp[0])-20, 0, -10)
+        len(twod_coords_temp[0])-2, len(twod_coords_temp[0])-(len(z[0][z[0] != 0])), -1)
+    ind4 = np.arange(len(twod_coords_temp[0])-(2*len(z[0][z[0] != 0])), 0, -len(z[0][z[0] != 0]))
     ind = np.concatenate([ind1, ind2, ind3, ind4])
     for i in ind:
         twod_coords.append([twod_coords_temp[0][i], twod_coords_temp[1][i]])
@@ -151,9 +161,11 @@ def irradiance_distribution(blimp, angle_sun):
     # calculate area of the projected polygon
     polygon = []
     polygon = plt.fill(twod_coords[0], twod_coords[1])
+    plt.close()
     area = computeArea(polygon[0].xy)
+    plt.scatter(twod_coords[0], twod_coords[1])
 
-    return area/surface
+    return surface, area
 
 
 def plot_blimp(blimp):
