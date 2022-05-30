@@ -19,15 +19,15 @@ class TestTest(unittest.TestCase):
 
         testblimp.sizeBalloon()
 
-        print(testblimp.volume, 175.246)
-        print(testblimp.explosive_potential, 8762.322)
-        print(testblimp.radius, 3.525)
-        print(testblimp.length, 21.152)
-        print(testblimp.radius_ballonet, 1.736)
-        print(testblimp.mass['ballonets'], 13.327)
-        print(testblimp.surface_area, 383.098)
-        print(testblimp.mass['envelope'], 0.096)
-        print(testblimp.ref_area, 31.316)
+        print(testblimp.volume)
+        print(testblimp.explosive_potential)
+        print(testblimp.radius)
+        print(testblimp.length)
+        print(testblimp.radius_ballonet)
+        print(testblimp.mass['ballonets'])
+        print(testblimp.surface_area)
+        print(testblimp.mass['envelope'])
+        print(testblimp.ref_area)
         # self.volume = self.MTOM / lift_h2
         # self.explosive_potential = self.volume * self.liftgas.spec_energy
         # self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio)) ** (1 / 3)
