@@ -4,24 +4,6 @@ import matplotlib.pyplot as plt
 
 # plt.ioff()
 
-
-def surface_area(a, b, c):
-    """
-    Calculate the surface area of an ellipsoid shape.
-
-    Parameters
-    ----------
-    a,b,c : The half-length principle axis coordinates
-
-    Returns
-    -------
-    Surface area of the ellipsoid
-
-    """
-    p = 1.6075
-    return(4*np.pi*((((a*b)**p+(a*c)**p+(b*c)**p))/3)**(1/p))
-
-
 def computeArea(pos):
     """
     Compute the area of a polygon determined by x,y coordinates.
@@ -80,9 +62,6 @@ def irradiance_distribution(blimp, angle_sun):
     rx=rx*blimp.length/2
     ry=ry*blimp.length/2
     rz=rz*blimp.length/2
-
-    # calculate total surface area of the generated ellipsoid
-    surface_total = surface_area(rx, ry, rz)
 
     # calculate solar panel surface area
     length_factor = blimp.length_factor
@@ -163,7 +142,6 @@ def irradiance_distribution(blimp, angle_sun):
     polygon = plt.fill(twod_coords[0], twod_coords[1])
     plt.close()
     area = computeArea(polygon[0].xy)
-    plt.scatter(twod_coords[0], twod_coords[1])
 
     return surface, area
 
