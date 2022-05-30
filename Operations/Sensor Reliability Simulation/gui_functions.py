@@ -6,7 +6,6 @@ import matplotlib.animation as animation
 import numpy as np
 import simulation_functions as simfunc
 import mesh_types
-from scipy import ndimage
 
 
 def single_animation(mesh, width_triangle, C0_init_ppm, t):
@@ -97,7 +96,7 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
 
 if __name__ == "__main__":
     df = simfunc.read_and_edit_samples("./data/samples.csv")
-    t_max = 10*60
+    t_max = 8*60
     N = int(100*(t_max/(8*60)))
     gas = "CO"
     time = np.linspace(0, 10*60, N)

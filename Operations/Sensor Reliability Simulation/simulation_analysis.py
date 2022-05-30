@@ -4,7 +4,7 @@ import gui_functions as gui
 import mesh_types
 
 if __name__ == "__main__":
-    df = pd.read_csv(r"./data/fire_detection_time.csv")
+    df = pd.read_csv(r"./data/fire_detection_time_0.csv")
 
     mesh_points = mesh_types.mesh1(
         10000, 280, 280, 0)

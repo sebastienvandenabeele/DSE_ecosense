@@ -8,8 +8,8 @@ import gui_functions as gui
 def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, plotting=False):
     start_time = time_lib.time()
     for index, t in enumerate(time):
-        if index < 1:
-            print(f"Running try no. {index+1}...")
+        if index < 1000:
+            # print(f"Running try no. {index+1}...")
 
             # Get random fire location within mesh
             x_f, y_f = np.random.uniform(0, size, 2)
@@ -70,7 +70,7 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, plo
                 # Get the final detection time of the fire for the current iteration and break the loop
                 if len(detection_times) != 0:
                     detection_time = np.min(detection_times)
-                    print(f"Fire Detected!!! in {detection_time} [s]")
+                    # print(f"Fire Detected!!! in {detection_time} [s]")
                     df.loc[index, "detection_time_gas"] = detection_time
                     df.loc[index, "detected"] = True
                     df.loc[index, "fire_area"] = np.pi * \
@@ -85,6 +85,6 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, plo
                                  wind_dir, length_triangle, width_triangle, wind_spd/3.6, temp, N, mesh_points, size, detection_point_arr, relevant_points)
 
         # Save data to a new CSV file
-        #print("Saving to CSV...")
-        #df.to_csv(r"./data/fire_detection_time_" + str(run_nbr) + ".csv")
+        print("Saving to CSV...")
+        df.to_csv(r"./data/fire_detection_time_" + str(run_nbr) + ".csv")
     print("--- %s seconds ---" % (time_lib.time() - start_time))
