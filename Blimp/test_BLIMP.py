@@ -47,9 +47,8 @@ class TestTest(unittest.TestCase):
     def test_sizeSolar(self):
         testblimp = unpickle('Simon')
         testblimp.area_solar = 33
-
-
-        testblimp.sizeSolar(shone_area=12)
+        print('test')
+        testblimp.sizeSolar()
 
         print(testblimp.power_solar)
         print(testblimp.mass['solar'])
@@ -77,5 +76,7 @@ class TestTest(unittest.TestCase):
         print(testblimp.battery_capacity)
         print(testblimp.mass['battery'])
         print(testblimp.battery_charge)
+
+
 if __name__ == '__main__':
     unittest.main()

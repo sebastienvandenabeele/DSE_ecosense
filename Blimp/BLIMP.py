@@ -112,18 +112,13 @@ class Blimp:
         self.solar_cell = solar_cell
         self.panel_angle = panel_angle
         self.length_factor = length_factor
-        self.panel_rows = -1
         self.area_solar = 0
         self.power_solar = 0
 
 
         # Balloon Aerodynamics
         self.spheroid_ratio = spheroid_ratio
-        dl = 1 / spheroid_ratio
-        ld = spheroid_ratio
-        list_element = min(dl_re[:, 0], key=lambda x: abs(x - dl))
-        re = dl_re[np.where(dl_re[:, 0] == list_element), 1][0][0]
-        self.CD = (0.172 * ld ** (1 / 3) + 0.252 * dl ** 1.2 + 1.032 * dl ** 2.7) / ((re * 10 ** 7) ** (1 / 6)) * margin
+        self.CD = 0.02
         self.liftgas = liftgas
         self.n_fins = n_fins
         self.h_trim = h_trim
@@ -159,13 +154,11 @@ class Blimp:
     def save(self):
         pickle(self, self.name)
 
-    def sizeSolar(self, shone_area=0):
+    def sizeSolar(self):
         """
         solar power estimation subroutine for iteration
         """
-        # self.area_solar = 0.8 * 2 * self.length / 2 * self.radius * 2 * self.panel_angle
         self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
-        #shone_area = self.area_solar * irradiance_distribution(self, avg_sun_elevation)
         self.power_solar = (shone_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar) * self.solar_cell.fillfac * self.solar_cell.efficiency
         self.mass['solar'] = self.area_solar * self.solar_cell.density
         if np.isnan(self.power_solar):
@@ -226,7 +219,7 @@ class Blimp:
         print('Number of fins: ', self.n_fins)
         print('C.g. located at ', self.estimateCG())
         print()
-        #print('Number of solar panels: ', round(self.n_panels, 0))
+        print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Solar panel coverage angle: ', round(self.panel_angle * 57.3, 0), ' degrees')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
@@ -266,8 +259,8 @@ class Blimp:
         requirements_met = True
         print('Iteration initialised.')
         # One row of solar panels is added along the perimeter
-        dalpha = self.solar_cell.width / 3
-        while self.panel_angle < np.radians(178) and requirements_met:
+        dalpha = self.solar_cell.width / 2
+        while self.panel_angle < np.radians(350) and requirements_met:
             self.panel_angle += dalpha
             for i in np.arange(0, 50, 1):  # Iterative Calculations
                 self.MTOM = sum(self.mass.values())
@@ -321,6 +314,7 @@ class Blimp:
                 plt.show()
         print('Iteration done.')
         self.power_per_engine = self.prop_power_available / self.n_engines
+        self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
 
     def estimateCost(self):
         """
@@ -329,7 +323,7 @@ class Blimp:
 
 
         cost = {}
-        #cost['solar'] = self.n_panels * self.solar_cell.cost
+        cost['solar'] = self.n_panels * self.solar_cell.cost
         cost['hydrogen'] = self.volume * self.liftgas.cost
         cost['electronics'] = sum([device.cost for device in self.electronics])
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
@@ -398,33 +392,33 @@ class Blimp:
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_deployment=      1,
-               n_fins=           4,
-
-               envelope_material=    mat.polyethylene_fiber,
-
-               n_engines=            2,
-               engine=              eng.tmt_4130_300,
-
-               electronics=         el.config_option_1,
-               mass_ballonet=        8,
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
+# Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                mass_deployment=      1,
+#                n_fins=           4,
+#
+#                envelope_material=    mat.polyethylene_fiber,
+#
+#                n_engines=            2,
+#                engine=              eng.tmt_4130_300,
+#
+#                electronics=         el.config_option_1,
+#                mass_ballonet=        8,
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          sc.maxeon_gen3)
 flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
 path = flightdata[:, 0]
 cruisepath = path[194:-194]
 
 # Shlimp.trim(cruisepath)
-Shlimp.save()
+# Shlimp.save()
 # Shlimp = unpickle('Shlimp_350km_2605_2325')
 # simAltitudeDynamics(Shlimp, cruisepath)
 
-Shlimp.report()
+# Shlimp.report()
 
 # hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
 # fs = [getRestoringForce(h, Shlimp) for h in hs]
@@ -437,7 +431,7 @@ Shlimp.report()
 # plt.legend(['ISA Model', 'ISA Model (linearised)'])
 # plt.grid()
 # plt.show()
-
+dummy = input()
 
 # Control Simulation
 # xs = np.arange(5000)
