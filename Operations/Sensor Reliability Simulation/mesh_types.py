@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def mesh1(size, x_spacing, y_spacing):
+def mesh1(size, x_spacing, y_spacing, shift_perc=0):
     """Creates a simple recatngular mesh (given x and y spacing)
 
     Args:
@@ -15,13 +15,20 @@ def mesh1(size, x_spacing, y_spacing):
     """
     x_sensor = np.arange(0, size+x_spacing, x_spacing)
     y_sensor = np.arange(0, size+y_spacing, y_spacing)
-    return np.vstack(map(np.ravel, np.meshgrid(x_sensor, y_sensor))).transpose()
+    n, m = len(x_sensor), len(y_sensor)
+    mesh = np.array(np.vstack(
+        map(np.ravel, np.meshgrid(x_sensor, y_sensor))).transpose(), dtype=float)
+
+    for j in range(m):
+        if j % 2 == 0:
+            mesh[j*n:j*n+n, 0] = mesh[j*n:j*n+n, 0] + shift_perc*x_spacing
+
+    return mesh
 
 
 if __name__ == "__main__":
-    size = 10000
-    mesh_points = mesh1(size, 350, 250)
-    print(np.shape(mesh_points)[0])
+    size = 10
+    mesh_points = mesh1(size, 2, 2, shift_perc=0.4)
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
     plt.xlim(0, size)

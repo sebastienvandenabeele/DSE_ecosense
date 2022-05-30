@@ -1,12 +1,15 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
+import gui_functions as gui
+from simulation import mesh_points
 
 if __name__ == "__main__":
     df = pd.read_csv(r"./data/fire_detection_time.csv")
-    reliability = (df['detection_time_gas']
-                [df['detection_time_gas'] != 0].count())/df.shape[0]
+    df.loc[df['detection_time_gas'] < 8*60, "detection_time_good"] = 1
+    df.loc[df['detection_time_gas'] > 8*60, "detection_time_good"] = 0
+
+    reliability = (df['detection_time_good']
+                   [df['detection_time_good'] != 0].count())/df.shape[0]
 
     print(
         f"\nReliability (within 8 minutes): {np.round(reliability*100, 2)}%")
@@ -15,8 +18,9 @@ if __name__ == "__main__":
     print(
         f"\nDetection time standard deviation: {np.round(df['detection_time_gas'].std()/60, 2)} [min]\n")
 
-    plotting = False
+    plotting = True
+    df["detected"] = df["detected"].astype(int)
+
     if plotting:
-        df["detection_time_gas"].plot.hist()
-        plt.xlabel("fire detection time")
-        plt.show()
+        # gui.detected_corr(df)
+        gui.detected_map(mesh_points, df)

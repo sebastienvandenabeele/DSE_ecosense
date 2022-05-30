@@ -2,25 +2,27 @@ import numpy as np
 import pandas as pd
 import simulation_functions as simfunc
 import mesh_types
-import gui_functions as gui
+import time as time_lib
 
 df = simfunc.read_and_edit_samples("./data/samples.csv")
 
-t_max = 8*60
+t_max = 10*60
 threshold = 0.05
-N, M = 100, len(df)
+N, M = 100*(t_max/(8*60)), len(df)
 size = 10000
-mesh_points = mesh_types.mesh1(size, 250, 350)
+mesh_points = mesh_types.mesh1(size, 280, 280, 0.5)
 time = np.linspace(0, t_max, N)*np.ones((M, 1))
 gas = "CO"
 
-
 if __name__ == "__main__":
+    start_time = time_lib.time()
     for index, t in enumerate(time):
+        # if index < 100:
         print(f"Running try no. {index+1}...")
 
         # Get random fire location within mesh
         x_f, y_f = np.random.uniform(0, size, 2)
+        df.loc[index, ["x_start", "y_start"]] = [x_f, y_f]
 
         # Determine parameters corresponding to the iteration sample
         R, lb, wind_dir, wind_spd, temp = df.iloc[index]["R"], df.iloc[index]["LB"], df.iloc[
@@ -37,7 +39,7 @@ if __name__ == "__main__":
                   y_f+centre_ellipse*np.sin(np.deg2rad(wind_dir))]
 
         # Get the concentration of the gas emitted as the fire ellipse centre at every time step
-        C0_init_ppm = simfunc.initial_gas_concentration(gas, t)
+        gas_init_ppm = simfunc.initial_gas_concentration(gas, t)
 
         upper_break = False
 
@@ -57,13 +59,13 @@ if __name__ == "__main__":
             for i, xy in enumerate(relevant_points):
                 # Get sensor gas concentration
                 sensor_concentration_temp = simfunc.get_concentration(
-                    (xy[0], xy[1]), (centre[0][i], centre[1][i]), wind_dir, time_idx, width_triangle, t, C0_init_ppm)
+                    (xy[0], xy[1]), (centre[0][i], centre[1][i]), wind_dir, time_idx, width_triangle, t, gas_init_ppm)
 
                 # Determine the extra time due to sensor placement wrt. to gas cone initial point
                 sensor_additional_time = time_idx/N * t_max
 
                 # Check if any sensor has detected a fire within the required time
-                if sensor_concentration_temp > threshold and (sensor_additional_time+t[time_idx]) < t_max:
+                if sensor_concentration_temp > threshold:
 
                     # Implement sensor manufacturer reliability and append detection time of the node that detected the fire
                     if np.random.uniform(0, 1) <= 0.92:
@@ -75,8 +77,13 @@ if __name__ == "__main__":
                 detection_time = np.min(detection_times)
                 print(f"Fire Detected!!! in {detection_time} [s]")
                 df.loc[index, "detection_time_gas"] = detection_time
+                df.loc[index, "detected"] = True
                 upper_break = True
+
+            else:
+                df.loc[index, "detected"] = False
 
     # Save data to a new CSV file
     print("Saving to CSV...")
     df.to_csv(r"./data/fire_detection_time.csv")
+    print("--- %s seconds ---" % (time_lib.time() - start_time))
