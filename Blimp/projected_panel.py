@@ -39,7 +39,7 @@ def angle(v1, v2):
     return angle
 
 
-def irradiance_distribution(blimp, angle_sun):
+def irradiance_distribution(blimp, angle_sun, n_iter):
     """
     Generate the projected surface ratio compared to the original surface.
 
@@ -67,19 +67,19 @@ def irradiance_distribution(blimp, angle_sun):
     length_factor = blimp.length_factor
     alpha = blimp.panel_angle/2
     # generate angle values for the polar solar panel coordinates
-    v = np.linspace(0, np.pi, 100)
+    v = np.linspace(0, np.pi, n_iter)
     corr = 0
-    u = np.linspace(-alpha, alpha, 100)
+    u = np.linspace(-alpha, alpha, n_iter)
     x_sample=rx * np.outer(np.cos(u), np.sin(v))
     # correct in case angle goes behind visual line
     if (beta_vec+np.pi/2) < alpha or (beta_vec-np.pi/2) < -alpha:
         corr = alpha-(np.pi/2-abs(beta_vec))
         if beta_vec > 0:
-            u = np.linspace(-alpha+corr, alpha, 100)
+            u = np.linspace(-alpha+corr, alpha, n_iter)
         elif beta_vec < 0:
-            u = np.linspace(-alpha, alpha-corr, 100)
+            u = np.linspace(-alpha, alpha-corr, n_iter)
         elif (beta_vec+np.pi/2) < alpha and (beta_vec-np.pi/2) < -alpha:
-            u = np.linspace(beta_vec-np.pi/2, beta_vec+np.pi/2, 100)
+            u = np.linspace(beta_vec-np.pi/2, beta_vec+np.pi/2, n_iter)
     radius_dist=np.array([])
     for i in x_sample:
         radius_dist=np.append(radius_dist,max(i))

@@ -46,12 +46,14 @@ class TestTest(unittest.TestCase):
 
     def test_sizeSolar(self):
         testblimp = unpickle('Simon')
-        testblimp.panel_rows = 7
+        testblimp.area_solar = 33
 
-        testblimp.sizeSolar()
 
-        self.assertClose(testblimp.panel_angle, )
-        # self.assertClose(self.area_solar,
+        testblimp.sizeSolar(shone_area=12)
+
+        print(testblimp.power_solar)
+        print(testblimp.mass['solar'])
+
 
         # self.panel_angle = self.panel_rows * self.solar_cell.width / self.radius
         # self.area_solar = 0.8 * 2 * self.length / 2 * self.radius * 2 * self.panel_angle
@@ -64,5 +66,16 @@ class TestTest(unittest.TestCase):
         # if np.isnan(self.power_solar):
         #     self.power_solar = 0
 
+    def test_sizeBattery(self):
+        testblimp = unpickle('Simon')
+        testblimp.power_electronics = 77
+        testblimp.CD = 0.06
+
+        testblimp.sizeBattery()
+
+        print(testblimp.battery_speed)
+        print(testblimp.battery_capacity)
+        print(testblimp.mass['battery'])
+        print(testblimp.battery_charge)
 if __name__ == '__main__':
     unittest.main()

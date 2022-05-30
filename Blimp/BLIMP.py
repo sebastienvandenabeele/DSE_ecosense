@@ -159,12 +159,12 @@ class Blimp:
     def save(self):
         pickle(self, self.name)
 
-    def sizeSolar(self):
+    def sizeSolar(self, shone_area=0):
         """
         solar power estimation subroutine for iteration
         """
         # self.area_solar = 0.8 * 2 * self.length / 2 * self.radius * 2 * self.panel_angle
-        self.area_solar, shone_area = () # TODO: Tilen's function
+        self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
         #shone_area = self.area_solar * irradiance_distribution(self, avg_sun_elevation)
         self.power_solar = (shone_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar) * self.solar_cell.fillfac * self.solar_cell.efficiency
         self.mass['solar'] = self.area_solar * self.solar_cell.density
@@ -226,7 +226,7 @@ class Blimp:
         print('Number of fins: ', self.n_fins)
         print('C.g. located at ', self.estimateCG())
         print()
-        print('Number of solar panels: ', round(self.n_panels, 0))
+        #print('Number of solar panels: ', round(self.n_panels, 0))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Solar panel coverage angle: ', round(self.panel_angle * 57.3, 0), ' degrees')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
@@ -266,9 +266,8 @@ class Blimp:
         requirements_met = True
         print('Iteration initialised.')
         # One row of solar panels is added along the perimeter
-        dalpha = self.solar_cell.width / self.radius
+        dalpha = self.solar_cell.width / 3
         while self.panel_angle < np.radians(178) and requirements_met:
-            self.panel_rows += 1
             self.panel_angle += dalpha
             for i in np.arange(0, 50, 1):  # Iterative Calculations
                 self.MTOM = sum(self.mass.values())
@@ -321,7 +320,6 @@ class Blimp:
                 plt.xlabel('Number of solar panels per row')
                 plt.show()
         print('Iteration done.')
-        self.n_panels = 2 * self.panel_rows * round(self.length_factor * self.length / self.solar_cell.width, 0)
         self.power_per_engine = self.prop_power_available / self.n_engines
 
     def estimateCost(self):
@@ -331,7 +329,7 @@ class Blimp:
 
 
         cost = {}
-        cost['solar'] = self.n_panels * self.solar_cell.cost
+        #cost['solar'] = self.n_panels * self.solar_cell.cost
         cost['hydrogen'] = self.volume * self.liftgas.cost
         cost['electronics'] = sum([device.cost for device in self.electronics])
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
