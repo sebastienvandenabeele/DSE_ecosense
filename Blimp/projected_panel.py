@@ -53,6 +53,7 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
     projected area/real area ratio
 
     """
+    plt.ioff()
     beta_vec = 0
     alpha_vec = angle_sun
 
