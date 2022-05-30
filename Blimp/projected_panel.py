@@ -55,7 +55,7 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
     """
     plt.ioff()
     beta_vec = 0
-    alpha_vec = angle_sun
+    alpha_vec = np.radians(angle_sun)
 
     # generate the ellipsoid coefficient and radii
     coefs = (blimp.spheroid_ratio**2, blimp.spheroid_ratio**2, 1)
@@ -143,7 +143,7 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
     polygon = plt.fill(twod_coords[0], twod_coords[1])
     plt.close()
     area = computeArea(polygon[0].xy)
-
+    
     return surface, area
 
 
