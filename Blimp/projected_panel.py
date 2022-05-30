@@ -83,7 +83,7 @@ def irradiance_distribution(blimp, angle_sun):
 
     # calculate solar panel surface area
     length_factor = blimp.length_factor
-    alpha = blimp.panel_angle
+    alpha = blimp.panel_angle/2
     surface = alpha/np.pi*surface_total*length_factor
 
     # generate angle values for the polar solar panel coordinates
