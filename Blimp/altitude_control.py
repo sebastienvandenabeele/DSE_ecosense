@@ -58,11 +58,11 @@ def simNonLinear(blimp, ref_path, ts, kp):
         u = kp * e
 
         v_vec = np.sqrt(v**2 + blimp.cruiseV**2)
-        drag_vec = 0.5 * getISA('rho', h) * v_vec**2 * blimp.ref_area * 0.06
+        drag_vec = 0.5 * getISA('rho', h) * v_vec**2 * blimp.CD * 1.2 * np.pi * blimp.radius * blimp.length * 0.5
         drag_vert = drag_vec * v / v_vec
 
-        Fnet = u + getRestoringForce(h + blimp.h_trim, blimp) - drag_vert
-        print(u, getRestoringForce(h + blimp.h_trim, blimp), drag_vert)
+        Fnet = u - getRestoringForce(h + blimp.h_trim, blimp) - drag_vert
+        print(u, -getRestoringForce(h + blimp.h_trim, blimp), drag_vert)
         a = Fnet / blimp.MTOM
 
         v += a * dt
@@ -99,7 +99,7 @@ def getC(blimp, cruisepath):
     v_y = np.array([s * blimp.cruiseV for s in slope])
     v_model = np.mean(v_y)
 
-    c = getISA('rho', blimp.h_trim) * blimp.ref_area * v_model * 0.06
+    c = getISA('rho', blimp.h_trim) * v_model * blimp.CD * 1.2 * np.pi * blimp.radius * blimp.length * 0.5
 
     return c
     # diffs = []

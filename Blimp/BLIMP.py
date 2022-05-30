@@ -399,24 +399,24 @@ class Blimp:
 
 
 
-# Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_350km_2605_2325",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_deployment=      1,
-#                n_fins=           4,
-#
-#                envelope_material=    mat.polyethylene_fiber,
-#
-#                n_engines=            4,
-#                engine=              eng.tmt_4130_300,
-#
-#                electronics=         el.config_option_1,
-#                mass_ballonet=        8,
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
+#Creation of blimp design, run either this or unpickle from file
+Shlimp = Blimp(name=                "Shlimp_350km_2605_2325",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_deployment=      1,
+               n_fins=           4,
+
+               envelope_material=    mat.polyethylene_fiber,
+
+               n_engines=            4,
+               engine=              eng.tmt_4130_300,
+
+               electronics=         el.config_option_1,
+               mass_ballonet=        8,
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
 flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
 path = flightdata[:, 0]
 cruisepath = path[194:-194]
