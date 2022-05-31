@@ -6,9 +6,25 @@ import matplotlib.animation as animation
 import numpy as np
 import simulation_functions as simfunc
 import mesh_types
+from mpl_toolkits import mplot3d
 
 
-def single_animation(mesh, width_triangle, C0_init_ppm, t):
+def concentration_3d(width_triangle, C0_init_ppm, t, lb):
+    begin_N = 1
+    fig = plt.figure(figsize=(12, 10))
+    ax = plt.axes(projection='3d')
+    x = np.array([np.linspace(
+        width_triangle[0], width_triangle[-1], len(t)), np.linspace(
+        width_triangle[0], width_triangle[-1]*lb, len(t))])
+    X, Y = np.meshgrid(x[0][begin_N:], x[1][begin_N:])
+    data = simfunc.concentration_distribution(x[0][begin_N:])
+    Z = np.array([C0_init_ppm[begin_N:]*simfunc.density_plot(x[0][begin_N:],
+                 params[0], params[1]) for params in data])
+    ax.plot_surface(X, Y, Z, cmap=plt.cm.gist_heat_r)
+    plt.show()
+
+
+def animation_2d(width_triangle, C0_init_ppm, t):
     fig, ax = plt.subplots()
 
     def init():
@@ -19,15 +35,10 @@ def single_animation(mesh, width_triangle, C0_init_ppm, t):
         x = np.linspace(
             width_triangle[0], width_triangle[-1], len(t))
         begin_N = 1
-
         data = simfunc.concentration_distribution(x[begin_N:])
         Z = np.array([C0_init_ppm[i]*simfunc.density_plot(x[begin_N:],
                                                           params[0], params[1]) for params in data])
-
-        # rotated_Z = ndimage.rotate(Z, 45)
         ax.imshow(Z, vmin=0.0, vmax=0.1, cmap="Greys", zorder=1)
-        # ax.scatter(mesh[:, 0], mesh[:, 1], zorder=2)
-
     anim = animation.FuncAnimation(
         fig, animate, init_func=init, frames=len(t)-1, interval=1, repeat=False)
     plt.show()
@@ -103,44 +114,41 @@ def draw_reliability(df):
 
 def draw_overall_reliabilities(x_spacing_rel, y_spacing_rel, shift_rel, x_spacing_range, y_spacing_range, shift_range):
     fig, ax = plt.subplots(3, figsize=(15, 9))
-    bar0 = ax[0].bar(x_spacing_range, x_spacing_rel, width=10)
+    bar0 = ax[0].bar(x_spacing_range, x_spacing_rel,
+                     width=10, color='deepskyblue')
     ax[0].set_xticks(x_spacing_range)
     ax[0].plot(x_spacing_range, [62, 62, 62], '--', color='r')
     ax[0].bar_label(bar0)
+    ax[0].set_ylabel("Reliability [%]")
+    ax[0].set_xlabel("East-West Sensor Spacing [m]")
 
-    bar1 = ax[1].bar(y_spacing_range, y_spacing_rel, width=10)
+    bar1 = ax[1].bar(y_spacing_range, y_spacing_rel,
+                     width=10, color='deepskyblue')
     ax[1].set_xticks(y_spacing_range)
     ax[1].plot(y_spacing_range, [62, 62, 62], '--', color='r')
     ax[1].bar_label(bar1)
+    ax[1].set_ylabel("Reliability [%]")
+    ax[1].set_xlabel("North-South Sensor Spacing [m]")
 
-    bar2 = ax[2].bar(shift_range, shift_rel, width=0.04)
-    ax[2].set_xticks(shift_range)
-    ax[2].plot(shift_range, [62, 62, 62, 62], '--', color='r')
+    bar2 = ax[2].bar(np.array(shift_range)*100, shift_rel,
+                     width=4, color='deepskyblue')
+    ax[2].set_xticks(np.array(shift_range)*100)
+    ax[2].plot(np.array(shift_range)*100, [62, 62, 62, 62], '--', color='r')
     ax[2].bar_label(bar2)
+    ax[2].set_ylabel("Reliability [%]")
+    ax[2].set_xlabel("Sensor Shift [%]")
 
     plt.show()
 
 
 if __name__ == "__main__":
     df = simfunc.read_and_edit_samples("./data/samples.csv")
-    t_max = 8*60
+    t_max = 10*60
     N = int(100*(t_max/(8*60)))
     gas = "CO"
-    time = np.linspace(0, 10*60, N)
-    u = 10/3.6
-    R = 0.1/3.6
+    time = np.linspace(0, t_max, N)
+    width_triangle = np.linspace(0, 200, N)
+    C0_init_ppm = np.linspace(0, 10, N)
     lb = 1.5
-    wind_dir = 20
-    temp = 25
-    size = 10000
-    iteration = [300, 300, 0]
-    x_f, y_f = np.random.uniform(0, size, 2)
-    mesh_points = mesh_types.mesh1(
-        size, iteration[0], iteration[1], iteration[2])
-    length_triangle, width_triangle = simfunc.cone_params(time, u, lb)
-    length_ellipse, width_ellipse, centre_ellipse = simfunc.ellips_params(
-        time, R, lb)
-    centre = [x_f+centre_ellipse*np.cos(np.deg2rad(wind_dir)),
-              y_f + centre_ellipse*np.sin(np.deg2rad(wind_dir))]
-    draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse,
-                 wind_dir, length_triangle, width_triangle, u, temp, N, mesh_points, size)
+    # animation_2d(width_triangle, C0_init_ppm, time)
+    concentration_3d(width_triangle, C0_init_ppm, time, lb)
