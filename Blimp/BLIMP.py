@@ -154,13 +154,14 @@ class Blimp:
     def save(self):
         pickle(self, self.name)
 
-    def sizeSolar(self):
+    def sizeSolar(self, shone_area=0):
         """
         solar power estimation subroutine for iteration
         """
-        self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
-        self.power_solar = (shone_area * np.mean(tmy["DNI"]) + np.mean(tmy["DHI"]) * self.area_solar) * self.solar_cell.fillfac * self.solar_cell.efficiency
-        self.mass['solar'] = self.area_solar * self.solar_cell.density
+        #self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
+        self.power_solar = (shone_area * np.mean(tmy["DNI"]) + self.area_solar * np.mean(tmy["DHI"])) * self.solar_cell.fillfac * self.solar_cell.efficiency
+        self.mass['solar'] = self.area_solar * self.solar_cell.density * self.solar_cell.fillfac * 1.1 # margin for wiring
+
         if np.isnan(self.power_solar):
             self.power_solar = 0
 
@@ -186,13 +187,12 @@ class Blimp:
         
     def sizeBattery(self):
         dod=0.9 
-        battery_density = 250 # [Wh/kg]
+        battery_density = 250 * 3600 # [J/kg]
         voltage_nominal=3.7 # [V]
         n_series=12
 
-        self.battery_speed = (2 * prop_eff * motor_eff * self.power_electronics / (rho * self.ref_area * self.CD)) ** (
-                    1 / 3)
-        self.battery_capacity= 2 * self.power_electronics * req.range_on_battery / 1000 / (self.battery_speed * 3.6) / dod * margin
+        self.battery_speed = (prop_eff * self.engine.efficiency * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3) # [m/s]
+        self.battery_capacity= (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed * dod) * 1.1     # [J]
         self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_charge= self.battery_capacity / (n_series * voltage_nominal)
 
@@ -202,8 +202,8 @@ class Blimp:
         """
         print('###################### DESIGN CHARACTERISTICS ###################################')
         print()
-        print('Number of sensors: ', round(REQ_n_sensors, 0))
-        print('Number of relays: ', n_relays)
+        print('Number of sensors: ', int(REQ_n_sensors))
+        print('Number of relays: ', int(n_relays))
         print()
         print('MTOM: ', round(self.MTOM, 2), ' kg')
         for key, value in self.mass.items():
@@ -214,29 +214,29 @@ class Blimp:
         print('Balloon volume: ', round(self.volume, 2), ' m^3')
         print('Balloon thickness: ', round(self.balloon_thickness*1000, 3), ' mm')
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
-        print('Explosive potential: ', round(self.explosive_potential/1000000, 2), ' MJ')
+        print('Explosive potential: ', round(self.explosive_potential/10**6, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print('Number of fins: ', self.n_fins)
         print('C.g. located at ', self.estimateCG())
         print()
-        print('Number of solar panels: ', round(self.n_panels, 0))
+        print('Number of solar panels: ', int(round(self.n_panels, 0)))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
         print('Solar panel coverage angle: ', round(self.panel_angle * 57.3, 0), ' degrees')
         print('Generated power: ', round(self.power_solar/1000, 2), ' kW')
-        print('On-board electronics power: ', round(self.power_electronics, 2), ' W')
+        print('On-board electronics power: ', int(round(self.power_electronics, 0)), ' W')
         print()
         print('Engine type: ', self.engine.name)
         print('Single engine max power: ', round(self.engine.max_power / 1000, 2), ' kW')
-        print('Number of engines:', round(self.n_engines, 0))
+        print('Number of engines:', self.n_engines)
         print('Actual propulsion power available: ', round(self.prop_power_available / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
-        print('Engine utilization ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 1), ' % (out of 55% steady-state)')
+        print('Cruise throttle ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 1), ' % (out of 55% recommended for steady-state)')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
-        print('Battery Speed: ', round(self.battery_speed * 3.6, 2), ' km/h')
+        print('Speed on battery: ', round(self.battery_speed * 3.6, 2), ' km/h')
         print('Return time on battery: ', round(req.range_on_battery/self.battery_speed/3600, 1), ' h')
-        print('Cruise Speed: ', round(self.cruiseV*3.6, 2), ' km/h')
-        print('Range on 1 day: ', round(self.range/1000, 1), ' km')
+        print('Cruise Speed: ', round(self.cruiseV * 3.6, 2), ' km/h')
+        print('Range on 1 day: ', round(self.range / 1000, 1), ' km')
 
     def trim(self, cruisepath):
         self.h_trim = np.mean(cruisepath)
@@ -431,7 +431,7 @@ cruisepath = path[194:-194]
 # plt.legend(['ISA Model', 'ISA Model (linearised)'])
 # plt.grid()
 # plt.show()
-dummy = input()
+
 
 # Control Simulation
 # xs = np.arange(5000)

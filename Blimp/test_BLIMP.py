@@ -1,14 +1,13 @@
 import unittest
-from Blimp.BLIMP import *
+from BLIMP import *
 
 precision = 3
 
 class TestTest(unittest.TestCase):
-    def assertClose(self, a, b):
-        self.assertEqual(round(a, precision), b)
-        print(a)
+
 
     def test_sizeBalloon(self):
+        print('test')
         testblimp = unpickle('Simon')
         testblimp.MTOM = 200
         testblimp.liftgas.spec_energy = 50
@@ -19,6 +18,7 @@ class TestTest(unittest.TestCase):
 
         testblimp.sizeBalloon()
 
+        self.assertEqual(testblimp.MTOM, 200)
         print(testblimp.volume)
         print(testblimp.explosive_potential)
         print(testblimp.radius)
@@ -47,8 +47,8 @@ class TestTest(unittest.TestCase):
     def test_sizeSolar(self):
         testblimp = unpickle('Simon')
         testblimp.area_solar = 33
-        print('test')
-        testblimp.sizeSolar()
+
+        testblimp.sizeSolar(shone_area=13)
 
         print(testblimp.power_solar)
         print(testblimp.mass['solar'])
@@ -69,6 +69,7 @@ class TestTest(unittest.TestCase):
         testblimp = unpickle('Simon')
         testblimp.power_electronics = 77
         testblimp.CD = 0.06
+        testblimp.ref_area = 25
 
         testblimp.sizeBattery()
 
