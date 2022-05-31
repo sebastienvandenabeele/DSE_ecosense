@@ -13,7 +13,6 @@ class Gas:
         self.temp = temp
         self.pres = pres
         self.dens = (self.pres * self.m_molar)/(self.temp * Gas.R)  # ideal gas law
-
         self.spec_energy = spec_energy  # [J/m3]
         self.cost = cost  # [EUR / m^3]
 
