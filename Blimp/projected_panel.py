@@ -2,8 +2,6 @@ import numpy as np
 from mayavi.mlab import *
 import matplotlib.pyplot as plt
 
-# plt.ioff()
-
 def computeArea(pos):
     """
     Compute the area of a polygon determined by x,y coordinates.
@@ -54,6 +52,7 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
 
     """
     plt.ioff()
+    global x,y,z,proj_point,vector,p,q,n, plane, point, proj
     beta_vec = 0
     alpha_vec = np.radians(angle_sun)
 
@@ -106,11 +105,12 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
     for i in range(len(x)):
         for j in range(len(x)):
             if z[i][j] != 0:
-                point_vec = [x[i][j], y[i][j], z[i][j]]-vector
-                dist = np.dot(point_vec, vector)
-                proj = [x[i][j], y[i][j], z[i][j]]-dist*vector
+                q=[x[i][j], y[i][j], z[i][j]]
+                p=vector*10
+                n=vector
+                proj = q - np.dot(q - p, n) * n
                 proj_point.append(proj)
-
+    proj_point=np.array(proj_point)
     origin_point = np.array(proj_point[0])
     base_point = np.array(proj_point[1])
     base_vector = np.array(base_point-origin_point)
@@ -120,19 +120,19 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
     twod_coords.append([0, 0])
     twod_coords.append([np.linalg.norm(base_vector), 0])
     for i in range(len(proj_point)-2):
-        vector = proj_point[i+2]-origin_point
-        ang = angle(vector, base_vector)
-        l = np.linalg.norm(vector)
+        vector2d = proj_point[i+2]-origin_point
+        ang = angle(vector2d, base_vector)
+        l = np.linalg.norm(vector2d)
         twod_coords.append([np.cos(ang)*l, np.sin(ang)*l])
 
     twod_coords_temp = np.transpose(twod_coords)
     
     twod_coords = []
-    ind1 = np.arange(0, len(z[0][z[0] != 0]), 1)
-    ind2 = np.arange(2*len(z[0][z[0] != 0])-1, len(twod_coords_temp[0]), len(z[0][z[0] != 0]))
+    ind1 = np.arange(2*len(z[0][z[0] != 0]), 3*len(z[0][z[0] != 0]), 1)
+    ind2 = np.arange(4*len(z[0][z[0] != 0])-1, len(twod_coords_temp[0])-2*len(z[0][z[0] != 0]), len(z[0][z[0] != 0]))
     ind3 = np.arange(
-        len(twod_coords_temp[0])-2, len(twod_coords_temp[0])-(len(z[0][z[0] != 0])), -1)
-    ind4 = np.arange(len(twod_coords_temp[0])-(2*len(z[0][z[0] != 0])), 0, -len(z[0][z[0] != 0]))
+        len(twod_coords_temp[0])-2*len(z[0][z[0] != 0])-2, len(twod_coords_temp[0])-3*len(z[0][z[0] != 0]), -1)
+    ind4 = np.arange(len(twod_coords_temp[0])-(3*len(z[0][z[0] != 0])), 2*len(z[0][z[0] != 0]), -len(z[0][z[0] != 0]))
     ind = np.concatenate([ind1, ind2, ind3, ind4])
     for i in ind:
         twod_coords.append([twod_coords_temp[0][i], twod_coords_temp[1][i]])
