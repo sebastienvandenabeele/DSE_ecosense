@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse, Polygon, Circle
+from matplotlib.patches import Ellipse, Polygon, Circle, Arc
 import matplotlib.animation as animation
 import seaborn as sns
 import matplotlib.animation as animation
@@ -75,7 +75,7 @@ def detected_corr(df):
 
 
 def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, length_triangle, width_triangle, wind_spd, temp, N, mesh_points, size, detection_point, relevant_points):
-    ellipse_patches, triangle_patches = [], []
+    ellipse_patches, triangle_patches, arc_patches = [], [], []
     for i in range(N):
         ellipse_patches.append(Ellipse((centre[0][i], centre[1][i]), length_ellipse[i],
                                        width_ellipse[i], wind_dir, facecolor="none", edgecolor="orange", linewidth="0.2"))

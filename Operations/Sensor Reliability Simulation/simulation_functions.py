@@ -58,7 +58,7 @@ def get_relevant_detection_nodes(centre, mesh_points, wind_dir, length_triangle)
         ndarray: mesh array containing the relevant poins [m, m]
     """
     x0, y0, radius = (centre[0]+length_triangle/2 * np.cos(np.deg2rad(wind_dir))
-                      ), (centre[1]+length_triangle/2 * np.sin(np.deg2rad(wind_dir))), length_triangle/2
+                      ), (centre[1]+length_triangle/2 * np.sin(np.deg2rad(wind_dir))), (length_triangle/2)*1.5
     relevant_arg = np.argwhere(
         np.sqrt((mesh_points[:, 0]-x0)**2 + (mesh_points[:, 1]-y0)**2) < radius)
     return mesh_points[relevant_arg][:, 0, :]
@@ -114,8 +114,8 @@ def ellips_params(t, R, lb):
     Returns:
         ndarray: length, width and focal point position [m]
     """
-    if type(lb) == "numpy.ndarray":
-        if len(lb.to_list()) > 1:
+    if isinstance(lb, np.ndarray):
+        if np.shape(lb)[0] > 1:
             for i in range(len(lb)):
                 if lb[i] < 1:
                     lb[i] = 1.1

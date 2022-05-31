@@ -1,3 +1,4 @@
+from audioop import mul
 import itertools
 import simulation
 import mesh_types
@@ -23,4 +24,4 @@ if __name__ == "__main__":
             size, iteration[0], iteration[1], iteration[2])
         time = np.linspace(0, t_max, N)*np.ones((M, 1))
         simulation.simulate(mesh_points, time, i, df,
-                            threshold, N, size, gas, t_max, 1000, plotting=False, saving=True)
+                            threshold, N, size, gas, t_max, 1000, plotting=False, multiple=True)

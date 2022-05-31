@@ -5,7 +5,7 @@ import time as time_lib
 import gui_functions as gui
 
 
-def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chsn_idx, plotting=False, saving=False):
+def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chsn_idx, plotting=False, multiple=False):
     start_time = time_lib.time()
     for index, t in enumerate(time):
         if index < chsn_idx:
@@ -41,6 +41,8 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chs
             # Start the loop to go through time in the current iteration
             for time_idx in range(N):
 
+                inside_break = False
+
                 # Move on to next iteration as soon as the fire has been detected
                 if upper_break:
                     break
@@ -64,6 +66,10 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chs
                             detection_times.append(
                                 sensor_additional_time+t[time_idx])
                             detection_point.append(xy)
+                            inside_break = True
+
+                    if inside_break:
+                        break
 
                 detection_point_arr = np.array(detection_point)
 
@@ -82,11 +88,12 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chs
 
             if plotting:
                 gui.draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse,
-                                 wind_dir, length_triangle, width_triangle, wind_spd/3.6, temp, N, mesh_points, size, detection_point_arr, relevant_points)
-            if saving:
+                                 wind_dir, length_triangle, width_triangle, wind_spd, temp, N, mesh_points, size, detection_point_arr, relevant_points)
+            if multiple:
                 # Save data to a new CSV file
                 print("Saving to CSV...")
-                df.to_csv(r"./data/fire_detection_time_" + str(run_nbr) + ".csv")
+                df.to_csv(r"./data/fire_detection_time_" +
+                          str(run_nbr) + ".csv")
             else:
                 # Save data to a new CSV file
                 print("Saving to CSV...")

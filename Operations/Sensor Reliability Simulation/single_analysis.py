@@ -13,6 +13,6 @@ if __name__ == "__main__":
     average_detection_time = df["detection_time_gas"].mean()
 
     print(
-        f"\nReliability (within 8 minutes): {np.round(reliability*100, 2)}%")
+        f"\nReliability (within 10 minutes): {np.round(reliability*100, 2)}%")
     print(
         f"\nAverage detection time: {np.round(df['detection_time_gas'].mean()/60, 2)} [min]")
