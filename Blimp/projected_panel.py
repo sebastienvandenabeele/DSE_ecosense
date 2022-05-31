@@ -52,7 +52,6 @@ def irradiance_distribution(blimp, angle_sun, n_iter):
 
     """
     plt.ioff()
-    global x,y,z,proj_point,vector,p,q,n, plane, point, proj
     beta_vec = 0
     alpha_vec = np.radians(angle_sun)
 
@@ -170,7 +169,7 @@ def plot_blimp(blimp):
     coefs = (9, 9, 1)
     rx, ry, rz = 1/np.sqrt(coefs)
     v_panel = np.linspace(0, np.pi, 100)
-    u_panel = np.linspace(-alpha, alpha, 100)
+    u_panel = np.linspace(-alpha/2, alpha/2, 100)
 
     x_panel = np.array(rx * np.outer(np.cos(u_panel), np.sin(v_panel))*1.05)
     y_panel = np.array(ry * np.outer(np.sin(u_panel), np.sin(v_panel))*1.05)
