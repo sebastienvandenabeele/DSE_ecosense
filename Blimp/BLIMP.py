@@ -150,6 +150,9 @@ class Blimp:
 
         self.target_speed = target_speed
         self.setCruiseSpeed(plot=False)
+        self.power_per_engine = self.prop_power_available / self.n_engines
+        self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
+        self.estimateCG()
 
     def save(self):
         pickle(self, self.name)
@@ -158,7 +161,7 @@ class Blimp:
         """
         solar power estimation subroutine for iteration
         """
-        #self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
+        self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
         self.power_solar = (shone_area * np.mean(tmy["DNI"]) + self.area_solar * np.mean(tmy["DHI"])) * self.solar_cell.fillfac * self.solar_cell.efficiency
         self.mass['solar'] = self.area_solar * self.solar_cell.density * self.solar_cell.fillfac * 1.1 # margin for wiring
 
@@ -217,7 +220,7 @@ class Blimp:
         print('Explosive potential: ', round(self.explosive_potential/10**6, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print('Number of fins: ', self.n_fins)
-        print('C.g. located at ', self.estimateCG())
+        print('C.g. located at x: ' + str(round(self.x_bar / self.length * 100, 2)) + ' % length, z: ' + str(round(self.z_bar, 2)) + ' m')
         print()
         print('Number of solar panels: ', int(round(self.n_panels, 0)))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
@@ -313,8 +316,7 @@ class Blimp:
                 plt.xlabel('Number of solar panels per row')
                 plt.show()
         print('Iteration done.')
-        self.power_per_engine = self.prop_power_available / self.n_engines
-        self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
+
 
     def estimateCost(self):
         """
@@ -378,7 +380,7 @@ class Blimp:
         self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
 
         print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
-        return 'x: ' + str(round(self.x_bar / self.length * 100, 2)) + ' % length, z: ' + str(round(self.z_bar, 2)) + ' m'
+
 
 
 
@@ -392,23 +394,23 @@ class Blimp:
 
 
 #Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_deployment=      1,
-#                n_fins=           4,
-#
-#                envelope_material=    mat.polyethylene_fiber,
-#
-#                n_engines=            2,
-#                engine=              eng.tmt_4130_300,
-#
-#                electronics=         el.config_option_1,
-#                mass_ballonet=        8,
-#                length_factor=        0.8,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          sc.maxeon_gen3)
+Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_deployment=      1,
+               n_fins=           4,
+
+               envelope_material=    mat.polyethylene_fiber,
+
+               n_engines=            2,
+               engine=              eng.tmt_4130_300,
+
+               electronics=         el.config_option_1,
+               mass_ballonet=        8,
+               length_factor=        0.8,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          sc.maxeon_gen3)
 flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
 path = flightdata[:, 0]
 cruisepath = path[194:-194]
@@ -418,7 +420,7 @@ cruisepath = path[194:-194]
 # Shlimp = unpickle('Shlimp_350km_2605_2325')
 # simAltitudeDynamics(Shlimp, cruisepath)
 
-# Shlimp.report()
+Shlimp.report()
 
 # hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
 # fs = [getRestoringForce(h, Shlimp) for h in hs]
