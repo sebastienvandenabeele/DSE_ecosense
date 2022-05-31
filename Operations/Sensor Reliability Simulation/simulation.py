@@ -5,10 +5,10 @@ import time as time_lib
 import gui_functions as gui
 
 
-def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, plotting=False):
+def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chsn_idx, plotting=False, saving=False):
     start_time = time_lib.time()
     for index, t in enumerate(time):
-        if index < 1000:
+        if index < chsn_idx:
             # print(f"Running try no. {index+1}...")
 
             # Get random fire location within mesh
@@ -69,12 +69,12 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, plo
 
                 # Get the final detection time of the fire for the current iteration and break the loop
                 if len(detection_times) != 0:
-                    detection_time = np.min(detection_times)
-                    # print(f"Fire Detected!!! in {detection_time} [s]")
+                    detection_time = np.floor(np.min(detection_times)/10)*10
+                    print(f"Fire Detected!!! in {detection_time} [s]")
                     df.loc[index, "detection_time_gas"] = detection_time
                     df.loc[index, "detected"] = True
                     df.loc[index, "fire_area"] = np.pi * \
-                        length_ellipse[i]/2 * width_ellipse[i]/2
+                        length_ellipse[time_idx]/2 * width_ellipse[time_idx]/2
                     upper_break = True
 
                 else:
@@ -83,8 +83,12 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, plo
             if plotting:
                 gui.draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse,
                                  wind_dir, length_triangle, width_triangle, wind_spd/3.6, temp, N, mesh_points, size, detection_point_arr, relevant_points)
-
-        # Save data to a new CSV file
-        print("Saving to CSV...")
-        df.to_csv(r"./data/fire_detection_time_" + str(run_nbr) + ".csv")
+            if saving:
+                # Save data to a new CSV file
+                print("Saving to CSV...")
+                df.to_csv(r"./data/fire_detection_time_" + str(run_nbr) + ".csv")
+            else:
+                # Save data to a new CSV file
+                print("Saving to CSV...")
+                df.to_csv(r"./data/fire_detection_time_.csv")
     print("--- %s seconds ---" % (time_lib.time() - start_time))

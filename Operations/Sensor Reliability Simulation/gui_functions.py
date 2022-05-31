@@ -53,7 +53,7 @@ def detected_map(mesh_points, df):
 
 
 def detected_corr(df):
-    fig, ax = plt.subplots(3, figsize=(14, 9))
+    fig, ax = plt.subplots(3, figsize=(15, 9))
     df[["detected", "wind_dir"]].plot.scatter(
         ax=ax[0], x="wind_dir", y="detected")
     df[["detected", "wind_spd"]].plot.scatter(
@@ -72,7 +72,7 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
             length_triangle[i], width_triangle[i], (centre[0][i], centre[1][i]), wind_dir)
         triangle_patches.append(Polygon(
             triangle_points, closed=True, facecolor="none", edgecolor="grey", linewidth="0.2"))
-    circle_patch = Circle((x_f+length_triangle[-1]/2 * np.cos(np.deg2rad(wind_dir)), y_f+length_triangle[-1]/2 * np.sin(np.deg2rad(wind_dir))), radius=length_triangle[-1]/2,
+    circle_patch = Circle((x_f+length_triangle[-1]/2 * np.cos(np.deg2rad(wind_dir)), y_f+length_triangle[-1]/2 * np.sin(np.deg2rad(wind_dir))), radius=1.5*(length_triangle[-1]/2),
 
                           facecolor="none", edgecolor="red")
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -91,6 +91,33 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
     plt.ylim(0, size)
     plt.title(
         f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Speed: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
+    plt.show()
+
+
+def draw_reliability(df):
+    fig, ax = plt.subplots(figsize=(15, 9))
+    ax.bar(np.arange(36), df["reliability"])
+    ax.plot([0, 35], [0.62, 0.62], color='r')
+    plt.show()
+
+
+def draw_overall_reliabilities(x_spacing_rel, y_spacing_rel, shift_rel, x_spacing_range, y_spacing_range, shift_range):
+    fig, ax = plt.subplots(3, figsize=(15, 9))
+    bar0 = ax[0].bar(x_spacing_range, x_spacing_rel, width=10)
+    ax[0].set_xticks(x_spacing_range)
+    ax[0].plot(x_spacing_range, [62, 62, 62], '--', color='r')
+    ax[0].bar_label(bar0)
+
+    bar1 = ax[1].bar(y_spacing_range, y_spacing_rel, width=10)
+    ax[1].set_xticks(y_spacing_range)
+    ax[1].plot(y_spacing_range, [62, 62, 62], '--', color='r')
+    ax[1].bar_label(bar1)
+
+    bar2 = ax[2].bar(shift_range, shift_rel, width=0.04)
+    ax[2].set_xticks(shift_range)
+    ax[2].plot(shift_range, [62, 62, 62, 62], '--', color='r')
+    ax[2].bar_label(bar2)
+
     plt.show()
 
 

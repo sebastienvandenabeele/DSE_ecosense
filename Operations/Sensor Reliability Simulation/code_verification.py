@@ -2,13 +2,13 @@ from re import L
 import numpy as np
 import unittest
 import simulation_functions as simfunc
-import mesh_types
 
 
 class simulation_unit_tests(unittest.TestCase):
     # Cone parameters were skipped because the calculations are the same as the first two steps of ellipse parameters
     # Skipped Triangle points for now, probably better to verify it using the GUI
     # Centre caluclations will be verified using the GUI
+    # Relevant points were checked visually
 
     def test_mc(self):
         # Set dummy parameters
@@ -79,15 +79,6 @@ class simulation_unit_tests(unittest.TestCase):
         # Run test
         np.testing.assert_array_almost_equal(
             concentrations, np.array([0, 0.425, 0.85, 2.885, 23.3, 42.7, 0, 0.15, 0.3, 0.355, 0.5, 4]))
-
-
-def test_relevant_points(self):
-    size = 1000
-    radius = 200
-    mesh_points = mesh_types.mesh1(size, 100, 100)
-    centre = np.random.uniform(0, size, 2)
-    relevant_mesh = simfunc.get_relevant_detection_nodes(
-        centre, radius, mesh_points)
 
 
 if __name__ == '__main__':
