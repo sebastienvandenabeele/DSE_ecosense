@@ -17,4 +17,4 @@ if __name__ == "__main__":
         size, iteration[0], iteration[1], iteration[2])
     time = np.linspace(0, t_max, N)*np.ones((M, 1))
     simulation.simulate(mesh_points, time, 0, df,
-                        threshold, N, size, gas, t_max, 1000, plotting=False, multiple=False)
+                        threshold, N, size, gas, t_max, 1, plotting=True, multiple=False)
