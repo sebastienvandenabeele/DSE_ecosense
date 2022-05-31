@@ -1,5 +1,6 @@
 import unittest
 from BLIMP import *
+from Classes import engines as eng, electronics as el
 
 precision = 3
 
@@ -78,6 +79,15 @@ class TestTest(unittest.TestCase):
         print(testblimp.mass['battery'])
         print(testblimp.battery_charge)
 
+    def test_init(self):
+        testblimp = Blimp('Simon', engine=eng.tmt_0803_22000, n_engines=12, mass_payload=83, electronics=[el.lidar, el.skynode, el.ZED_F9P])
+
+        print(testblimp.mass['engines'])
+        print(testblimp.cruise_prop_power)
+        print(testblimp.mass['gondola structure'])
+        print(testblimp.power_electronics)
+        print(testblimp.mass['electronics'])
+        print(testblimp.volume)
 
 if __name__ == '__main__':
     unittest.main()

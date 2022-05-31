@@ -6,7 +6,7 @@ import requirements as req
 from Classes import electronics as el, engines as eng, materials as mat, gas
 from control_surface import sizeControl
 from drag_coefficient import calculateCD
-import structures2 as struc
+import structures as struc
 from simulator import *
 from altitude_control import *
 
@@ -83,8 +83,8 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * n_engines * 1.5 # margin for mounting
-        self.mass['propellers'] = self.n_engines * 0.18 # Louis estimate
+        self.mass['engines'] = self.engine.mass * self.n_engines * 1.5  # margin for mounting
+        self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
         print("Power deliverable by the engines: ", self.cruise_prop_power)
 
@@ -151,8 +151,8 @@ class Blimp:
 
         ballonet_surface_frac = 1
         self.radius_ballonet = (self.mass['payload'] / self.MTOM * self.volume * 3 / 8 / np.pi)**(1/3)
-        self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * ballonet_surface_frac * 0.192
-
+        #self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * ballonet_surface_frac * 0.0584 + 1
+        self.mass['ballonets'] = 11.2
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         #self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
         self.mass['envelope'] = self.surface_area * 0.192
@@ -249,7 +249,7 @@ class Blimp:
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
                 if not np.isnan(calculateCD(self, rho)): 
-                    self.CD = calculateCD(self, rho)
+                    self.CD = calculateCD(self, rho) + 0.0665 / self.ref_area
                 self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
             if plot:
@@ -351,7 +351,7 @@ class Blimp:
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
+Shlimp = Blimp(name=                "Shlimp_wing",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_deployment=      15,
@@ -359,11 +359,11 @@ Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
 
                envelope_material=    mat.polyethylene_fiber,
 
-               n_engines=            2,
+               n_engines=            4,
                engine=              eng.tmt_4130_300,
 
                electronics=         el.config_option_1,
-               length_factor=        0.8,
+               length_factor=        0.9,
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
                solar_cell=          solar.maxeon_gen3)
@@ -373,10 +373,11 @@ cruisepath = path[194:-194]
 
 # Shlimp.trim(cruisepath)
 # Shlimp.save()
-# Shlimp = unpickle('Shlimp_350km_2605_2325')
+#Shlimp = unpickle('Shlimp_no_alt_ctrl')
 # simAltitudeDynamics(Shlimp, cruisepath)
 
 Shlimp.report()
+Shlimp.save()
 
 # hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
 # fs = [getRestoringForce(h, Shlimp) for h in hs]

@@ -212,7 +212,7 @@ def sizeSolar(blimp, shone_area=0):
     """
     solar power estimation subroutine for iteration
     """
-    blimp.area_solar, shone_area = projectPanel(blimp, avg_sun_elevation, 15)
+    blimp.area_solar, shone_area = projectPanel(blimp, avg_sun_elevation, 30)
     blimp.power_solar = (shone_area * np.mean(tmy["DNI"]) + blimp.area_solar * np.mean(tmy["DHI"])) * blimp.solar_cell.fillfac * blimp.solar_cell.efficiency
     blimp.mass['solar'] = blimp.area_solar * blimp.solar_cell.density * blimp.solar_cell.fillfac * 1.1 # margin for wiring
 

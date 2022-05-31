@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import control.matlab as ml
 
+xstep = 200 # [m]
 
 def getRestoringForce(h, blimp):
     delta_rho = getISA('rho', h) - getISA('rho', blimp.h_trim)
@@ -22,21 +23,21 @@ def simAltitudeDynamics(blimp, cruisepath):
     k = getK(blimp)
     s = ml.tf('s')
 
-    kp = 1 # Proportional Control Gain
+    kp = 2 # Proportional Control Gain
 
     ref_signal = cruisepath - blimp.h_trim
 
     OLTF = kp / (m * s**2 + c*s + k)    # Blimp Altitude Dynamics TF
     CLTF = OLTF / (1 + OLTF)           # Unit feedback closed-loop TF
     sys = ml.ss(CLTF)
-    ts = np.arange(0, len(cruisepath) / blimp.cruiseV, 1 / blimp.cruiseV)
+    ts = np.arange(0, len(cruisepath) * xstep / blimp.cruiseV, xstep / blimp.cruiseV)
 
     ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts)
 
     y_nonlin = simNonLinear(blimp, ref_signal, ts, kp)
 
     plt.plot(ts, y_nonlin + blimp.h_trim)
-    plt.plot(ts, ys + blimp.h_trim)
+    #plt.plot(ts, ys + blimp.h_trim)
     plt.plot(ts, ref_signal + blimp.h_trim)
     plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
 
@@ -49,7 +50,7 @@ def simAltitudeDynamics(blimp, cruisepath):
 def simNonLinear(blimp, ref_path, ts, kp):
 
     hs = []
-    h = 0
+    h = ref_path[0]
     v = 0
     a = 0
     dt = ts[1] - ts[0]
@@ -92,7 +93,7 @@ def simNonLinear(blimp, ref_path, ts, kp):
     # plt.show()
 
 def ddx(list):
-    return [list[i] - list[i-1] for i in np.arange(1, len(list))]
+    return [(list[i] - list[i-1])/xstep for i in np.arange(1, len(list))]
 
 def getC(blimp, cruisepath):
     slope = ddx(cruisepath)
