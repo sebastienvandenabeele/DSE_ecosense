@@ -37,7 +37,7 @@ def angle(v1, v2):
     return angle
 
 
-def irradiance_distribution(blimp, angle_sun, n_iter):
+def projectPanel(blimp, angle_sun, n_iter):
     """
     Generate the projected surface ratio compared to the original surface.
 
