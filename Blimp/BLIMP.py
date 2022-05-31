@@ -169,7 +169,7 @@ class Blimp:
         self.battery_capacity= (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed * dod) * 1.1     # [J]
         self.mass['battery'] = self.battery_capacity / battery_density
         self.battery_charge= self.battery_capacity / (n_series * voltage_nominal)
-arch
+
     def report(self):
         """
         User-friendly output of most important design characteristics
