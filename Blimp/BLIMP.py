@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from projected_panel import plot_blimp, irradiance_distribution
-from Classes import solarcells as sc, gas
+import solar_sizing as solar
 import pickle as pick
 import requirements as req
-from Classes import electronics as el, engines as eng, materials as mat
+from Classes import electronics as el, engines as eng, materials as mat, gas
 from control_surface import sizeControl
 from drag_coefficient import calculateCD
 import structures2 as struc
@@ -28,34 +27,14 @@ lift_he                         = 1.0465 #    kg lift per cubic meter
 lift_h2                          = 1.14125
 p                               = 1.6075  # []          Constant for ellipsoid calculation
 
-dl_re=np.array([[0.05, 2.36],
-                [0.1, 1.491],
-                [0.15, 1.138],
-                [0.182, 1],
-                [0.2, 0.94],
-                [0.25, 0.81],
-                [0.3, 0.716]
-    ])
-
-
-foil_density                    = 0.01136  # [kg/m2]
-linen_light_density             = 0.030  # [kg/m2]
-linen_heavy_density             = 0.150  # [kg/m2]
-silk_density                    = 0.02165  # [kg/m2]
-fin_foam_density                = 15 # [kg/m3]
-fin_wood_density                = 150 # [kg/m3]
-
-prop_eff                        = 0.8
-motor_eff                       = 0.9
+prop_eff                        = 0.8065 # Set by Louis design
 prop_limit                      = 0.55
 
 #Environment
 avg_sun_elevation               = 52  # [deg]
 #tmy = read_irradiance()
-tmy = unpickle('tmy.txt')
+
 rho                             = 1.225  # [kg/m3]
-
-
 
 
 ###################
@@ -104,7 +83,8 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * n_engines * 1.5 # margin for mounting and prop
+        self.mass['engines'] = self.engine.mass * n_engines * 1.5 # margin for mounting
+        self.mass['propellers'] = self.n_engines * 0.18 # Louis estimate
         self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
         print("Power deliverable by the engines: ", self.cruise_prop_power)
 
@@ -157,16 +137,7 @@ class Blimp:
     def save(self):
         pickle(self, self.name)
 
-    def sizeSolar(self, shone_area=0):
-        """
-        solar power estimation subroutine for iteration
-        """
-        self.area_solar, shone_area = irradiance_distribution(self, avg_sun_elevation, 15)
-        self.power_solar = (shone_area * np.mean(tmy["DNI"]) + self.area_solar * np.mean(tmy["DHI"])) * self.solar_cell.fillfac * self.solar_cell.efficiency
-        self.mass['solar'] = self.area_solar * self.solar_cell.density * self.solar_cell.fillfac * 1.1 # margin for wiring
 
-        if np.isnan(self.power_solar):
-            self.power_solar = 0
 
     def sizeBalloon(self):
         """
@@ -268,21 +239,12 @@ class Blimp:
             for i in np.arange(0, 50, 1):  # Iterative Calculations
                 self.MTOM = sum(self.mass.values())
                 self.sizeBalloon()
-                self.sizeSolar()
+                self.area_solar, self.power_solar, self.mass['solar'] = solar.sizeSolar(self)
                 self.sizeBattery()
                 self.mass['controls'], self.control_surface, self.control_chord = sizeControl(self)
-                # self.mass['control'] = sizeControl(self)*(0.95*fin_foam_density+0.05*fin_wood_density)
 
-                # Uncomment this if an engine is selected
                 self.solar_power_available = (self.power_solar - self.power_electronics) * self.engine.efficiency * prop_eff
                 self.prop_power_available = min([self.cruise_prop_power, self.solar_power_available])
-
-
-                # Uncomment this if no engine is selected
-                # self.prop_power_available = self.power_solar * motor_eff * prop_eff
-                # self.mass_propulsion = eng.weight_per_W * self.power_solar
-                # if np.isnan(self.mass_propulsion):
-                #     self.mass_propulsion = 0
 
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
@@ -384,11 +346,6 @@ class Blimp:
 
 
 
-
-
-
-
-
 ########################### END OF CLASS DEFINITION ############################### END OF CLASS DEFINTION #######################################
 
 
@@ -397,7 +354,7 @@ class Blimp:
 Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
-               mass_deployment=      1,
+               mass_deployment=      15,
                n_fins=           4,
 
                envelope_material=    mat.polyethylene_fiber,
@@ -406,11 +363,10 @@ Shlimp = Blimp(name=                "Shlimp_350km_3005_1508",
                engine=              eng.tmt_4130_300,
 
                electronics=         el.config_option_1,
-               mass_ballonet=        8,
                length_factor=        0.8,
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
-               solar_cell=          sc.maxeon_gen3)
+               solar_cell=          solar.maxeon_gen3)
 flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
 path = flightdata[:, 0]
 cruisepath = path[194:-194]
