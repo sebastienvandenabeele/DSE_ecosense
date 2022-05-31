@@ -1,122 +1,50 @@
+from Classes.gas import Gas, air
+import numpy as np
 
-# initial_volume_Hyd = 50.89 # m^3
-# m_take_off = 58.078 # kg
-# m_payload = 43.16 # kg
 
-def required_density_gas(initial_volume_H,m_take_off,m_payload):
+def envelope_pressure(blimp, atm_gas=air):
     """
-    This definition calculates the required density of the gas 
-    to lower the blimp (no payload,)
-    no payload -> lowest buoyancy force to lower vehicle
+    Calculate the pressure inside the envelope due to ballonets
+    :param blimp: [Blimp] Blimp object to be investigated [-]
+    :param mass_dropped: [float] The mass dropped to be compensated by the ballonete subsystem [kg]
+    :param atm_gas: [Gas] The atmospheric surrounding gas [-]
+    :return: [float] Max. pressure difference between envelope and atmosphere [Pa]
     """
+    m_final = blimp.MTOM - blimp.mass['payload']
+    density_final = -m_final / blimp.volume + atm_gas.dens
+    m_final_air = (density_final - blimp.liftgas.dens) * blimp.volume
+    m_lifting_gas = blimp.liftgas.dens * blimp.volume
+    mol_air = m_final_air / atm_gas.m_molar
+    mol_lifting_gas = m_lifting_gas / blimp.liftgas.m_molar
+    p_total = ((mol_air + mol_lifting_gas) * Gas.R * atm_gas.temp) / blimp.volume
+    p_diff = p_total - atm_gas.pres
+    return p_diff
 
-    density_air = 1.225 # kg/m^3
-    
-    final_density_gas = (density_air*initial_volume_H-(m_take_off-m_payload))/initial_volume_H
-    return final_density_gas
 
-#print(required_density_gas(initial_volume_Hyd,m_take_off,m_payload))
-#density_gas_final = required_density_gas(initial_volume_Hyd,m_take_off,m_payload)
-
-def volume_ballonets(initial_volume_H,final_density_gas):
+def envelope_thickness(blimp, p_diff, safety_factor=5):
     """
-    This def calculates volume of the ballonets   
-    to lower the vehicle              
+    Through calculating critical von Mises stress for the envelope of the blimp,
+    calculates the required material thickness.
+    :param blimp: [Blimp] Blimp object to be investigated [-]
+    :param p_diff: [float] Max. pressure difference between the envelope [Pa]
+    :return: [float] Thickness of material required for the envelope [m]
     """
-    density_H = 0.088 # kg/m^3
-    mass_H = density_H*initial_volume_H
-    density_air = 1.225 # kg/m^3
+    sigma_zz = 0  # Principal stress is 0 in z direction
+    sigma_xx = (p_diff * blimp.radius) / 2  # Longit. stress. Assuming 1m thickness for now.
+    sigma_yy = (p_diff * blimp.radius)  # Hoop stress. Assuming 1m thickness for now.
+    sigma_vm = von_mises_stress(sigma_xx, sigma_yy, sigma_zz)  # Eq. von Mises stress
+    t_req = sigma_vm / blimp.material['envelope'].tensile_strength
+    safe_t_req = t_req * safety_factor
+    return safe_t_req
 
-    # increment 
-    volume_air_added = 1
 
-    flag = 0
-    while flag == 0:
-
-        ### volume of hydrogen decreased by added volume of air
-        new_volume_H = initial_volume_H - volume_air_added
-
-        ### mass of hydrogen and air in blimp
-        total_mass = mass_H + density_air*volume_air_added
-
-        ### fractions of weight hydrogen/air to the total mass
-        weight_air = density_air*volume_air_added/total_mass
-        weight_H = mass_H/total_mass
-
-        ### calculated density with added air
-        new_density =  weight_H*(mass_H/(new_volume_H)) + weight_air*(density_air*volume_air_added/(initial_volume_H-(new_volume_H)))
-        #print("new density", new_density) 
-
-        ### check if density gas is reached
-        # density of the gas is too low -> increase volume air to increase density gas
-        if (final_density_gas-new_density)> 0.01:
-            volume_air_added = volume_air_added +0.005*volume_air_added
-            
-        # density of the gas is too high -> decrease volume air to decrease density gas
-        elif (final_density_gas-new_density)<-0.01:
-            # lower added volume air
-            volume_air_added = volume_air_added - +0.005*volume_air_added
-            
-        # the calculated density is close the desired density
-        elif abs(final_density_gas-new_density)< 0.01:
-            flag = 1
-        
-
-    return volume_air_added 
-
-#print(volume_ballonets(initial_volume_Hyd,density_gas_final))
-#new_volume_H = initial_volume_Hyd - volume_ballonets(initial_volume_Hyd,density_gas_final)
-
-def pressure_blimp_gas(initial_volume_H,new_volume_H):
+def von_mises_stress(sigma_a, sigma_b, sigma_c):
     """
-    def returns the pressure (relative to surrounding pressure) 
-    required to be carried by the envelope 
+    Calculate equivalent von Mises stress (relevant failure criterion for ductile materials)
+    from the 3 principal stresses.
+    :param sigma_a: [float] Principal stress [Pa]
+    :param sigma_b: [float] Principal stress [Pa]
+    :param sigma_c: [float] Principal stress [Pa]
+    :return: [float] Equivalent von Mises stress [Pa]
     """
-    T = 273.15 # K
-    R = 8.314  # JK^-1 mol^-1
-    p_atm = 101325 # pa
-
-    M_H = 1.00794*10**(-3) # kg/mol
-    M_air = 28.97*10**(-3) #kg/mol
-
-    density_H = 0.082 # kg/m^3
-    density_air = 1.225 # kg/m^3
-
-    m_H = density_H*initial_volume_H
-    m_air = density_air*(initial_volume_H-new_volume_H)
-
-    n_H = m_H/M_H
-    n_air = m_air/M_air
-
-    p_gas = ((n_H+n_air)*R*T)/initial_volume_H
-    rel_p_gas = p_gas - p_atm
-
-    return rel_p_gas
-
-#print(pressure_blimp_gas(initial_volume_Hyd,new_volume_H))
-
-#rel_p_gas = pressure_blimp_gas(initial_volume_Hyd,new_volume_H)
-# Diameter_blimp = 6.3 #m
-# wall_thickness = 0.0003 #m
-
-def stress_blimp(diameter, inside_pressure, wall_thickness):
-    """
-    hoop stress for blimp
-    """
-        
-    ss = inside_pressure*diameter/(2*wall_thickness)
-    return ss*10**(-6)
-
-
-initial_volume_Hyd = 50.89 # m^3
-m_take_off = 58.078 # kg
-m_payload = 43.16 # kg
-Diameter_blimp = 2.36 #m
-wall_thickness = 0.0006 #m
-
-density_gas_final = required_density_gas(initial_volume_Hyd,m_take_off,m_payload)
-new_volume_H = initial_volume_Hyd - volume_ballonets(initial_volume_Hyd,density_gas_final)
-rel_p_gas = pressure_blimp_gas(initial_volume_Hyd,new_volume_H)
-print(rel_p_gas)
-hoop_stress = stress_blimp(Diameter_blimp,rel_p_gas,wall_thickness)
-print(hoop_stress)
+    return np.sqrt((((sigma_a - sigma_b) ** 2) + ((sigma_b - sigma_c) ** 2) + ((sigma_c - sigma_a) ** 2)) / 2)
