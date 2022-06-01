@@ -11,7 +11,7 @@ from mpl_toolkits import mplot3d
 
 def concentration_3d(width_triangle, C0_init_ppm, t, lb):
     begin_N = 1
-    fig = plt.figure(figsize=(12, 10))
+    fig = plt.figure(figsize=(10, 9))
     ax = plt.axes(projection='3d')
     x = np.array([np.linspace(
         width_triangle[0], width_triangle[-1], len(t)), np.linspace(
@@ -21,14 +21,19 @@ def concentration_3d(width_triangle, C0_init_ppm, t, lb):
     Z = np.array([C0_init_ppm[begin_N:]*simfunc.density_plot(x[0][begin_N:],
                  params[0], params[1]) for params in data])
     ax.plot_surface(X, Y, Z, cmap=plt.cm.gist_heat_r)
+    ax.set_xlabel('X [m]')
+    ax.set_ylabel('Y [m]')
+    ax.set_zlabel('Concentration [ppm]')
     plt.show()
+    fig.savefig('./figures/3d_concentration.png')
 
 
 def animation_2d(width_triangle, C0_init_ppm, t):
     fig, ax = plt.subplots()
 
     def init():
-        ax.imshow(np.zeros((10, 10)))
+        sns.heatmap(np.zeros((10, 10)), vmin=0.0, vmax=0.1,
+                    cmap="Greys", cbar_kws={'label': 'Concentration [ppm]'})
 
     def animate(i):
         ax.cla()
@@ -38,9 +43,12 @@ def animation_2d(width_triangle, C0_init_ppm, t):
         data = simfunc.concentration_distribution(x[begin_N:])
         Z = np.array([C0_init_ppm[i]*simfunc.density_plot(x[begin_N:],
                                                           params[0], params[1]) for params in data])
-        ax.imshow(Z, vmin=0.0, vmax=0.1, cmap="Greys", zorder=1)
+        c = sns.heatmap(Z, vmin=0.0, vmax=0.1, cmap="Greys", cbar=False)
+
     anim = animation.FuncAnimation(
         fig, animate, init_func=init, frames=len(t)-1, interval=1, repeat=False)
+
+    anim.save('./figures/2d_animation.gif', writer='imagemagick', fps=60)
     plt.show()
 
 
@@ -103,6 +111,7 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
     plt.title(
         f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Speed: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
     plt.show()
+    fig.savefig('./figures/patches.png')
 
 
 def draw_reliability(df):
@@ -150,5 +159,5 @@ if __name__ == "__main__":
     width_triangle = np.linspace(0, 200, N)
     C0_init_ppm = np.linspace(0, 10, N)
     lb = 1.5
-    # animation_2d(width_triangle, C0_init_ppm, time)
-    concentration_3d(width_triangle, C0_init_ppm, time, lb)
+    animation_2d(width_triangle, C0_init_ppm, time)
+    #concentration_3d(width_triangle, C0_init_ppm, time, lb)

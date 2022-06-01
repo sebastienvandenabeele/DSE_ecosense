@@ -3,7 +3,7 @@ import simulation_functions as simfunc
 import numpy as np
 import mesh_types
 
-iteration = [300, 0.75]
+iteration = [300, 0.5]
 
 df = simfunc.read_and_edit_samples("./data/samples.csv")
 t_max = 10*60
@@ -17,6 +17,6 @@ if __name__ == "__main__":
         size, iteration[0], iteration[1])
     time = np.linspace(0, t_max, N)*np.ones((M, 1))
     df = simulation.simulate(mesh_points, time, df,
-                        threshold, N, size, gas, t_max, 1000, plotting=False)
+                        threshold, N, size, gas, t_max, 1, plotting=True)
     print("Saving to CSV...")
     df.to_csv(r"./data/fire_detection_time_.csv")
