@@ -151,8 +151,7 @@ class Blimp:
 
         ballonet_surface_frac = 1
         self.radius_ballonet = (self.mass['payload'] / self.MTOM * self.volume * 3 / 8 / np.pi)**(1/3)
-        #self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * ballonet_surface_frac * 0.0584 + 1
-        self.mass['ballonets'] = 11.2
+        self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * ballonet_surface_frac * 0.0584 + 1
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         #self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
         self.mass['envelope'] = self.surface_area * 0.192
@@ -239,7 +238,9 @@ class Blimp:
             for i in np.arange(0, 50, 1):  # Iterative Calculations
                 self.MTOM = sum(self.mass.values())
                 self.sizeBalloon()
-                self.area_solar, self.power_solar, self.mass['solar'] = solar.sizeSolar(self)
+                if i % 10 == 0:
+                    self.area_solar, self.power_solar, self.mass['solar'] = solar.sizeSolar(self)
+
                 self.sizeBattery()
                 self.mass['controls'], self.control_surface, self.control_chord = sizeControl(self)
 
@@ -249,7 +250,7 @@ class Blimp:
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
                 if not np.isnan(calculateCD(self, rho)): 
-                    self.CD = calculateCD(self, rho) + 0.0665 / self.ref_area
+                    self.CD = calculateCD(self, rho)
                 self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
             if plot:
@@ -351,7 +352,7 @@ class Blimp:
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_wing",
+Shlimp = Blimp(name=                "Shlimp_0106_1031",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_deployment=      15,
@@ -377,6 +378,7 @@ cruisepath = path[194:-194]
 # simAltitudeDynamics(Shlimp, cruisepath)
 
 Shlimp.report()
+Shlimp.estimateCost()
 Shlimp.save()
 
 # hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
