@@ -32,7 +32,7 @@ prop_limit                      = 0.55
 
 #Environment
 avg_sun_elevation               = 52  # [deg]
-#tmy = read_irradiance()
+
 
 rho                             = 1.225  # [kg/m3]
 
@@ -41,16 +41,7 @@ rho                             = 1.225  # [kg/m3]
 # Requirement inputs
 ###################
 margin                          = 1.2
-maximum_triptime                = 5 * 3600  # [s]
-minimum_velocity                = req.range / maximum_triptime
 
-REQ_n_sensors                   = 1295 / 2
-relays_per_sensor               = 25
-n_relays                        = int(round(REQ_n_sensors / relays_per_sensor, 0))
-m_sensor                        = 0.052      # [kg]
-m_relay                         = 0.338     # [kg]
-m_deployment_system             = 2         # [kg]
-REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor + m_deployment_system
 
 
 
@@ -58,7 +49,7 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor 
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, envelope_material=0, liftgas=0, mass_deployment=0,
                  mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
-                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0):
+                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
         :param name: [str] Name of instance
@@ -86,7 +77,6 @@ class Blimp:
         self.mass['engines'] = self.engine.mass * self.n_engines * 1.5  # margin for mounting
         self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
-        print("Power deliverable by the engines: ", self.cruise_prop_power)
 
         # Solar cells
         self.solar_cell = solar_cell
@@ -97,6 +87,10 @@ class Blimp:
 
 
         # Balloon Aerodynamics
+        self.h_trim = h_trim
+        self.balloon_pressure = balloon_pressure
+        self.lift_factor = setLiftConstant(0, self.balloon_pressure)
+        print('Lift factor: ', self.lift_factor)
         self.spheroid_ratio = spheroid_ratio
         self.CD = 0.02
         self.liftgas = liftgas
@@ -111,7 +105,7 @@ class Blimp:
         self.x_bar = 0
         self.z_bar = 0
         self.mass['payload'] = mass_payload
-        self.mass['gondola structure'] = 0.15 * mass_payload
+        self.mass['gondola structure'] = 8
         self.mass['controls'] = mass_control
 
         self.electronics = electronics
@@ -143,26 +137,24 @@ class Blimp:
         """
         lifting body estimation subroutine for iteration
         """
-        self.volume = self.MTOM / lift_h2
+        self.volume = self.MTOM / self.lift_factor
         self.explosive_potential = self.volume * self.liftgas.spec_energy
         self.radius = ((3 * self.volume) / (4 * self.spheroid_ratio * np.pi)) ** (1 / 3)
         self.length = self.spheroid_ratio * self.radius * 2
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
 
-        ballonet_surface_frac = 1
         self.radius_ballonet = (self.mass['payload'] / self.MTOM * self.volume * 3 / 8 / np.pi)**(1/3)
-        self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * ballonet_surface_frac * 0.0584 + 1
+        self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * 0.0584 + 1
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
-        #self.mass['envelope'] = self.surface_area * self.balloon_thickness * self.material['envelope'].density
         self.mass['envelope'] = self.surface_area * 0.192
         self.ref_area = self.volume ** (2 / 3)
 
         
     def sizeBattery(self):
-        dod=0.9 
-        battery_density = 250 * 3600 # [J/kg]
-        voltage_nominal=3.7 # [V]
-        n_series=12
+        dod = 0.9
+        battery_density = 250 * 3600  # [J/kg]
+        voltage_nominal = 3.7  # [V]
+        n_series = 12
 
         self.battery_speed = (prop_eff * self.engine.efficiency * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3) # [m/s]
         self.battery_capacity= (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed * dod) * 1.1     # [J]
@@ -174,9 +166,6 @@ class Blimp:
         User-friendly output of most important design characteristics
         """
         print('###################### DESIGN CHARACTERISTICS ###################################')
-        print()
-        print('Number of sensors: ', int(REQ_n_sensors))
-        print('Number of relays: ', int(n_relays))
         print()
         print('MTOM: ', round(self.MTOM, 2), ' kg')
         for key, value in self.mass.items():
@@ -209,7 +198,6 @@ class Blimp:
         print('Speed on battery: ', round(self.battery_speed * 3.6, 2), ' km/h')
         print('Return time on battery: ', round(req.range_on_battery/self.battery_speed/3600, 1), ' h')
         print('Cruise Speed: ', round(self.cruiseV * 3.6, 2), ' km/h')
-        print('Range on 1 day: ', round(self.range / 1000, 1), ' km')
 
     def trim(self, cruisepath):
         self.h_trim = np.mean(cruisepath)
@@ -243,7 +231,7 @@ class Blimp:
 
                 self.sizeBattery()
                 self.mass['controls'], self.control_surface, self.control_chord = sizeControl(self)
-
+                self.mass['gondola structure'] = 0.15 * (self.mass['payload'] + self.mass['electronics'] + self.mass['battery'])
                 self.solar_power_available = (self.power_solar - self.power_electronics) * self.engine.efficiency * prop_eff
                 self.prop_power_available = min([self.cruise_prop_power, self.solar_power_available])
 
@@ -251,7 +239,7 @@ class Blimp:
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
                 if not np.isnan(calculateCD(self, rho)): 
                     self.CD = calculateCD(self, rho)
-                self.range = self.cruiseV * maximum_triptime
+                #self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
             if plot:
                 alphas.append(self.panel_angle)
@@ -348,63 +336,6 @@ class Blimp:
 
 
 ########################### END OF CLASS DEFINITION ############################### END OF CLASS DEFINTION #######################################
-
-
-
-#Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_0106_1031",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_deployment=      15,
-               n_fins=           4,
-
-               envelope_material=    mat.polyethylene_fiber,
-
-               n_engines=            4,
-               engine=              eng.tmt_4130_300,
-
-               electronics=         el.config_option_1,
-               length_factor=        0.9,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          solar.maxeon_gen3)
-flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
-path = flightdata[:, 0]
-cruisepath = path[194:-194]
-
-# Shlimp.trim(cruisepath)
-# Shlimp.save()
-#Shlimp = unpickle('Shlimp_no_alt_ctrl')
-# simAltitudeDynamics(Shlimp, cruisepath)
-
-Shlimp.report()
-Shlimp.estimateCost()
-Shlimp.save()
-
-# hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
-# fs = [getRestoringForce(h, Shlimp) for h in hs]
-# fs_linearised = getK(Shlimp) * (hs - Shlimp.h_trim)
-# plt.plot(hs, fs, linestyle='dashed')
-# plt.plot(hs, fs_linearised)
-# plt.xlim(Shlimp.h_trim-3000,Shlimp.h_trim+ 3000)
-# plt.xlabel('Deviation from Trim Altitude [m]')
-# plt.ylabel('Buoyancy Restoring Force [N]')
-# plt.legend(['ISA Model', 'ISA Model (linearised)'])
-# plt.grid()
-# plt.show()
-
-
-# Control Simulation
-# xs = np.arange(5000)
-# ref_path = 10 * np.sin(0.01* xs) + 300
-# simulateFlightpath(Shlimp, ref_path, 300)
-
-
-# Shlimp.estimateCost()
-#simulateCruiseAcceleration(Shlimp)
-#simulateVelocity(Shlimp, v0=Shlimp.cruiseV, throttle=0, tmax=50)
-#Shlimp.report()
-#plot_blimp(Shlimp)
 
 
 

@@ -5,6 +5,17 @@ import control.matlab as ml
 
 xstep = 200 # [m]
 
+def setLiftConstant(altitude, delta_p):
+    rho_atm = getISA('rho', altitude)
+
+    p = getISA('p', altitude) + delta_p
+    T = getISA('T', altitude)
+    R = 8.314
+    M = 0.00201568
+    rho_gas = p * M / (R * T)
+
+    return rho_atm - rho_gas
+
 def getRestoringForce(h, blimp):
     delta_rho = getISA('rho', h) - getISA('rho', blimp.h_trim)
     force = -delta_rho * blimp.volume * g       # TODO: adapt volume for ballonets change
