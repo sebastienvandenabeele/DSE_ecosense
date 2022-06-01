@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import itertools
 
 if __name__ == "__main__":
-    N = 41
+    N = 51
     plotting_df = pd.DataFrame(columns=["reliability"], index=np.arange(N))
     for i in range(N):
         df = pd.read_csv(r"./data/fire_detection_time_"+str(i)+".csv")
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         plotting_df.loc[i,
                         "avg_detection_time"] = df["detection_time_gas"].mean()
 
-    spacing_range = np.linspace(300, 600, 41)
+    spacing_range = np.linspace(300, 700, 51)
     shift_range = [0.]
     iteration_list = list(itertools.product(
         spacing_range, shift_range))
