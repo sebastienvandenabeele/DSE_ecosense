@@ -32,7 +32,7 @@ Shlimp = Blimp(name=                "Shlimp_0106_1031",
                envelope_material=    mat.polyethylene_fiber,
                balloon_pressure=     500,
                h_trim=               trim_altitude,
-               n_engines=            4,
+               n_engines=            2,
                engine=              eng.tmt_4130_300,
 
                electronics=         el.config_option_1,

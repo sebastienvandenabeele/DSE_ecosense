@@ -42,7 +42,7 @@ rho                             = 1.225  # [kg/m3]
 ###################
 margin                          = 1.2
 
-
+iteration_precision = 0.001
 
 
 # Creation of Blimp class
@@ -212,7 +212,7 @@ class Blimp:
         """
 
         alphas = []
-        vs = []
+        vs = [0]
         vols = []
         masses = []
         radii = []
@@ -223,10 +223,12 @@ class Blimp:
         dalpha = self.solar_cell.width / 2
         while self.panel_angle < np.radians(350) and requirements_met:
             self.panel_angle += dalpha
+            masses = []
             for i in np.arange(0, 50, 1):  # Iterative Calculations
                 self.MTOM = sum(self.mass.values())
+                masses.append(self.MTOM)
                 self.sizeBalloon()
-                if i % 10 == 0:
+                if i % 4 == 0:
                     self.area_solar, self.power_solar, self.mass['solar'] = solar.sizeSolar(self)
 
                 self.sizeBattery()
@@ -239,11 +241,15 @@ class Blimp:
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
                 if not np.isnan(calculateCD(self, rho)): 
                     self.CD = calculateCD(self, rho)
+                if i > 2:
+                    if np.abs(masses[-1] - masses[-2]) < iteration_precision:
+                        print(i, ' iterations needed')
+                        break
                 #self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
+
             if plot:
                 alphas.append(self.panel_angle)
-                vs.append(self.cruiseV)
                 vols.append(self.volume)
                 masses.append(self.MTOM)
                 radii.append(self.radius)
@@ -256,6 +262,9 @@ class Blimp:
             if np.abs(self.prop_power_available - self.cruise_prop_power) <= 10:
                 print('Engine limit reached')
                 break
+            if self.cruiseV < vs[-1]:
+                break
+            vs.append(self.cruiseV)
 
         if plot:
                 plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
@@ -331,13 +340,6 @@ class Blimp:
         self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
 
         print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
-
-
-
-
-########################### END OF CLASS DEFINITION ############################### END OF CLASS DEFINTION #######################################
-
-
 
 
 
