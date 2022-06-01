@@ -16,8 +16,7 @@ if __name__ == '__main__':
 
     # result = [random_square(i) for i in inputs]
 
-    result = Parallel(n_jobs=4, backend='multiprocessing', verbose=1)(delayed(random_square)(i)
-                                                                      for i in inputs)
+    result = Parallel(n_jobs=4, backend='multiprocessing', verbose=1)(delayed(random_square)(i) for i in inputs)
 
     # print(result)
     print("--- %s seconds ---" % (time.time() - start_time))
