@@ -5,7 +5,7 @@ import time as time_lib
 import gui_functions as gui
 
 
-def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chsn_idx, plotting=False, multiple=False):
+def simulate(mesh_points, time, df, threshold, N, size, gas, t_max, chsn_idx, plotting=False):
     start_time = time_lib.time()
     for index, t in enumerate(time):
         if index < chsn_idx:
@@ -89,13 +89,6 @@ def simulate(mesh_points, time, run_nbr, df, threshold, N, size, gas, t_max, chs
             if plotting:
                 gui.draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse,
                                  wind_dir, length_triangle, width_triangle, wind_spd, temp, N, mesh_points, size, detection_point_arr, relevant_points)
-            if multiple:
-                # Save data to a new CSV file
-                print("Saving to CSV...")
-                df.to_csv(r"./data/fire_detection_time_" +
-                          str(run_nbr) + ".csv")
-            else:
-                # Save data to a new CSV file
-                print("Saving to CSV...")
-                df.to_csv(r"./data/fire_detection_time_.csv")
     print("--- %s seconds ---" % (time_lib.time() - start_time))
+
+    return df

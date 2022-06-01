@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     data_distribution = pd.DataFrame([])
     samples = pd.DataFrame([])
-    N = 20000
+    N = 70000
     parameters = ["RH", "wind_dir", "wind_spd"]
     for parameter in parameters:
         mu, sig = normal_distr_params(data[parameter].values)

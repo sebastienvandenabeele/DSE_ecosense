@@ -83,7 +83,7 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
             length_triangle[i], width_triangle[i], (centre[0][i], centre[1][i]), wind_dir)
         triangle_patches.append(Polygon(
             triangle_points, closed=True, facecolor="none", edgecolor="grey", linewidth="0.2"))
-    circle_patch = Circle((x_f+length_triangle[-1]/2 * np.cos(np.deg2rad(wind_dir)), y_f+length_triangle[-1]/2 * np.sin(np.deg2rad(wind_dir))), radius=1.5*(length_triangle[-1]/2),
+    circle_patch = Circle((x_f+length_triangle[-1]/2 * np.cos(np.deg2rad(wind_dir)), y_f+length_triangle[-1]/2 * np.sin(np.deg2rad(wind_dir))), radius=(length_triangle[-1]/2),
 
                           facecolor="none", edgecolor="red")
     fig, ax = plt.subplots(figsize=(8, 8))
