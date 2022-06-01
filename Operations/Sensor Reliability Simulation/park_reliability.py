@@ -1,5 +1,8 @@
 import numpy as np
 import scipy.optimize as sco
+import time
+
+start_time = time.time()
 
 
 def get_reliability(M):
@@ -27,3 +30,5 @@ for i in range(N):
 
 print(result)
 print(reliability)
+
+print("--- %s seconds ---" % (time.time() - start_time))
