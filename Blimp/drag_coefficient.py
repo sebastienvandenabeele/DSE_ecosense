@@ -61,26 +61,47 @@ def calculateCD(blimp):
     #hull
     v=15.06*10**(-6)
     Re=blimp.cruiseV*blimp.length/v
-    Cf=0.075/(np.log10(Re)-2)**2
+    if Re>1000000:
+        Cf=0.075/(np.log10(Re)-2)**2
+    elif Re<=1000000:
+        Cf=0.664/np.sqrt(Re)
+    else:
+        Cf=0.001
     Cd_Cf=4*blimp.spheroid_ratio**(1/3)+6*(1/blimp.spheroid_ratio)**1.2+24*(1/blimp.spheroid_ratio)**2.7
     Cd_body=Cd_Cf*Cf
     
     #fins
+    Re=blimp.cruiseV*blimp.control_chord/v
+    # if Re>1000000:
+    #     Cf=0.075/(np.log10(Re)-2)**2
+    # elif Re<=1000000:
+    #     Cf=0.664/np.sqrt(Re)
+    # else:
+    #     Cf=0.001
     tc=0.08
+    # Cds_2Cf=1+2*tc+60*tc**4
+    # Cd_airfoil_S=Cds_2Cf*2*Cf
     Cd_airfoil_S=0.00392
     Cd_airfoil=Cd_airfoil_S*blimp.control_surface/blimp.volume**(2/3)
     Cd_fin_interference_t=0.75*tc-0.0003/tc**2
     Cd_fin_interference=Cd_fin_interference_t*(blimp.control_chord*0.08)**2/blimp.volume**(2/3)
     
     #undercarriage
-    undercarriage_projected_area_temp=1
+    undercarriage_projected_area_temp=0.2
     Cd_undercarriage_A=0.1
     Cd_undercarriage=Cd_undercarriage_A*undercarriage_projected_area_temp/blimp.volume**(2/3)
     
     #engines
-    engine_projected_area_temp=0.2
+    engine_projected_area_temp=0.02
     Cd_engine_A=0.5*1.2
     Cd_engine=Cd_engine_A*engine_projected_area_temp/blimp.volume**(2/3)
+    
+    print(Cd_body)
+    print(blimp.n_fins*Cd_airfoil)
+    print(blimp.n_fins*Cd_fin_interference)
+    print(Cd_undercarriage)
+    print(blimp.n_engines*Cd_engine)
+    
     
     Cd=Cd_body+blimp.n_fins*(Cd_airfoil+Cd_fin_interference)+Cd_undercarriage+blimp.n_engines*Cd_engine
     return Cd
