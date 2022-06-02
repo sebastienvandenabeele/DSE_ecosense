@@ -1,4 +1,5 @@
 import numpy as np
+import pvlib
 from mayavi.mlab import *
 import matplotlib.pyplot as plt
 import pickle as pick
@@ -222,6 +223,22 @@ def sizeSolar(blimp, shone_area=0):
     return blimp.area_solar, blimp.power_solar, blimp.mass['solar']
 
 
+def getIrradiance(hour):
+    df_tmy, meta_dict = pvlib.iotools.read_tmy3("tmy.csv")
+    df_tmy = df_tmy.reset_index()
+    for i in range(len(df_tmy)):
+        df_tmy["Time (HH:MM)"][i]=int(df_tmy["Time (HH:MM)"][i].split(":")[0]) + 10
+        if df_tmy["Time (HH:MM)"][i] > 23:
+            df_tmy["Time (HH:MM)"][i] = df_tmy["Time (HH:MM)"][i] - 24
+    #df_tmy["Time (HH:MM)"]=df_tmy["Time (HH:MM)"]+10
+    print(df_tmy["Time (HH:MM)"])
+    df_tmy=df_tmy[df_tmy["Time (HH:MM)"] == hour]
+    df_tmy = df_tmy.reset_index()
+    df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
+    return df_tmy
+
+def getSolarPower(blimp, sun_angle):
+    total_area, shone_area = projectPanel(blimp, sun_angle, 30)
 
 class Solarcell:
     def __init__(self, density, efficiency, width, length, area, fillfac, cost, Vmpp=0, Impp=0):

@@ -23,38 +23,53 @@ trim_altitude = np.mean(cruisepath)
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_0106_1031",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               mass_deployment=      15,
-               n_fins=           4,
-
-               envelope_material=    mat.polyethylene_fiber,
-               balloon_pressure=     500,
-               h_trim=               trim_altitude,
-               n_engines=            2,
-               engine=              eng.tmt_4130_300,
-
-               electronics=         el.config_option_1,
-               length_factor=        0.9,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          solar.maxeon_gen3)
-
-
-# #Shlimp = unpickle('Shlimp_no_alt_ctrl')
-# # simAltitudeDynamics(Shlimp, cruisepath)
+# Shlimp = Blimp(name=                "Shlimp_0106_1031",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                mass_deployment=      15,
+#                n_fins=           4,
 #
-Shlimp.report()
-Shlimp.estimateCost()
-Shlimp.save()
+#                envelope_material=    mat.polyethylene_fiber,
+#                balloon_pressure=     500,
+#                h_trim=               trim_altitude,
+#                n_engines=            4,
+#                engine=              eng.tmt_4130_300,
+#
+#                electronics=         el.config_option_1,
+#                length_factor=        0.9,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          solar.maxeon_gen3)
+#
+#
+#
+# # # simAltitudeDynamics(Shlimp, cruisepath)
+# Shlimp.MTOM += Shlimp.mass['payload']
+# Shlimp.report()
+# Shlimp.estimateCost()
+# Shlimp.save()
 
-# hs = np.arange(Shlimp.h_trim-3000, Shlimp.h_trim + 3000, 1)
-# fs = [getRestoringForce(h, Shlimp) for h in hs]
-# fs_linearised = getK(Shlimp) * (hs - Shlimp.h_trim)
-# plt.plot(hs, fs, linestyle='dashed')
-# plt.plot(hs, fs_linearised)
-# plt.xlim(Shlimp.h_trim-3000,Shlimp.h_trim+ 3000)
+Shlimp = unpickle('Shlimp_0106_1031')
+simulateRange(Shlimp)
+# simAltitudeDynamics(Shlimp, cruisepath)
+# vys = np.arange(-20, 20, 1)
+# fs = [0.5 * getISA('rho', Shlimp.h_trim) * np.sqrt(vy**2 + Shlimp.cruiseV**2) * vy * Shlimp.ref_area * Shlimp.CD for vy in vys]
+# fs_linearised = getC(Shlimp, cruisepath) * vys
+# plt.plot(vys, fs, linestyle='dashed')
+# plt.plot(vys, fs_linearised)
+# plt.xlim((-20, 20))
+# plt.legend(['Usual Drag Model', 'Small Angle Approximation'])
+# plt.grid()
+# plt.xlabel('Vertical Velocity [m/s]')
+# plt.ylabel('Drag in Vertical Direction [N]')
+# plt.show()
+
+# dhs = np.arange(-2000, 2000, 1)
+# fs = [getRestoringForce(dh, Shlimp) for dh in dhs]
+# fs_linearised = getK(Shlimp) * dhs
+# plt.plot(dhs, fs, linestyle='dashed')
+# plt.plot(dhs, fs_linearised)
+# plt.xlim(-2000, 2000)
 # plt.xlabel('Deviation from Trim Altitude [m]')
 # plt.ylabel('Buoyancy Restoring Force [N]')
 # plt.legend(['ISA Model', 'ISA Model (linearised)'])

@@ -144,7 +144,8 @@ class Blimp:
         self.balloon_thickness = struc.envelope_thickness(self, struc.envelope_pressure(self))
 
         self.radius_ballonet = (self.mass['payload'] / self.MTOM * self.volume * 3 / 8 / np.pi)**(1/3)
-        self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * 0.0584 + 1
+        #self.mass['ballonets'] = 2 * 4 * np.pi * self.radius_ballonet**2 * 0.0584 + 1
+        self.mass['ballonets'] = 11.2
         self.surface_area = 4*np.pi * ((self.radius**(2*p) + 2*(self.radius*self.length/2)**p)/3)**(1/p)
         self.mass['envelope'] = self.surface_area * 0.192
         self.ref_area = self.volume ** (2 / 3)
@@ -225,7 +226,7 @@ class Blimp:
             self.panel_angle += dalpha
             masses = []
             for i in np.arange(0, 50, 1):  # Iterative Calculations
-                self.MTOM = sum(self.mass.values())
+                self.MTOM = sum(self.mass.values()) - self.mass['payload']
                 masses.append(self.MTOM)
                 self.sizeBalloon()
                 if i % 4 == 0:
@@ -240,7 +241,7 @@ class Blimp:
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
                 if not np.isnan(calculateCD(self, rho)): 
-                    self.CD = calculateCD(self, rho)
+                    self.CD = calculateCD(self, rho) + 0.065 / self.ref_area
                 if i > 2:
                     if np.abs(masses[-1] - masses[-2]) < iteration_precision:
                         print(i, ' iterations needed')
@@ -262,8 +263,9 @@ class Blimp:
             if np.abs(self.prop_power_available - self.cruise_prop_power) <= 10:
                 print('Engine limit reached')
                 break
-            if self.cruiseV < vs[-1]:
-                break
+            # if self.cruiseV < vs[-1]:
+            #     print('Could not reach target speed!')
+            #     break
             vs.append(self.cruiseV)
 
         if plot:

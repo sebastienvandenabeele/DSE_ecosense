@@ -16,14 +16,14 @@ def setLiftConstant(altitude, delta_p):
 
     return rho_atm - rho_gas
 
-def getRestoringForce(h, blimp):
-    delta_rho = getISA('rho', h) - getISA('rho', blimp.h_trim)
-    force = -delta_rho * blimp.volume * g       # TODO: adapt volume for ballonets change
+def getRestoringForce(delta_h, blimp):
+    delta_rho = getISA('rho', blimp.h_trim) - getISA('rho', blimp.h_trim + delta_h)
+    force = delta_rho * blimp.volume * g       # TODO: adapt volume for ballonets change
     return force
 
 def getK(blimp):
-    h1 = blimp.h_trim - 1
-    h2 = blimp.h_trim + 1
+    h1 = - 1
+    h2 = 1
 
     k = (getRestoringForce(h2, blimp) - getRestoringForce(h1, blimp)) / (h2 - h1)
     return k
@@ -42,21 +42,21 @@ def simAltitudeDynamics(blimp, cruisepath):
     CLTF = OLTF / (1 + OLTF)           # Unit feedback closed-loop TF
     sys = ml.ss(CLTF)
     ts = np.arange(0, len(cruisepath) * xstep / blimp.cruiseV, xstep / blimp.cruiseV)
-
-    ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts)
-
-    y_nonlin = simNonLinear(blimp, ref_signal, ts, kp)
-
-    plt.plot(ts, y_nonlin + blimp.h_trim)
-    #plt.plot(ts, ys + blimp.h_trim)
-    plt.plot(ts, ref_signal + blimp.h_trim)
-    plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
-
-    plt.grid()
-    plt.xlabel('Time [s]')
-    plt.ylabel('Altitude [m]')
-    plt.legend(['Actual Flightpath', 'Linearised Flightpath', 'Reference Flightpath', 'Trim Altitude'])
-    plt.show()
+    ml.bode(OLTF)
+    # ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts, X0=ref_signal[0])
+    #
+    # y_nonlin = simNonLinear(blimp, ref_signal, ts, kp)
+    #
+    # plt.plot(ts, y_nonlin + blimp.h_trim)
+    # plt.plot(ts, ys + blimp.h_trim)
+    # plt.plot(ts, ref_signal + blimp.h_trim)
+    # plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
+    #
+    # plt.grid()
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('Altitude [m]')
+    # plt.legend(['Non-Linear Simulation', 'Linearised Simulation', 'Reference Flightpath', 'Trim Altitude'])
+    # plt.show()
 
 def simNonLinear(blimp, ref_path, ts, kp):
 
@@ -66,22 +66,23 @@ def simNonLinear(blimp, ref_path, ts, kp):
     a = 0
     dt = ts[1] - ts[0]
     for i in range(len(ts)):
+        hs.append(h)
         e = ref_path[i] - h
         u = kp * e
 
         v_vec = np.sqrt(v**2 + blimp.cruiseV**2)
-        drag_vec = 0.5 * getISA('rho', h) * v_vec**2 * blimp.CD * 1.2 * np.pi * blimp.radius * blimp.length * 0.5
+        drag_vec = 0.5 * getISA('rho', h) * v_vec**2 * blimp.ref_area * blimp.CD
         drag_vert = drag_vec * v / v_vec
 
-        Fnet = u - getRestoringForce(h + blimp.h_trim, blimp) - drag_vert
-        print(u, -getRestoringForce(h + blimp.h_trim, blimp), drag_vert)
+        Fnet = u + getRestoringForce(h, blimp) - drag_vert
+
         a = Fnet / blimp.MTOM
 
         v += a * dt
         h += v * dt
 
-        hs.append(h)
-    return hs
+
+    return [h for h in hs]
 
 
 
@@ -107,11 +108,11 @@ def ddx(list):
     return [(list[i] - list[i-1])/xstep for i in np.arange(1, len(list))]
 
 def getC(blimp, cruisepath):
-    slope = ddx(cruisepath)
-    v_y = np.array([s * blimp.cruiseV for s in slope])
-    v_model = np.mean(v_y)
+    #slope = ddx(cruisepath)
+    #v_y = np.array([s * blimp.cruiseV for s in slope])
+    #v_model = np.mean(v_y)
 
-    c = getISA('rho', blimp.h_trim) * v_model * blimp.CD * 1.2 * np.pi * blimp.radius * blimp.length * 0.5
+    c = 0.5 * getISA('rho', blimp.h_trim) * blimp.cruiseV * blimp.ref_area * blimp.CD
 
     return c
     # diffs = []

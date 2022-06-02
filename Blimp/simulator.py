@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import requirements as req
+from solar_sizing import projectPanel, getIrradiance
 
 rho = 1.225
 T0 = 288.15             # [K]
@@ -59,6 +60,18 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
     plt.ylabel('Velocity [m/s]')
     # plt.savefig('acceleration.png')
     plt.show()
+
+def simulateRange(blimp):
+    work_time = 8 * 60  #  [min]
+    start_time = 9      # [h]
+    ts = np.arange(0, work_time, 1)
+    hours = []
+
+    for t in ts:
+        hour = start_time + t // 60
+        #blimp.area_solar, shone_area = projectPanel(blimp, avg_sun_elevation, 30)
+    tmy = getIrradiance(8)
+    print(tmy['DHI'])
 
 
 def simulateTurn(blimp):
