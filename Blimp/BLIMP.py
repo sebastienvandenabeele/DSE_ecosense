@@ -309,7 +309,7 @@ class Blimp:
 
     def estimateCG(self):
         """
-        Estimation of Blimp c.g. in the plane of symmetry. Datum is the front tip of the envelope. Positive z up, positive x along longitudinal.
+        Estimation of Blimp c.g. in the plane of symmetry. Datum is the centroid of the envelope. Positive z up, positive x along longitudinal.
         :return: x_bar: x-coordinate of c.g. [m]
         :return: z_bar: z-coordinate of c.g. [m]
         """
@@ -318,7 +318,7 @@ class Blimp:
         z = {}
         mass = {}
 
-        x['balloon'] = self.length / 2
+        x['balloon'] = 0
         z['balloon'] = 0
         mass['balloon'] = self.mass['envelope']
 
