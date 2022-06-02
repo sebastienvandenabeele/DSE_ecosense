@@ -74,7 +74,7 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * self.n_engines * 1.5  # margin for mounting
+        self.mass['engines'] = self.engine.mass * self.n_engines * 2.2  # margin for mounting
         self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.installed_engine_power = self.n_engines * self.engine.max_power * prop_limit
 
@@ -243,7 +243,7 @@ class Blimp:
 
 
                 self.cruiseV = (2 * self.net_prop_power / rho / self.ref_area / self.CD) ** (1 / 3)
-                if not np.isnan(calculateCD(self, rho)): 
+                if not np.isnan(calculateCD(self, rho)):
                     self.CD = calculateCD(self, rho) #+ 0.065 / self.ref_area
                 if i > 2:
                     if np.abs(masses[-1] - masses[-2]) < iteration_precision:
