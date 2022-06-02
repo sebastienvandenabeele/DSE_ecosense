@@ -6,6 +6,11 @@ import mesh_types
 import matplotlib.pyplot as plt
 import itertools
 
+
+def get_reliability(probability_range, likelihood):
+    return probability_range[0] + likelihood*(probability_range[1]-probability_range[0])
+
+
 if __name__ == "__main__":
     N = 51
     plotting_df = pd.DataFrame(columns=["reliability"], index=np.arange(N))
@@ -34,8 +39,46 @@ if __name__ == "__main__":
     shift_rel = [np.round(plotting_df[plotting_df["shift"] == shift]
                           ["reliability"].mean() * 100, 2) for shift in shift_range]
 
-    plt.plot(plotting_df["spacing"], plotting_df["reliability"]*100)
-    plt.show()
+    spacing_array = np.flip([float(spacing)
+                             for spacing in plotting_df["spacing"].values][:34])
+    reliability_array = np.flip([float(reliability)
+                                 for reliability in plotting_df["reliability"].values*100][:34])
+
+    z = np.polyfit(reliability_array, spacing_array, 5)
+    f = np.poly1d(z)
+
+    x_new = np.linspace(
+        np.min(reliability_array), np.max(reliability_array), len(reliability_array)-1)
+    y_new = f(x_new)
+
+    ybar = np.sum(spacing_array)/len(spacing_array)
+    ssreg = np.sum((y_new-ybar)**2)
+    sstot = np.sum((spacing_array - ybar)**2)
+    r_squared = ssreg / sstot
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.plot(x_new, y_new, label="Curve Fit")
+    ax.plot(reliability_array,
+            spacing_array, label="Raw Data")
+    ax.set_xlabel("Reliability [%]")
+    ax.set_ylabel('Spacing [m]')
+    ax.legend()
+    ax.grid()
+    ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
+    # fig.savefig('./figures/curve_fit.png')
+    # plt.show()
+
+    df = pd.read_csv("../Flight_software/data/prob_density.csv")
+    likelihood = df["likelihood"].values
+    probabilities = df["fire_prob"].values
+    df["rel_req"] = get_reliability((55, 75), likelihood)
+    df["spacing_req"] = f(df["rel_req"].values)
+    df["nbr_sensor"] = np.floor(1500/df["spacing_req"].values)**2
+
+    print(np.dot(df["rel_req"].values, probabilities))
+    print(df)
+    print(int(df["nbr_sensor"].sum()))
+
     plotting = False
     if plotting:
         df["detected"] = df["detected"].astype(int)
