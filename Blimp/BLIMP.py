@@ -240,8 +240,8 @@ class Blimp:
 
 
                 self.cruiseV = (2 * self.prop_power_available / rho / self.ref_area / self.CD) ** (1 / 3)
-                if not np.isnan(calculateCD(self, rho)): 
-                    self.CD = calculateCD(self, rho) + 0.065 / self.ref_area
+                if not np.isnan(calculateCD(self)): 
+                    self.CD = calculateCD(self) + 0.065 / self.ref_area
                 if i > 2:
                     if np.abs(masses[-1] - masses[-2]) < iteration_precision:
                         print(i, ' iterations needed')

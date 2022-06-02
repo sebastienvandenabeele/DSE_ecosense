@@ -56,3 +56,31 @@ def calculateCD(Shlimp, rho):
     # print(Cd0)
 
     return Cd0
+
+def calculateUpdatedCD(blimp):
+    #hull
+    v=15.06*10**(-6)
+    Re=blimp.cruiseV*blimp.length/v
+    Cf=0.075/(np.log10(Re)-2)**2
+    Cd_Cf=4*blimp.spheroid_ratio**(1/3)+6*(1/blimp.spheroid_ratio)**1.2+24*(1/blimp.spheroid_ratio)**2.7
+    Cd_body=Cd_Cf*Cf
+    
+    #fins
+    tc=0.08
+    Cd_airfoil_S=0.00392
+    Cd_airfoil=Cd_airfoil_S*blimp.control_surface/blimp.volume**(2/3)
+    Cd_fin_interference_t=0.75*tc-0.0003/tc**2
+    Cd_fin_interference=Cd_fin_interference_t*(blimp.control_chord*0.08)**2/blimp.volume**(2/3)
+    
+    #undercarriage
+    undercarriage_projected_area_temp=1
+    Cd_undercarriage_A=0.1
+    Cd_undercarriage=Cd_undercarriage_A*undercarriage_projected_area_temp/blimp.volume**(2/3)
+    
+    #engines
+    engine_projected_area_temp=0.2
+    Cd_engine_A=0.5*1.2
+    Cd_engine=Cd_engine_A*engine_projected_area_temp/blimp.volume**(2/3)
+    
+    Cd=Cd_body+Cd_airfoil+Cd_fin_interference+Cd_undercarriage+Cd_engine
+    return Cd
