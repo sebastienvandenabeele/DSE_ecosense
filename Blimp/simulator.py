@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import requirements as req
 from solar_sizing import projectPanel, getIrradiance
+import BLIMP as Blimp
 
 rho = 1.225
 T0 = 288.15             # [K]
@@ -62,16 +63,41 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
     plt.show()
 
 def simulateRange(blimp):
-    work_time = 8 * 60  #  [min]
-    start_time = 9      # [h]
-    ts = np.arange(0, work_time, 1)
-    hours = []
+    start_time = 11      # [h]
+    end_time = 16
+    hours = np.arange(start_time, end_time+1, 1)
+    elevations = [23, 34, 45, 53, 56, 55, 48, 38, 26, 14]  # [deg] starts at 8 ends at 5
 
-    for t in ts:
-        hour = start_time + t // 60
-        #blimp.area_solar, shone_area = projectPanel(blimp, avg_sun_elevation, 30)
-    tmy = getIrradiance(8)
-    print(tmy['DHI'])
+    range = 0
+    vs = []
+    powers = []
+    for t in hours:
+        print('Its', t, ' o clock')
+        elevation = elevations[t - 8]
+        total_area, shone_area = projectPanel(blimp, elevation, 30)
+        tmy = getIrradiance(t)
+        DNI = np.mean(tmy['DNI'])
+        DHI = np.mean(tmy['DHI'])
+        generated_power = (DNI * shone_area + DHI * total_area) * blimp.solar_cell.efficiency * blimp.solar_cell.fillfac
+        powers.append(generated_power)
+        installed_power = blimp.n_engines * blimp.engine.max_power * Blimp.prop_limit
+        power_for_prop = generated_power - blimp.power_electronics
+        gross_prop_power = min(power_for_prop, installed_power)
+        net_prop_power = gross_prop_power * blimp.engine.efficiency * Blimp.prop_eff
+
+        v = (2 * net_prop_power / (blimp.ref_area * blimp.CD * Blimp.rho))**(1/3)
+        range += 3600 * v
+        vs.append(v)
+
+    print(range)
+    plt.scatter(hours, vs)
+    plt.plot(hours, np.ones(len(hours)) * blimp.cruiseV, linestyle='dashed')
+    plt.xlabel('Time [h]')
+    plt.ylabel('Velocity [m/s]')
+
+    plt.grid()
+    plt.show()
+    print(range)
 
 
 def simulateTurn(blimp):

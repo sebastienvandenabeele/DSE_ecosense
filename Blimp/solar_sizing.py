@@ -214,13 +214,13 @@ def sizeSolar(blimp, shone_area=0):
     solar power estimation subroutine for iteration
     """
     blimp.area_solar, shone_area = projectPanel(blimp, avg_sun_elevation, 30)
-    blimp.power_solar = (shone_area * np.mean(tmy["DNI"]) + blimp.area_solar * np.mean(tmy["DHI"])) * blimp.solar_cell.fillfac * blimp.solar_cell.efficiency
+    blimp.generated_power = (shone_area * np.mean(tmy["DNI"]) + blimp.area_solar * np.mean(tmy["DHI"])) * blimp.solar_cell.fillfac * blimp.solar_cell.efficiency
     blimp.mass['solar'] = blimp.area_solar * blimp.solar_cell.density * blimp.solar_cell.fillfac * 1.1 # margin for wiring
 
-    if np.isnan(blimp.power_solar):
-        blimp.power_solar = 0
+    if np.isnan(blimp.generated_power):
+        blimp.generated_power = 0
 
-    return blimp.area_solar, blimp.power_solar, blimp.mass['solar']
+    return blimp.area_solar, blimp.generated_power, blimp.mass['solar']
 
 
 def getIrradiance(hour):
@@ -230,15 +230,11 @@ def getIrradiance(hour):
         df_tmy["Time (HH:MM)"][i]=int(df_tmy["Time (HH:MM)"][i].split(":")[0]) + 10
         if df_tmy["Time (HH:MM)"][i] > 23:
             df_tmy["Time (HH:MM)"][i] = df_tmy["Time (HH:MM)"][i] - 24
-    #df_tmy["Time (HH:MM)"]=df_tmy["Time (HH:MM)"]+10
-    print(df_tmy["Time (HH:MM)"])
     df_tmy=df_tmy[df_tmy["Time (HH:MM)"] == hour]
     df_tmy = df_tmy.reset_index()
     df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
     return df_tmy
 
-def getSolarPower(blimp, sun_angle):
-    total_area, shone_area = projectPanel(blimp, sun_angle, 30)
 
 class Solarcell:
     def __init__(self, density, efficiency, width, length, area, fillfac, cost, Vmpp=0, Impp=0):
