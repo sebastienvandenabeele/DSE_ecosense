@@ -56,6 +56,8 @@ if __name__ == "__main__":
     sstot = np.sum((spacing_array - ybar)**2)
     r_squared = ssreg / sstot
 
+    print(y_new)
+    print(spacing_array)
     fig, ax = plt.subplots(figsize=(10, 8))
     ax.plot(x_new, y_new, label="Curve Fit")
     ax.plot(reliability_array,
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     ax.grid()
     ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
     # fig.savefig('./figures/curve_fit.png')
-    # plt.show()
+    plt.show()
 
     df = pd.read_csv("../Flight_software/data/prob_density.csv")
     likelihood = df["likelihood"].values
@@ -75,9 +77,17 @@ if __name__ == "__main__":
     df["spacing_req"] = f(df["rel_req"].values)
     df["nbr_sensor"] = np.floor(1500/df["spacing_req"].values)**2
 
-    print(np.dot(df["rel_req"].values, probabilities))
+    final_park_reliability = np.round(
+        np.dot(df["rel_req"].values, probabilities), 2)
+    park_nbr_sensors = int(df["nbr_sensor"].sum())
+    constant_spacing_nbr_sensor = int(
+        np.floor(1500/f(final_park_reliability))**2 * 3770)
+    variable_vs_constant = constant_spacing_nbr_sensor - park_nbr_sensors
     print(df)
-    print(int(df["nbr_sensor"].sum()))
+    print(f"Reliability: {final_park_reliability}%")
+    print(f"Variable mesh nbr. of sensors: {park_nbr_sensors}")
+    print(f"Constant mesh nbr. of sensors: {constant_spacing_nbr_sensor}")
+    print(f"Variable vs. Constant mesh: {variable_vs_constant}")
 
     plotting = False
     if plotting:
