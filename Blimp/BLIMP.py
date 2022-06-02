@@ -74,7 +74,7 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * self.n_engines * 1.5  # margin for mounting
+        self.mass['engines'] = self.engine.mass * self.n_engines * 2.2  # margin for mounting
         self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.cruise_prop_power = self.n_engines * self.engine.max_power * self.engine.efficiency * prop_limit * prop_eff
 
