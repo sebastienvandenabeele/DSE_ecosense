@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from BLIMP import *
 
 
-maximum_triptime                = 5 * 3600  # [s]
+maximum_triptime                = 7 * 3600  # [s]
 minimum_velocity                = req.range / maximum_triptime
 
 REQ_n_sensors                   = 1295 / 2
@@ -40,16 +40,16 @@ trim_altitude = np.mean(cruisepath)
 #                spheroid_ratio=       3,
 #                liftgas=             gas.hydrogen,
 #                solar_cell=          solar.maxeon_gen3)
-#
-#
-#
-# # # simAltitudeDynamics(Shlimp, cruisepath)
-# Shlimp.MTOM += Shlimp.mass['payload']
-# Shlimp.report()
-# Shlimp.estimateCost()
-# Shlimp.save()
-
+# #
+# #
+# #
+# # # # simAltitudeDynamics(Shlimp, cruisepath)
+# # Shlimp.MTOM += Shlimp.mass['payload']
 Shlimp = unpickle('Shlimp_0106_1031')
+Shlimp.report()
+Shlimp.estimateCost()
+
+
 simulateRange(Shlimp)
 # simAltitudeDynamics(Shlimp, cruisepath)
 # vys = np.arange(-20, 20, 1)
