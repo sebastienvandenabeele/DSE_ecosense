@@ -47,8 +47,8 @@ iteration_precision = 0.001
 
 # Creation of Blimp class
 class Blimp:
-    def __init__(self, name, target_speed=0, mass_payload=0, mass_gondola=0, envelope_material=0, liftgas=0, mass_deployment=0,
-                 mass_electronics=0, mass_ballonet=0, solar_cell=0, engine=0, electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
+    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0
+                 , mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
@@ -108,9 +108,11 @@ class Blimp:
         self.mass['gondola structure'] = 8
         self.mass['controls'] = mass_control
 
-        self.electronics = electronics
-        self.power_electronics = sum([el.power_consumption for el in self.electronics])
-        self.mass['electronics'] = sum([el.mass for el in self.electronics])
+        self.gondola_electronics = gondola_electronics
+        self.envelope_electronics = envelope_electronics
+        self.power_electronics = sum([el.power_consumption for el in self.envelope_electronics]) + sum([el.power_consumption for el in self.gondola_electronics])
+        self.mass['envelope electronics'] = sum([el.mass for el in self.envelope_electronics])
+        self.mass['gondola electronics'] = sum([el.mass for el in self.gondola_electronics])
 
         self.mass['solar'] = mass_solar_cell
         self.mass['envelope'] = mass_balloon
@@ -231,7 +233,7 @@ class Blimp:
                 self.sizeBalloon()
                 self.mass['controls'], self.control_surface, self.control_chord = sizeControl(self)
                 self.mass['gondola structure'] = 0.15 * (
-                            self.mass['payload'] + self.mass['electronics'] + self.mass['battery'])
+                            self.mass['payload'] + self.mass['gondola electronics'] + self.mass['battery'])
                 self.sizeBattery()
 
                 if i % 4 == 0:
@@ -292,11 +294,12 @@ class Blimp:
         cost = {}
         cost['solar'] = self.n_panels * self.solar_cell.cost
         cost['hydrogen'] = self.volume * self.liftgas.cost
-        cost['electronics'] = sum([device.cost for device in self.electronics])
+        cost['electronics'] = sum([device.cost for device in np.append(self.envelope_electronics, self.gondola_electronics)])
         cost['engines'] = self.n_engines * self.engine.cost * 1.2
         cost['envelope'] = self.mass['envelope'] * self.material['envelope'].cost
         cost['deployment'] = 1000
         cost['fins'] = self.n_fins * (100 + 30)
+        #cost['battery'] = self.batt
 
         print()
         print('############ COST ESTIMATION ################')
@@ -321,7 +324,7 @@ class Blimp:
 
         x['gondola'] = self.length / 2
         z['gondola'] = -self.radius - 0.5
-        mass['gondola'] = self.mass['gondola structure'] + self.mass['electronics'] + self.mass['payload'] + self.mass['engines'] + self.mass['battery'] + self.mass['deployment']
+        mass['gondola'] = self.mass['gondola structure'] + self.mass['gondola electronics'] + self.mass['payload'] + self.mass['engines'] + self.mass['battery'] + self.mass['deployment']
 
         x['controls'] = 0.9 * self.length
         z['controls'] = 0
