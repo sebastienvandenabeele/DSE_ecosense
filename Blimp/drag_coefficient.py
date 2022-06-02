@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def calculateCD(Shlimp, rho):
+def OLDcalculateCD(Shlimp, rho):
     mu = 18.18*10**(-7)
 
     # body
@@ -57,7 +57,7 @@ def calculateCD(Shlimp, rho):
 
     return Cd0
 
-def calculateUpdatedCD(blimp):
+def calculateCD(blimp):
     #hull
     v=15.06*10**(-6)
     Re=blimp.cruiseV*blimp.length/v
