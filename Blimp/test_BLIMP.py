@@ -51,7 +51,7 @@ class TestTest(unittest.TestCase):
 
         testblimp.sizeSolar(shone_area=13)
 
-        print(testblimp.power_solar)
+        print(testblimp.generated_power)
         print(testblimp.mass['solar'])
 
 
@@ -83,7 +83,7 @@ class TestTest(unittest.TestCase):
         testblimp = Blimp('Simon', engine=eng.tmt_0803_22000, n_engines=12, mass_payload=83, electronics=[el.lidar, el.skynode, el.ZED_F9P])
 
         print(testblimp.mass['engines'])
-        print(testblimp.cruise_prop_power)
+        print(testblimp.installed_engine_power)
         print(testblimp.mass['gondola structure'])
         print(testblimp.power_electronics)
         print(testblimp.mass['electronics'])
