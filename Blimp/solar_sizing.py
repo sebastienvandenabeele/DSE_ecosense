@@ -209,6 +209,22 @@ def plot_blimp(blimp):
     # getattr(ax, 'set_{}lim'.format(axis))((-max_radius, max_radius))
     # plt.show()
 
+def getIrradiance(hour1, hour2):
+    df_tmy, meta_dict = pvlib.iotools.read_tmy3("tmy.csv")
+    df_tmy = df_tmy.reset_index()
+    for i in range(len(df_tmy)):
+        df_tmy["Time (HH:MM)"][i]=int(df_tmy["Time (HH:MM)"][i].split(":")[0]) + 10
+        if df_tmy["Time (HH:MM)"][i] > 23:
+            df_tmy["Time (HH:MM)"][i] = df_tmy["Time (HH:MM)"][i] - 24
+    df_tmy=df_tmy[df_tmy["Time (HH:MM)"] >= hour1]
+    df_tmy = df_tmy[df_tmy["Time (HH:MM)"] <= hour2]
+    df_tmy = df_tmy.reset_index()
+    df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
+    return df_tmy
+
+#tmy = getIrradiance(12)
+
+
 def sizeSolar(blimp, shone_area=0):
     """
     solar power estimation subroutine for iteration
@@ -223,17 +239,6 @@ def sizeSolar(blimp, shone_area=0):
     return blimp.area_solar, blimp.generated_power, blimp.mass['solar']
 
 
-def getIrradiance(hour):
-    df_tmy, meta_dict = pvlib.iotools.read_tmy3("tmy.csv")
-    df_tmy = df_tmy.reset_index()
-    for i in range(len(df_tmy)):
-        df_tmy["Time (HH:MM)"][i]=int(df_tmy["Time (HH:MM)"][i].split(":")[0]) + 10
-        if df_tmy["Time (HH:MM)"][i] > 23:
-            df_tmy["Time (HH:MM)"][i] = df_tmy["Time (HH:MM)"][i] - 24
-    df_tmy=df_tmy[df_tmy["Time (HH:MM)"] == hour]
-    df_tmy = df_tmy.reset_index()
-    df_tmy.drop(df_tmy.index[400:1300], axis=0, inplace=True)
-    return df_tmy
 
 
 class Solarcell:

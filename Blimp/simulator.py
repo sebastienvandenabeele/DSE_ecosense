@@ -63,21 +63,22 @@ def simulateCruiseAcceleration(blimp, v0=0, throttle=1, tmax=30):
     plt.show()
 
 def simulateRange(blimp):
-    start_time = 11      # [h]
+    start_time = 9      # [h]
     end_time = 16
     hours = np.arange(start_time, end_time+1, 1)
-    elevations = [23, 34, 45, 53, 56, 55, 48, 38, 26, 14]  # [deg] starts at 8 ends at 5
+    elevations = [23, 34, 45, 53, 56, 55, 48, 38, 26, 14]  # [deg] starts at 8 ends at 17
 
-    range = 0
+    #range = 0
     vs = []
     powers = []
     for t in hours:
-        print('Its', t, ' o clock')
+        print('Its', t, 'o clock')
         elevation = elevations[t - 8]
         total_area, shone_area = projectPanel(blimp, elevation, 30)
-        tmy = getIrradiance(t)
+        tmy = getIrradiance(t, t)
         DNI = np.mean(tmy['DNI'])
         DHI = np.mean(tmy['DHI'])
+
         generated_power = (DNI * shone_area + DHI * total_area) * blimp.solar_cell.efficiency * blimp.solar_cell.fillfac
         powers.append(generated_power)
         installed_power = blimp.n_engines * blimp.engine.max_power * Blimp.prop_limit
@@ -86,18 +87,21 @@ def simulateRange(blimp):
         net_prop_power = gross_prop_power * blimp.engine.efficiency * Blimp.prop_eff
 
         v = (2 * net_prop_power / (blimp.ref_area * blimp.CD * Blimp.rho))**(1/3)
-        range += 3600 * v
         vs.append(v)
 
-    print(range)
+    design_range = blimp.cruiseV * (end_time - start_time) * 3.6
+    simrange = np.mean(vs) * 3.6 * (end_time - start_time)
+    print('Simulated range:', simrange)
+    print('Design Range:', design_range)
     plt.scatter(hours, vs)
     plt.plot(hours, np.ones(len(hours)) * blimp.cruiseV, linestyle='dashed')
+    # plt.scatter(hours, powers, color='yellow')
+    # plt.plot(hours, np.ones(len(hours)) * blimp.generated_power, color='yellow')
     plt.xlabel('Time [h]')
     plt.ylabel('Velocity [m/s]')
 
     plt.grid()
     plt.show()
-    print(range)
 
 
 def simulateTurn(blimp):

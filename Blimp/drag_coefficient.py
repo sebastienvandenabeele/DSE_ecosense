@@ -96,11 +96,11 @@ def calculateCD(blimp):
     Cd_engine_A=0.5*1.2
     Cd_engine=Cd_engine_A*engine_projected_area_temp/blimp.volume**(2/3)
     
-    print(Cd_body)
-    print(blimp.n_fins*Cd_airfoil)
-    print(blimp.n_fins*Cd_fin_interference)
-    print(Cd_undercarriage)
-    print(blimp.n_engines*Cd_engine)
+    # print(Cd_body)
+    # print(blimp.n_fins*Cd_airfoil)
+    # print(blimp.n_fins*Cd_fin_interference)
+    # print(Cd_undercarriage)
+    # print(blimp.n_engines*Cd_engine)
     
     
     Cd=Cd_body+blimp.n_fins*(Cd_airfoil+Cd_fin_interference)+Cd_undercarriage+blimp.n_engines*Cd_engine

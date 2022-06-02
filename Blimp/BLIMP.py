@@ -250,7 +250,7 @@ class Blimp:
                         print(i, ' iterations needed')
                         break
                 #self.range = self.cruiseV * maximum_triptime
-            print('Progress: ', round(self.cruiseV/self.target_speed * 100, 0), ' %')
+            print('Progress: ', round(self.cruiseV/self.target_speed/1.1 * 100, 0), ' %')
 
             if plot:
                 alphas.append(self.panel_angle)
@@ -260,15 +260,15 @@ class Blimp:
 
             # Addition of solar panels is stopped if requirements are infringed
             requirements_met = req.checkRequirements(self)
-            if self.cruiseV >= self.target_speed:
+            if self.cruiseV >= self.target_speed * 1.1:
                 print('Target design speed reached.')
                 break
             if np.abs(self.power_for_prop - self.installed_engine_power) <= 10:
                 print('Engine limit reached')
                 break
-            # if self.cruiseV < vs[-1]:
-            #     print('Could not reach target speed!')
-            #     break
+            if self.cruiseV < vs[-1]:
+                print('Could not reach target speed!')
+                break
             vs.append(self.cruiseV)
 
         if plot:
