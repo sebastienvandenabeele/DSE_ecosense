@@ -83,7 +83,7 @@ def detected_corr(df):
 
 
 def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, length_triangle, width_triangle, wind_spd, temp, N, mesh_points, size, detection_point, relevant_points):
-    ellipse_patches, triangle_patches, arc_patches = [], [], []
+    ellipse_patches, triangle_patches = [], []
     for i in range(N):
         ellipse_patches.append(Ellipse((centre[0][i], centre[1][i]), length_ellipse[i],
                                        width_ellipse[i], wind_dir, facecolor="none", edgecolor="orange", linewidth="0.2"))
@@ -93,7 +93,7 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
             triangle_points, closed=True, facecolor="none", edgecolor="grey", linewidth="0.2"))
     circle_patch = Circle((x_f+length_triangle[-1]/2 * np.cos(np.deg2rad(wind_dir)), y_f+length_triangle[-1]/2 * np.sin(np.deg2rad(wind_dir))), radius=(length_triangle[-1]/2),
 
-                          facecolor="none", edgecolor="red")
+                          facecolor="none", edgecolor="slategrey")
     fig, ax = plt.subplots(figsize=(8, 8))
     for i, ellipse in enumerate(ellipse_patches):
         ax.add_patch(ellipse)
@@ -101,17 +101,21 @@ def draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse, wind_dir, leng
     ax.add_patch(circle_patch)
     ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
     ax.scatter(relevant_points[:, 0],
-               relevant_points[:, 1], color='cyan')
+               relevant_points[:, 1], color='gold')
+    ax.arrow(x_f, y_f, length_triangle[-1]/2 * np.cos(np.deg2rad(
+        wind_dir)), length_triangle[-1]/2 * np.sin(np.deg2rad(wind_dir)), width=5, head_width=50, head_length=50, color="black")
     if len(detection_point) != 0:
         ax.scatter(detection_point[:, 0],
                    detection_point[:, 1], color='chartreuse')
-    plt.scatter(x_f, y_f, color='red')
+    plt.scatter(x_f, y_f, color='red', s=50)
     plt.xlim(0, size)
+    plt.xlabel("Longitude [m]")
+    plt.ylabel("Latitude [m]")
     plt.ylim(0, size)
-    plt.title(
-        f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Speed: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
+    # plt.title(
+    #     f'Wind Direction: {np.round(wind_dir, 0)} [deg], Wind Speed: {np.round(wind_spd, 2)} [km/h], Temperature: {np.round(temp, 2)} [C]')
     plt.show()
-    fig.savefig('./figures/patches.png')
+    fig.savefig('./figures/sensor_patches.png')
 
 
 def draw_reliability(df):
@@ -159,5 +163,5 @@ if __name__ == "__main__":
     width_triangle = np.linspace(0, 200, N)
     C0_init_ppm = np.linspace(0, 10, N)
     lb = 1.5
-    animation_2d(width_triangle, C0_init_ppm, time)
+    # animation_2d(width_triangle, C0_init_ppm, time)
     #concentration_3d(width_triangle, C0_init_ppm, time, lb)
