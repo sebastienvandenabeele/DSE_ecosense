@@ -82,5 +82,5 @@ def calculateUpdatedCD(blimp):
     Cd_engine_A=0.5*1.2
     Cd_engine=Cd_engine_A*engine_projected_area_temp/blimp.volume**(2/3)
     
-    Cd=Cd_body+Cd_airfoil+Cd_fin_interference+Cd_undercarriage+Cd_engine
+    Cd=Cd_body+blimp.n_fins*(Cd_airfoil+Cd_fin_interference)+Cd_undercarriage+blimp.n_engines*Cd_engine
     return Cd
