@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import solar_sizing as solar
 import pickle as pick
 import requirements as req
-from Classes import electronics as el, engines as eng, materials as mat, gas
+from Classes import electronics as el, engines as eng, materials as mat, gas, battery as bat
 from control_surface import sizeControl
 from drag_coefficient import calculateCD
 import structures as struc
@@ -22,18 +22,17 @@ def unpickle(filename):
 # Constants
 ###################
 
-#Physical Constants
+# Physical Constants
 lift_he                         = 1.0465 #    kg lift per cubic meter
 lift_h2                          = 1.14125
 p                               = 1.6075  # []          Constant for ellipsoid calculation
 
+# Propulsion constants
 prop_eff                        = 0.8065 # Set by Louis design
 prop_limit                      = 0.55
 
-#Environment
+# Environment
 avg_sun_elevation               = 52  # [deg]
-
-
 rho                             = 1.225  # [kg/m3]
 
 
@@ -41,7 +40,6 @@ rho                             = 1.225  # [kg/m3]
 # Requirement inputs
 ###################
 margin                          = 1.2
-
 iteration_precision = 0.001
 
 
@@ -74,7 +72,7 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * self.n_engines * 2.2  # margin for mounting
+        self.mass['engines'] = self.engine.mass * self.n_engines * 2.2  # margin for mounting, esc, servo
         self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.installed_engine_power = self.n_engines * self.engine.max_power * prop_limit
 
@@ -84,7 +82,6 @@ class Blimp:
         self.length_factor = length_factor
         self.area_solar = 0
         self.generated_power = 0
-
 
         # Balloon Aerodynamics
         self.h_trim = h_trim
@@ -96,7 +93,6 @@ class Blimp:
         self.liftgas = liftgas
         self.n_fins = n_fins
         self.h_trim = h_trim
-
 
         # Materials
         self.material = {'envelope': envelope_material}
@@ -131,8 +127,6 @@ class Blimp:
     def save(self):
         pickle(self, self.name)
 
-
-
     def sizeBalloon(self):
         """
         lifting body estimation subroutine for iteration
@@ -150,17 +144,16 @@ class Blimp:
         self.mass['envelope'] = self.surface_area * 0.192
         self.ref_area = self.volume ** (2 / 3)
 
-        
     def sizeBattery(self):
-        dod = 0.9
-        battery_density = 250 * 3600  # [J/kg]
+        dod = 0.9  # depth of discharge
         voltage_nominal = 3.7  # [V]
         n_series = 12
 
-        self.battery_speed = (prop_eff * self.engine.efficiency * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3) # [m/s]
-        self.battery_capacity= (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed * dod) * 1.1     # [J]
-        self.mass['battery'] = self.battery_capacity / battery_density
-        self.battery_charge= self.battery_capacity / (n_series * voltage_nominal)
+        self.battery_speed = (prop_eff * self.engine.efficiency * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3)  # [m/s]
+        self.battery_capacity = (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed) * 1.1  # [J]
+        self.battery_pack = bat.BatteryPack(self.battery_capacity, dod)
+        self.mass['battery'] = self.battery_pack.mass
+        self.battery_charge = self.battery_capacity / (n_series * voltage_nominal)  # [As]
 
     def report(self):
         """
@@ -202,7 +195,6 @@ class Blimp:
 
     def trim(self, cruisepath):
         self.h_trim = np.mean(cruisepath)
-
 
     def setCruiseSpeed(self, plot=False):
         """
@@ -282,7 +274,6 @@ class Blimp:
                 plt.show()
         print('Iteration done.')
 
-
     def estimateCost(self):
         """
         adds and orders all costs from used parts
@@ -345,7 +336,3 @@ class Blimp:
         self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
 
         print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
-
-
-
-
