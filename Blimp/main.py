@@ -7,17 +7,16 @@ from gondola import *
 maximum_triptime                = 7 * 3600  # [s]
 minimum_velocity                = req.range / maximum_triptime
 
-REQ_n_sensors                   = 1295 / 2
+REQ_n_sensors                   = int(round(1295 / 2, 0))
 relays_per_sensor               = 25
 n_relays                        = int(round(REQ_n_sensors / relays_per_sensor, 0))
 m_sensor                        = 0.052      # [kg]
 m_relay                         = 0.338     # [kg]
-m_deployment_system             = 2         # [kg]
-REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor + m_deployment_system
+REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor
 
-flightdata = np.genfromtxt('flight_path.csv', delimiter=',', skip_header=1)
-path = flightdata[:, 0]
-cruisepath = path[194:-194]
+flightdata = np.genfromtxt('flight_path_data.csv', delimiter=',', skip_header=1)
+altitude_path = flightdata[:, 2]
+cruisepath = altitude_path[194:-194]
 trim_altitude = np.mean(cruisepath)
 
 gondola = Gondola(length=2, height=1, x=-1, z=-2)

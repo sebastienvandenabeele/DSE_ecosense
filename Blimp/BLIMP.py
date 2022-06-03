@@ -109,8 +109,8 @@ class Blimp:
         self.material = {'envelope': envelope_material}
 
         # Masses
-        self.x_bar = 0
-        self.z_bar = 0
+        self.x_cg = 0
+        self.z_cg = 0
         self.mass['payload'] = mass_payload
         self.mass['gondola structure'] = 8
         self.mass['controls'] = mass_control
@@ -190,7 +190,11 @@ class Blimp:
         print('Explosive potential: ', round(self.explosive_potential/10**6, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print('Number of fins: ', self.n_fins)
-        print('C.g. located at x: ' + str(round(self.x_bar, 2)) + ' m, z: ' + str(round(self.z_bar, 2)) + ' m')
+        print()
+        print('C.g. located at x: ' + str(round(self.x_cg, 2)) + ' m, z: ' + str(round(self.z_cg, 2)) + ' m')
+        print('Gondola at x:', round(self.gondola.x_cg, 2), 'm, z: ', round(self.gondola.z_cg, 2), 'm')
+        print('Engine assembly cg at x:', round(self.x_eng, 2), 'm, z:', round(self.z_eng, 2), 'm')
+        print('Hangdown angle at take-off: ', round(np.arctan(self.x_cg / self.z_cg) * 57.3, 2), ' degrees')
         print()
         print('Number of solar panels: ', int(round(self.n_panels, 0)))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
@@ -220,12 +224,8 @@ class Blimp:
 
         performs design iterations for solar panel area and balloon volume to reach a given cruise speed
         """
-
-        alphas = []
         vs = [0]
-        vols = []
-        masses = []
-        radii = []
+
 
         requirements_met = True
         print('Iteration initialised.')
@@ -262,12 +262,6 @@ class Blimp:
                 #self.range = self.cruiseV * maximum_triptime
             print('Progress: ', round(self.cruiseV/self.target_speed/1.1 * 100, 0), ' %')
 
-            if plot:
-                alphas.append(self.panel_angle)
-                vols.append(self.volume)
-                masses.append(self.MTOM)
-                radii.append(self.radius)
-
             # Addition of solar panels is stopped if requirements are infringed
             requirements_met = req.checkRequirements(self)
             if self.cruiseV >= self.target_speed * 1.1:
@@ -281,15 +275,6 @@ class Blimp:
                 break
             vs.append(self.cruiseV)
 
-        if plot:
-                plt.plot(np.arange(0, self.panel_rows+1, 1), vs)
-                plt.plot(np.arange(0, self.panel_rows+1, 1), radii)
-                plt.plot(np.arange(0, self.panel_rows+1, 1), vols)
-                plt.plot(np.arange(0, self.panel_rows+1, 1), masses)
-                plt.legend(['Velocity', 'Radius', 'Volume', 'Mass'])
-                plt.grid()
-                plt.xlabel('Number of solar panels per row')
-                plt.show()
         print('Iteration done.')
 
     def estimateCost(self):
@@ -355,8 +340,8 @@ class Blimp:
             # TODO: implement accurate estimation for angles larger than 90 deg
         mass['solar'] = self.mass['solar']
 
-        self.x_bar = sum([x[key] * mass[key] for key in x.keys()]) / sum(mass.values())
-        self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
+        self.x_cg = sum([x[key] * mass[key] for key in x.keys()]) / sum(mass.values())
+        self.z_cg = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
 
         #print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
 
@@ -372,24 +357,8 @@ class Blimp:
 
 
             self.estimateCG()
-            print('Gondola at: ', round(self.gondola.x_cg, 2), 'm')
-            print('C.G at: ', round(self.x_bar, 2), 'm')
-            print('Target C.G.: ', round(xcg_target, 2), 'm')
-            if np.abs(xcg_target - self.x_bar) < 0.005:
+            if np.abs(xcg_target - self.x_cg) < 0.005:
                 break
-
-
-
-
-
-        # xs = [100]
-        # while np.abs(self.x_eng - xs[-1]) > iteration_precision:
-        #     self.x_eng = self.x_bar
-        #     self.z_eng = self.MTOM * g * self.x_bar / self.cruise_thrust
-        #     xs.append(self.x_bar)
-        #     self.estimateCG()
-        #     print(self.cruise_thrust)
-        #     print('Engine loc: ', self.x_eng, self.z_eng)
 
 
 
