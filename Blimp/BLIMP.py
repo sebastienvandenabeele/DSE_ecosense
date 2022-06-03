@@ -46,7 +46,7 @@ iteration_precision = 0.001
 # Creation of Blimp class
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0, gondola=0, x_l_fins=0.9,
-                  mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
+                  mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0, n_engines_rod=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
@@ -73,7 +73,13 @@ class Blimp:
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
-        self.mass['engines'] = self.engine.mass * self.n_engines * 2.2  # margin for mounting, esc, servo
+        if self.n_engines_rod==1:
+            self.mass_engine_mount=0.226
+        elif self.n_engines_rod==2:
+            self.mass_engine_mount=0.36
+        self.mass_servo=0.197
+        self.mass_esc=0.109
+        self.mass['engines'] = (self.engine.mass+self.mass_esc) * self.n_engines + self.n_engines/self.n_engines_rod*(self.mass_engine_mount+self.mass_servo)   # margin for mounting, esc, servo
         self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.installed_engine_power = self.n_engines * self.engine.max_power * prop_limit
         self.x_eng = 0

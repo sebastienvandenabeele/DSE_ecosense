@@ -35,6 +35,7 @@ Shlimp = Blimp(name=                "Shlimp_0106_1031",
                balloon_pressure=     500,
                h_trim=               trim_altitude,
                n_engines=            2,
+               n_engines_rod=        1,
                engine=              eng.tmt_4130_300,
 
                gondola_electronics=         el.config_option_1,
