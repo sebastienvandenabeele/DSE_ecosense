@@ -1,5 +1,5 @@
 class Gondola:
-    def __init__(self, payload_mass, length, height, x, z):
+    def __init__(self, length, height, x, z):
         """
         Gondola parametric object
         :param payload_mass: [float] payload mass carried [kg]
@@ -8,7 +8,6 @@ class Gondola:
         :param x:
         :param z:
         """
-        self.mass['payload'] = payload_mass
         self.length = length
         self.height = height
         self.x_cg = length / 2
