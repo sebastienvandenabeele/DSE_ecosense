@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from BLIMP import *
+from gondola import *
 
 
 maximum_triptime                = 7 * 3600  # [s]
@@ -19,38 +20,40 @@ path = flightdata[:, 0]
 cruisepath = path[194:-194]
 trim_altitude = np.mean(cruisepath)
 
-
+gondola = Gondola(length=2, height=1, x=-1, z=-2)
 
 
 #Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_0106_1031",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_deployment=      15,
-#                n_fins=           4,
-#
-#                envelope_material=    mat.polyethylene_fiber,
-#                balloon_pressure=     500,
-#                h_trim=               trim_altitude,
-#                n_engines=            4,
-#                engine=              eng.tmt_4130_300,
-#
-#                electronics=         el.config_option_1,
-#                length_factor=        0.9,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          solar.maxeon_gen3)
+Shlimp = Blimp(name=                "Shlimp_0106_1031",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_deployment=      15,
+               n_fins=           4,
+               gondola=             gondola,
+
+               envelope_material=    mat.polyethylene_fiber,
+               balloon_pressure=     500,
+               h_trim=               trim_altitude,
+               n_engines=            2,
+               engine=              eng.tmt_4130_300,
+
+               gondola_electronics=         el.config_option_1,
+               length_factor=        0.9,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          solar.maxeon_gen3)
 # #
 # #
 # #
 # # # # simAltitudeDynamics(Shlimp, cruisepath)
 # # Shlimp.MTOM += Shlimp.mass['payload']
-Shlimp = unpickle('Shlimp_0106_1031')
+# Shlimp = unpickle('Shlimp_0106_1031')
 Shlimp.report()
 Shlimp.estimateCost()
+Shlimp.save()
 
 
-simulateRange(Shlimp)
+# simulateRange(Shlimp)
 # simAltitudeDynamics(Shlimp, cruisepath)
 # vys = np.arange(-20, 20, 1)
 # fs = [0.5 * getISA('rho', Shlimp.h_trim) * np.sqrt(vy**2 + Shlimp.cruiseV**2) * vy * Shlimp.ref_area * Shlimp.CD for vy in vys]
