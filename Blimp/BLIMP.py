@@ -231,7 +231,8 @@ class Blimp:
                 self.MTOM = sum(self.mass.values()) #- self.mass['payload']
                 masses.append(self.MTOM)
                 self.sizeBalloon()
-                self.mass['controls'], self.control_surface, self.control_chord = sizeControl(self)
+                self.fin=sizeControl(self)
+                self.mass["controls"]=self.fin.mass * self.n_fins
                 self.mass['gondola structure'] = 0.15 * (
                             self.mass['payload'] + self.mass['gondola electronics'] + self.mass['battery'])
                 self.sizeBattery()
