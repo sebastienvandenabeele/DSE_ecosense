@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from BLIMP import *
+from gondola import *
 
 
 maximum_triptime                = 7 * 3600  # [s]
@@ -19,7 +20,7 @@ path = flightdata[:, 0]
 cruisepath = path[194:-194]
 trim_altitude = np.mean(cruisepath)
 
-
+gondola = Gondola(length=2, height=1, x=-1, z=-2)
 
 
 #Creation of blimp design, run either this or unpickle from file
@@ -28,6 +29,7 @@ Shlimp = Blimp(name=                "Shlimp_0106_1031",
                target_speed=        minimum_velocity,
                mass_deployment=      15,
                n_fins=           4,
+               gondola=             gondola,
 
                envelope_material=    mat.polyethylene_fiber,
                balloon_pressure=     500,

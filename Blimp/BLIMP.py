@@ -47,8 +47,8 @@ iteration_precision = 0.001
 
 # Creation of Blimp class
 class Blimp:
-    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0
-                 , mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
+    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0, gondola=0, x_l_fins=0.9,
+                  mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
@@ -71,12 +71,15 @@ class Blimp:
         """
         self.name = name
         self.mass = {}
+
         # Propulsion
         self.n_engines = n_engines
         self.engine = engine
         self.mass['engines'] = self.engine.mass * self.n_engines * 2.2  # margin for mounting
         self.mass['propellers'] = self.n_engines * 0.18  # Louis estimate
         self.installed_engine_power = self.n_engines * self.engine.max_power * prop_limit
+        self.x_eng = 0
+        self.z_eng = -1
 
         # Solar cells
         self.solar_cell = solar_cell
@@ -95,6 +98,7 @@ class Blimp:
         self.CD = 0.02
         self.liftgas = liftgas
         self.n_fins = n_fins
+        self.x_l_fins = x_l_fins
         self.h_trim = h_trim
 
 
@@ -107,6 +111,7 @@ class Blimp:
         self.mass['payload'] = mass_payload
         self.mass['gondola structure'] = 8
         self.mass['controls'] = mass_control
+        self.gondola = gondola
 
         self.gondola_electronics = gondola_electronics
         self.envelope_electronics = envelope_electronics
@@ -126,9 +131,12 @@ class Blimp:
 
         self.target_speed = target_speed
         self.setCruiseSpeed(plot=False)
+        self.cruise_thrust = self.net_prop_power / self.cruiseV
         self.power_per_engine = self.gross_prop_power / self.n_engines
         self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
         self.estimateCG()
+        self.placeEngines()
+
 
     def save(self):
         pickle(self, self.name)
@@ -322,19 +330,23 @@ class Blimp:
         z['balloon'] = 0
         mass['balloon'] = self.mass['envelope']
 
-        x['gondola'] = self.length / 2
-        z['gondola'] = -self.radius - 0.5
-        mass['gondola'] = self.mass['gondola structure'] + self.mass['gondola electronics'] + self.mass['payload'] + self.mass['engines'] + self.mass['battery'] + self.mass['deployment']
+        x['gondola'] = self.gondola.x + self.gondola.x_cg
+        z['gondola'] = self.gondola.z + self.gondola.z_cg
+        mass['gondola'] = self.mass['gondola structure'] + self.mass['gondola electronics'] + self.mass['payload'] + self.mass['battery'] + self.mass['deployment']
 
-        x['controls'] = 0.9 * self.length
+        x['engines'] = self.x_eng
+        z['engines'] = self.z_eng
+        mass['engines'] = self.mass['engines'] + self.mass['propellers']
+
+        x['controls'] = self.x_l_fins * self.length - self.length / 2
         z['controls'] = 0
         mass['controls'] = self.mass['controls']
 
-        x['ballonets'] = self.length / 2
+        x['ballonets'] = 0
         z['ballonets'] = - self.radius + self.radius_ballonet
         mass['ballonets'] = self.mass['ballonets']
 
-        x['solar'] = self.length / 2
+        x['solar'] = 0
         angle = self.panel_angle / 2
         if angle <= np.pi / 2:
             z['solar'] = self.radius * (angle + np.cos(angle) * np.sin(angle)/(2*np.sin(angle)) )
@@ -348,6 +360,16 @@ class Blimp:
         self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
 
         print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
+
+    def placeEngines(self):
+        xs = [100]
+        while np.abs(self.x_eng - xs[-1]) > iteration_precision:
+            self.x_eng = self.x_bar
+            self.z_eng = self.MTOM * g * self.x_bar / self.cruise_thrust
+            xs.append(self.x_bar)
+            self.estimateCG()
+            print(self.cruise_thrust)
+            print('Engine loc: ', self.x_eng, self.z_eng)
 
 
 
