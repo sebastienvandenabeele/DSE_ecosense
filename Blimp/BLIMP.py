@@ -138,7 +138,7 @@ class Blimp:
         self.power_per_engine = self.gross_prop_power / self.n_engines
         self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
         self.estimateCG()
-        self.placeEngines()
+        self.placeGondola()
 
 
     def save(self):
@@ -190,7 +190,7 @@ class Blimp:
         print('Explosive potential: ', round(self.explosive_potential/10**6, 2), ' MJ')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print('Number of fins: ', self.n_fins)
-        print('C.g. located at x: ' + str(round(self.x_bar / self.length * 100, 2)) + ' % length, z: ' + str(round(self.z_bar, 2)) + ' m')
+        print('C.g. located at x: ' + str(round(self.x_bar, 2)) + ' m, z: ' + str(round(self.z_bar, 2)) + ' m')
         print()
         print('Number of solar panels: ', int(round(self.n_panels, 0)))
         print('Solar panel area: ', round(self.area_solar, 2), ' m^2')
@@ -329,8 +329,8 @@ class Blimp:
         z['balloon'] = 0
         mass['balloon'] = self.mass['envelope']
 
-        x['gondola'] = self.gondola.x + self.gondola.x_cg
-        z['gondola'] = self.gondola.z + self.gondola.z_cg
+        x['gondola'] = self.gondola.x_cg
+        z['gondola'] = self.gondola.z_cg
         mass['gondola'] = self.mass['gondola structure'] + self.mass['gondola electronics'] + self.mass['payload'] + self.mass['battery'] + self.mass['deployment']
 
         x['engines'] = self.x_eng
@@ -358,17 +358,38 @@ class Blimp:
         self.x_bar = sum([x[key] * mass[key] for key in x.keys()]) / sum(mass.values())
         self.z_bar = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
 
-        print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
+        #print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
 
-    def placeEngines(self):
-        xs = [100]
-        while np.abs(self.x_eng - xs[-1]) > iteration_precision:
-            self.x_eng = self.x_bar
-            self.z_eng = self.MTOM * g * self.x_bar / self.cruise_thrust
-            xs.append(self.x_bar)
+        print(x)
+
+    def placeGondola(self):
+        self.gondola.z_cg = - self.radius - self.gondola.height / 2
+        self.z_eng = self.gondola.z_cg
+        xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
+        for x_gondola in np.arange(0, self.length / 4, 0.01):
+            self.gondola.x_cg = -x_gondola
+            self.x_eng = xcg_target
+
+
             self.estimateCG()
-            print(self.cruise_thrust)
-            print('Engine loc: ', self.x_eng, self.z_eng)
+            print('Gondola at: ', round(self.gondola.x_cg, 2), 'm')
+            print('C.G at: ', round(self.x_bar, 2), 'm')
+            print('Target C.G.: ', round(xcg_target, 2), 'm')
+            if np.abs(xcg_target - self.x_bar) < 0.005:
+                break
+
+
+
+
+
+        # xs = [100]
+        # while np.abs(self.x_eng - xs[-1]) > iteration_precision:
+        #     self.x_eng = self.x_bar
+        #     self.z_eng = self.MTOM * g * self.x_bar / self.cruise_thrust
+        #     xs.append(self.x_bar)
+        #     self.estimateCG()
+        #     print(self.cruise_thrust)
+        #     print('Engine loc: ', self.x_eng, self.z_eng)
 
 
 
