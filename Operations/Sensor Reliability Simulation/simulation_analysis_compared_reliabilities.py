@@ -26,7 +26,8 @@ if __name__ == "__main__":
     x_spacing_range = [300, 400, 500]
     y_spacing_range = [300, 400, 500]
     shift_range = [0., 0.25, 0.5]
-    iteration_list = list(itertools.product(x_spacing_range, y_spacing_range, shift_range))
+    iteration_list = list(itertools.product(
+        x_spacing_range, y_spacing_range, shift_range))
 
     plotting_df["x_spacing"] = [item[0] for item in iteration_list]
     plotting_df["y_spacing"] = [item[1] for item in iteration_list]
@@ -39,7 +40,12 @@ if __name__ == "__main__":
     shift_rel = [np.round(plotting_df[plotting_df["shift"] == shift]
                           ["reliability"].mean() * 100, 2) for shift in shift_range]
 
-    plotting = True
+    corr = np.corrcoef(np.sort(plotting_df[plotting_df["x_spacing"] == 500]["reliability"].values.astype(float)),
+                       np.sort(plotting_df[plotting_df["y_spacing"] == 500]["reliability"].values.astype(float)))
+
+    print(corr)
+
+    plotting = False
     if plotting:
         gui.draw_overall_reliabilities(
             x_spacing_rel, y_spacing_rel, shift_rel, x_spacing_range, y_spacing_range, shift_range)

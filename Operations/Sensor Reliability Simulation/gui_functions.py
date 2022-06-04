@@ -52,13 +52,11 @@ def animation_2d(width_triangle, C0_init_ppm, t):
     plt.show()
 
 
-def mesh_plot(mesh_points, size, x_spacing, y_spacing, angle):
+def mesh_plot(mesh_points, size):
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.scatter(mesh_points[:, 0], mesh_points[:, 1])
     plt.xlim(0, size)
     plt.ylim(0, size)
-    plt.title(
-        f'X spacing: {x_spacing} [m], Y spacing: {y_spacing} [m], Angle: {angle} [deg]')
     plt.show()
 
 
@@ -126,31 +124,37 @@ def draw_reliability(df):
 
 
 def draw_overall_reliabilities(x_spacing_rel, y_spacing_rel, shift_rel, x_spacing_range, y_spacing_range, shift_range):
-    fig, ax = plt.subplots(3, figsize=(13, 9))
-    bar0 = ax[0].bar(x_spacing_range, x_spacing_rel,
-                     width=10)
-    ax[0].set_xticks(x_spacing_range)
-    ax[0].plot(x_spacing_range, [62, 62, 62], '--', color='r')
-    ax[0].bar_label(bar0)
-    ax[0].set_ylabel("Reliability [%]")
-    ax[0].set_xlabel("East-West Sensor Spacing [m]")
+    fig, ax = plt.subplots(figsize=(5, 4))
+    bar0 = ax.bar(x_spacing_range, x_spacing_rel,
+                  width=50)
+    ax.set_xticks(x_spacing_range)
+    ax.plot(x_spacing_range, [62, 62, 62], '--', color='r')
+    ax.bar_label(bar0)
+    ax.set_ylabel("Reliability [%]")
+    ax.set_xlabel("Longitudinal Sensor Spacing [m]")
+    fig.savefig('./figures/x_spacing_rel.png')
+    plt.show()
 
-    bar1 = ax[1].bar(y_spacing_range, y_spacing_rel,
-                     width=10)
-    ax[1].set_xticks(y_spacing_range)
-    ax[1].plot(y_spacing_range, [62, 62, 62], '--', color='r')
-    ax[1].bar_label(bar1)
-    ax[1].set_ylabel("Reliability [%]")
-    ax[1].set_xlabel("North-South Sensor Spacing [m]")
+    fig, ax = plt.subplots(figsize=(5, 4))
+    bar1 = ax.bar(y_spacing_range, y_spacing_rel,
+                  width=50)
+    ax.set_xticks(y_spacing_range)
+    ax.plot(y_spacing_range, [62, 62, 62], '--', color='r')
+    ax.bar_label(bar1)
+    ax.set_ylabel("Reliability [%]")
+    ax.set_xlabel("Latiduinal Sensor Spacing [m]")
+    fig.savefig('./figures/y_spacing_rel.png')
+    plt.show()
 
-    bar2 = ax[2].bar(np.array(shift_range)*100, shift_rel,
-                     width=3)
-    ax[2].set_xticks(np.array(shift_range)*100)
-    ax[2].plot(np.array(shift_range)*100, [62, 62, 62], '--', color='r')
-    ax[2].bar_label(bar2)
-    ax[2].set_ylabel("Reliability [%]")
-    ax[2].set_xlabel("Sensor Shift [%]")
-
+    fig, ax = plt.subplots(figsize=(5, 4))
+    bar2 = ax.bar(np.array(shift_range)*100, shift_rel,
+                  width=13)
+    ax.set_xticks(np.array(shift_range)*100)
+    ax.plot(np.array(shift_range)*100, [62, 62, 62], '--', color='r')
+    ax.bar_label(bar2)
+    ax.set_ylabel("Reliability [%]")
+    ax.set_xlabel("Sensor Shift [%]")
+    fig.savefig('./figures/shift_rel.png')
     plt.show()
 
 
