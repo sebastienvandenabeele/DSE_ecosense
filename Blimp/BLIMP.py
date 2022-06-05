@@ -47,7 +47,7 @@ iteration_precision = 0.001
 class Blimp:
     def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0, gondola=0, x_l_fins=0.9,
                   mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0, n_engines_rod=0,
-                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0):
+                 mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0, d_eng=0):
         """
         A class describing a virtual blimp object, used as vehicle design model
         :param name: [str] Name of instance
@@ -85,6 +85,7 @@ class Blimp:
         self.installed_engine_power = self.n_engines * self.engine.max_power * prop_limit
         self.x_eng = 0
         self.z_eng = -1
+        self.d_eng = d_eng
 
         # Solar cells
         self.solar_cell = solar_cell
@@ -349,17 +350,19 @@ class Blimp:
 
     def placeGondola(self):
         self.gondola.z_cg = - self.radius - self.gondola.height / 2
+        self.gondola.x_cg = 0
         self.z_eng = self.gondola.z_cg
-        xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
-        for x_gondola in np.arange(0, self.length / 4, 0.01):
-            self.gondola.x_cg = -x_gondola
-            self.x_eng = xcg_target
-
-
-            self.estimateCG()
-            if np.abs(xcg_target - self.x_cg) < 0.005:
-                break
-
+        self.x_eng = self.x_cg
+        self.estimateCG()
+        # xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
+        # for x_gondola in np.arange(0, self.length / 4, 0.01):
+        #     self.gondola.x_cg = -x_gondola
+        #     self.x_eng = xcg_target
+        #
+        #
+        #     self.estimateCG()
+        #     if np.abs(xcg_target - self.x_cg) < 0.005:
+        #         break
 
 
 

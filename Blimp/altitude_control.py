@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import control.matlab as ml
 
-xstep = 200 # [m]
+xstep = 200  # [m]
 
 def setLiftConstant(altitude, delta_p):
     rho_atm = getISA('rho', altitude)
@@ -42,34 +42,68 @@ def simAltitudeDynamics(blimp, cruisepath):
     CLTF = OLTF / (1 + OLTF)           # Unit feedback closed-loop TF
     sys = ml.ss(CLTF)
     ts = np.arange(0, len(cruisepath) * xstep / blimp.cruiseV, xstep / blimp.cruiseV)
-    ml.bode(OLTF)
-    # ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts, X0=ref_signal[0])
-    #
-    # y_nonlin = simNonLinear(blimp, ref_signal, ts, kp)
-    #
-    # plt.plot(ts, y_nonlin + blimp.h_trim)
-    # plt.plot(ts, ys + blimp.h_trim)
-    # plt.plot(ts, ref_signal + blimp.h_trim)
-    # plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
-    #
-    # plt.grid()
-    # plt.xlabel('Time [s]')
-    # plt.ylabel('Altitude [m]')
-    # plt.legend(['Non-Linear Simulation', 'Linearised Simulation', 'Reference Flightpath', 'Trim Altitude'])
-    # plt.show()
+
+    #ys, ts, xs = ml.lsim(sys, U=ref_signal, T = ts, X0=ref_signal[0])
+
+    hs, forces, thetas, gammas = simNonLinear(blimp, ref_signal, ts, kp)
+    alphas = thetas - gammas
+
+    plt.subplot(321)
+    plt.plot(ts, hs + blimp.h_trim)
+    plt.plot(ts, ref_signal + blimp.h_trim)
+    plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Altitude [m]')
+    plt.legend(['Non-Linear Simulation', 'Reference Flightpath', 'Trim Altitude'])
+
+    plt.subplot(322)
+    plt.plot(ts, forces)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Force required [N]')
+
+    plt.subplot(323)
+    plt.plot(ts, thetas * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Pitch angle [deg]')
+
+    plt.subplot(324)
+    plt.plot(ts, gammas * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Flightpath angle [deg]')
+
+    plt.subplot(325)
+    plt.plot(ts, alphas * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Angle of attack [deg]')
+
+    plt.show()
 
 def simNonLinear(blimp, ref_path, ts, kp):
 
-    hs = []
     h = ref_path[0]
     v = 0
-    a = 0
+
+    hs = []
+    forces = []
+    thetas = []
+    gammas = []
     dt = ts[1] - ts[0]
+    vertical_thrust_effectiveness = 1 + blimp.cruise_thrust * blimp.d_eng / (blimp.MTOM * g * blimp.z_cg)
+
     for i in range(len(ts)):
         hs.append(h)
+
         e = ref_path[i] - h
         u = kp * e
-
+        force_required = u / vertical_thrust_effectiveness
+        forces.append(force_required)
+        thetas.append(np.arcsin(force_required * blimp.d_eng / (blimp.MTOM * g * blimp.z_cg)))
+        gammas.append(np.arctan(v / blimp.cruiseV))
         v_vec = np.sqrt(v**2 + blimp.cruiseV**2)
         drag_vec = 0.5 * getISA('rho', h) * v_vec**2 * blimp.ref_area * blimp.CD
         drag_vert = drag_vec * v / v_vec
@@ -82,7 +116,7 @@ def simNonLinear(blimp, ref_path, ts, kp):
         h += v * dt
 
 
-    return [h for h in hs]
+    return np.array(hs), np.array(forces), np.array(thetas), np.array(gammas)
 
 
 
@@ -104,10 +138,11 @@ def simNonLinear(blimp, ref_path, ts, kp):
     # plt.legend(['Trim Altitude', 'Reference Path', 'Actual Path'])
     # plt.show()
 
+
 def ddx(list):
     return [(list[i] - list[i-1])/xstep for i in np.arange(1, len(list))]
 
-def getC(blimp, cruisepath):
+def getC(blimp):
     #slope = ddx(cruisepath)
     #v_y = np.array([s * blimp.cruiseV for s in slope])
     #v_model = np.mean(v_y)
@@ -115,28 +150,53 @@ def getC(blimp, cruisepath):
     c = 0.5 * getISA('rho', blimp.h_trim) * blimp.cruiseV * blimp.ref_area * blimp.CD
 
     return c
-    # diffs = []
-    # vs = np.arange(min(v_y), max(v_y), 0.001)
-    # for v in vs:
-    #     diffs.append(sum(np.abs(v_y - v)))
-    # v_model = vs[np.argwhere(diffs == min(diffs))][0][0]
-    # return v_model
+
+
+def symStateSpace(blimp):
+    V = blimp.cruiseV
+    dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
+    S = blimp.ref_area
+    C_m_q_hat = -0.073 # from Blibble, based on Solar HALE
+    T1 = blimp.cruise_thrust / 2
+    I_yy = 200 # TODO: estimate Moment of Inertia
+    k_atm = getK(blimp)
+    c_atm = getC(blimp)
+    l_ref  = blimp.volume**(1/3)
+
+    # Moment Arms
+    x_ac = blimp.length / 4   # Assumed at quarter length
+    z_cg = - blimp.z_cg
+    x_fin = (blimp.x_l_fins - 0.5) * blimp.length
+    d_eng = blimp.d_eng
+
+    # Coefficients for model
+    C_w    = blimp.MTOM * g / (dyn_pressure * S)
+    C_m_q  = C_m_q_hat * l_ref / V
+    C_T1   = T1 / (dyn_pressure * S)
+    mu_y   = I_yy / (dyn_pressure * S * l_ref)
+    C_k    = k_atm / (dyn_pressure * S)
+    C_mtom = blimp.MTOM / (dyn_pressure * S)
+    C_c    = c_atm / (dyn_pressure * S)
+    C_m_a_e = 2 / blimp.spheroid_ratio
+    C_m_a_h = 2 * blimp.fin.AR * np.pi() * blimp.fin.surface / blimp.ref_area
+
+    C1 = np.array([[0, 0, -mu_y, 0, 0],
+                  [0, 0, 0, 0, 0],
+                  [0, 1, 0, 0, 0],
+                  [0, 0, 0, 0, C_mtom],
+                  [0, 0, 0, 1, 0]])
+
+    C2 = np.array([[],
+                   [],
+                   [],
+                   [],
+                   []])
+
+    C3 = np.array([C_T1 * d_eng / l_ref],
+                  [0],
+                  [0],
+                  [C_T1],
+                  [0])
 
 
 
-
-# v_avg = np.mean(v_y)
-# print(v_model)
-# print(v_avg)
-
-
-
-#plt.plot(np.arange(len(cruisepath)), cruisepath)
-# plt.plot(np.arange(len(v_y)), v_y)
-# plt.plot(np.arange(len(v_y)), np.ones(len(v_y)) * v_model)
-# plt.legend(['Vertical Velocities', 'Chosen Model Speed'])
-# # plt.plot(np.arange(len(elevation)), elevation)
-# # plt.plot(np.arange(len(elevation_ma)), elevation_ma)
-# plt.grid()
-# # plt.legend(['Height', 'Elevation', 'Elevation MA'])
-# plt.show()

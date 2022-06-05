@@ -16,18 +16,21 @@ REQ_payload_mass                = n_relays * m_relay + REQ_n_sensors * m_sensor
 
 flightdata = np.genfromtxt('flight_path_data.csv', delimiter=',', skip_header=1)
 altitude_path = flightdata[:, 2]
-cruisepath = altitude_path[194:-194]
+
+cruisepath = altitude_path[260:-240]
+
+
 trim_altitude = np.mean(cruisepath)
 
-gondola = Gondola(length=2, height=1, x=-1, z=-2)
+gondola = Gondola(length=2, height=0.5, x=-1, z=-2)
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_0106_1031",
+Shlimp = Blimp(name=                "Shlimp_for_model",
                mass_payload =       REQ_payload_mass,
                target_speed=        minimum_velocity,
                mass_deployment=      15,
-               n_fins=           4,
+               n_fins=                4,
                gondola=             gondola,
 
                envelope_material=    mat.polyethylene_fiber,
@@ -36,13 +39,14 @@ Shlimp = Blimp(name=                "Shlimp_0106_1031",
                n_engines=            4,
                n_engines_rod=        1,
                engine=              eng.tmt_4130_300,
+               d_eng=                2,
 
                gondola_electronics=         el.config_option_1,
                length_factor=        0.9,
                spheroid_ratio=       3,
                liftgas=             gas.hydrogen,
                solar_cell=          solar.maxeon_gen3)
-# #
+#
 # #
 # #
 # # # # simAltitudeDynamics(Shlimp, cruisepath)
@@ -51,7 +55,7 @@ Shlimp = Blimp(name=                "Shlimp_0106_1031",
 Shlimp.report()
 Shlimp.estimateCost()
 Shlimp.save()
-
+print(Shlimp.fin.AR)
 
 # simulateRange(Shlimp)
 # simAltitudeDynamics(Shlimp, cruisepath)
