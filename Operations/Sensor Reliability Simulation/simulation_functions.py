@@ -13,7 +13,7 @@ def read_and_edit_samples(filepath):
     Returns:g all the information necessary to the simulation
     """
     df = pd.read_csv(filepath)
-    df["wind_spd"] = df["wind_spd"]*0.35
+    df["wind_spd"] = df["wind_spd"]*0.5
     df["MC"] = MC(df["RH"].values, df["temp"].values)
     df["FFDI"] = FFDI(df["MC"].values, df["wind_spd"].values)
     df["R"] = R(df["FFDI"].values, 23.57)/3.6

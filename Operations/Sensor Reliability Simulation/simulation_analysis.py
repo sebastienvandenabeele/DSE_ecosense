@@ -25,8 +25,11 @@ if __name__ == "__main__":
 
         plotting_df.loc[i,
                         "avg_detection_time"] = df["detection_time_gas"].mean()
+        
+        plotting_df.loc[i, "max_fire_size"] = df["fire_area"].max()
 
-    spacing_range = np.linspace(300, 700, 51)
+    
+    spacing_range = np.linspace(300, 550, 51)
     shift_range = [0.]
     iteration_list = list(itertools.product(
         spacing_range, shift_range))
@@ -40,15 +43,15 @@ if __name__ == "__main__":
                           ["reliability"].mean() * 100, 2) for shift in shift_range]
 
     spacing_array = np.flip([float(spacing)
-                             for spacing in plotting_df["spacing"].values][:34])
+                             for spacing in plotting_df["spacing"].values])
     reliability_array = np.flip([float(reliability)
-                                 for reliability in plotting_df["reliability"].values*100][:34])
+                                 for reliability in plotting_df["reliability"].values*100])
 
     z = np.polyfit(reliability_array, spacing_array, 5)
     f = np.poly1d(z)
 
     x_new = np.linspace(
-        np.min(reliability_array), np.max(reliability_array), len(reliability_array)-1)
+        np.min(reliability_array), np.max(reliability_array), len(reliability_array))
     y_new = f(x_new)
 
     ybar = np.sum(spacing_array)/len(spacing_array)
@@ -56,17 +59,17 @@ if __name__ == "__main__":
     sstot = np.sum((spacing_array - ybar)**2)
     r_squared = ssreg / sstot
 
-    # fig, ax = plt.subplots(figsize=(5, 4))
-    # ax.plot(x_new, y_new, label="Curve Fit")
-    # ax.plot(reliability_array,
-    #         spacing_array, label="Raw Data")
-    # ax.set_xlabel("Reliability [%]")
-    # ax.set_ylabel('Spacing [m]')
-    # ax.legend()
-    # ax.grid()
-    # ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
-    # fig.savefig('./figures/curve_fit.png')
-    # plt.show()
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.plot(x_new, y_new, label="Curve Fit")
+    ax.plot(reliability_array,
+            spacing_array, label="Raw Data")
+    ax.set_xlabel("Reliability [%]")
+    ax.set_ylabel('Spacing [m]')
+    ax.legend()
+    ax.grid()
+    ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
+    fig.savefig('./figures/curve_fit.png')
+    plt.show()
 
     df = pd.read_csv("../Flight_software/data/prob_density.csv")
     likelihood = df["likelihood"].values
