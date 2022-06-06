@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Fin:
-    def __init__(self, root_chord, tip_chord, control_chord, span, taper_ratio, mass, surface, MAC, cg):
+    def __init__(self, root_chord, tip_chord, control_chord, span, taper_ratio, mass, surface, MAC, cg, AR):
         self.root_chord = root_chord
         self.tip_chord = tip_chord
         self.control_chord = control_chord
@@ -12,9 +12,10 @@ class Fin:
         self.surface = surface
         self.MAC = MAC
         self.cg = cg
+        self.AR = AR
 
 
-def sizeControl(blimp, report=False):
+def sizeControl(blimp):
     taper_ratio = 0.5  # ratio form blibble
     surface = 0.03265958005 / blimp.n_fins * \
         blimp.volume  # ratio from blibble airships
@@ -29,10 +30,8 @@ def sizeControl(blimp, report=False):
     MAC = fin_root * 2/3 * \
         ((1 + taper_ratio + taper_ratio**2) / (1 + taper_ratio))
     cg = 0.52*fin_root
+    AR = span**2 / surface
 
-    if report:
-        print('Fin root', fin_root)
-        print('Fin tip', fin_tip)
 
     # first: ratio of control surfaces, second, third:coefficients from book
     mass_fin = 0.192*2*surface*(1-surface_ratio)*1.26*2.36
@@ -42,5 +41,5 @@ def sizeControl(blimp, report=False):
     mass_actuator = surface*surface_ratio*0.08*4.88*1.15
 
     fin = Fin(fin_root, fin_tip, control_root, span, taper_ratio, sum(
-        [mass_fin, mass_control, mass_actuator]), surface, MAC, cg)
+        [mass_fin, mass_control, mass_actuator]), surface, MAC, cg, AR)
     return fin
