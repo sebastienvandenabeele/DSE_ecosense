@@ -153,12 +153,14 @@ def getC(blimp):
 
 
 def symStateSpace(blimp):
+    blimp.fin.AR = 3
+
     V = blimp.cruiseV
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
     S = blimp.ref_area
     C_m_q_hat = -0.073 # from Blibble, based on Solar HALE
     T1 = blimp.cruise_thrust / 2
-    I_yy = 200000000 # TODO: estimate Moment of Inertia
+    I_yy = blimp.Iyy # TODO: estimate Moment of Inertia
     k_atm = getK(blimp)
     c_atm = getC(blimp)
     l_ref  = blimp.volume**(1/3)
@@ -209,8 +211,8 @@ def symStateSpace(blimp):
     sys = ml.ss(A, B, C, D)
     ml.damp(sys)
 
-    ts = np.arange(0, 6000, 0.1)
-    us = np.ones(len(ts)) * np.radians(10)
+    ts = np.arange(0, 30, 0.1)
+    us = np.ones(len(ts)) * np.radians(12)
 
     ys, ts_, xs = ml.lsim(sys, us, ts)
 
