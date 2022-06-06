@@ -160,7 +160,7 @@ def symStateSpace(blimp):
     S = blimp.ref_area
     C_m_q_hat = -0.073 # from Blibble, based on Solar HALE
     T1 = blimp.cruise_thrust / 2
-    I_yy = blimp.Iyy # TODO: estimate Moment of Inertia
+    I_yy = blimp.Iyy
     k_atm = getK(blimp)
     c_atm = getC(blimp)
     l_ref  = blimp.volume**(1/3)
@@ -175,7 +175,7 @@ def symStateSpace(blimp):
     C_w    = blimp.MTOM * g / (dyn_pressure * S)
     C_m_q  = C_m_q_hat * l_ref / V
     C_T1   = T1 / (dyn_pressure * S)
-    mu_y   = I_yy / (dyn_pressure * S * l_ref)
+    K_yy   = I_yy / (dyn_pressure * S * l_ref)
     C_k    = k_atm / (dyn_pressure * S)
     C_mtom = blimp.MTOM / (dyn_pressure * S)
     C_c    = c_atm / (dyn_pressure * S)
@@ -185,7 +185,7 @@ def symStateSpace(blimp):
     C_m_a = C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref - C_w * z_cg / l_ref
     print('Static stability, CMalpha = ', C_m_a)
 
-    C1 = np.array([[0, 0, -mu_y, 0, 0],
+    C1 = np.array([[0, 0, -K_yy, 0, 0],
                   [-1, 0, 0, 0, -1/V],
                   [0, 1, 0, 0, 0],
                   [0, 0, 0, 0, -C_mtom],
