@@ -197,10 +197,10 @@ def symStateSpace(blimp):
                    [C_L_a_e + C_L_a_h, 0, 0, -C_k, -C_c],
                    [0, 0, 0, 0, -1]])
 
-    C3 = np.array([[C_T1 * d_eng / l_ref],
+    C3 = np.array([[2/(rho*V**2*S) * d_eng / l_ref],
                   [0],
                   [0],
-                  [C_T1],
+                  [2/(rho*V**2*S)],
                   [0]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
@@ -212,7 +212,10 @@ def symStateSpace(blimp):
     ml.damp(sys)
 
     ts = np.arange(0, 30, 0.1)
-    us = np.ones(len(ts)) * np.radians(12)
+    U = 40 # N
+    nu = np.arcsin(U/T1)
+    print("Step input of ", U, 'N, thrust vectored at ', round(nu * 57.3, 2), 'degrees')
+    us = np.ones(len(ts)) * U
 
     ys, ts_, xs = ml.lsim(sys, us, ts)
 
