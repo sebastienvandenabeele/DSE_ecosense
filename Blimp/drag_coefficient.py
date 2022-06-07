@@ -89,7 +89,7 @@ def calculateCD(blimp):
     
     #undercarriage
     undercarriage_projected_area_temp=0.2
-    Cd_undercarriage_A=0.1
+    Cd_undercarriage_A=0.11
     Cd_undercarriage=Cd_undercarriage_A*undercarriage_projected_area_temp/blimp.volume**(2/3)
     
     #engines
