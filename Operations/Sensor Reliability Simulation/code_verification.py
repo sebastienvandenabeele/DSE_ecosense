@@ -6,7 +6,7 @@ import simulation_functions as simfunc
 
 class simulation_unit_tests(unittest.TestCase):
     # Cone parameters were skipped because the calculations are the same as the first two steps of ellipse parameters
-    # Skipped Triangle points for now, probably better to verify it using the GUI
+    # Skipped Triangle points, verify it using the GUI
     # Centre caluclations will be verified using the GUI
     # Relevant points were checked visually
     # the first part of get_concentration was verified by plotting the mesh, the relevant points and their coordinates in both the global and local smoke coordinate system
@@ -81,7 +81,6 @@ class simulation_unit_tests(unittest.TestCase):
         np.testing.assert_array_almost_equal(
             concentrations, np.array([0, 0.425, 0.85, 2.885, 23.3, 42.7, 0, 0.15, 0.3, 0.355, 0.5, 4]))
 
-
     def test_get_concentration(self):
         centre = np.array([0, 0])
         wind_dir = 0
@@ -97,6 +96,7 @@ class simulation_unit_tests(unittest.TestCase):
         concentration = simfunc.get_concentration(
             xy, centre, wind_dir, N-1, width_triangle, length_triangle, time, gas_init_ppm)
         np.testing.assert_almost_equal(concentration, 0.0228638894)
+
 
 if __name__ == '__main__':
     unittest.main()
