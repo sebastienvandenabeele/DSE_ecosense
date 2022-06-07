@@ -10,64 +10,34 @@ from shapely.geometry import MultiPolygon, Polygon
 import seaborn as sns
 from sklearn.neighbors import KernelDensity
 import webbrowser
-
-location = np.array([-33.30695106292519, 150.28798863116293])
-print("\nLocation coordinates :")
-print("lat: ",location[0])
-print("lon: ",location[1])
-
 #----------------------------------------------
 #IMPORT DATA
 #----------------------------------------------
 print("\nImporting terrain data...")
-file = rasterio.open(r'./data/50S150E_20101117_gmted_mea075.tif')
-dataset = file.read() #(-50,120)->(-30,150)
+from terrain_analysis import topography_data
+#dX,dY: scale/deg of lat or lon , dLat,dLong: km per degree of lat/lon
+topography,dX,dY,dLat,dLong = topography_data()
 
-file2 = rasterio.open(r'./data/50S120E_20101117_gmted_mea075.tif')
-dataset2 = file2.read()
+#------------------------------
+#SELECTION OF AREA
+#------------------------------
+print("\nLocation coordinates :")
+#from area_selection import select_area_map
+#location,distance = select_area_map(topography,True,dX,dY,dLat,dLong)
+#print("\nFinal location: ",location)
+#print("Distance from ground station: ",distance," km")
+#input("Press Enter to continue...")
 
-dX,dY = np.shape(dataset[0])[1]/30,np.shape(dataset[0])[0]/20 #scale per degree of latitude/longitude
-dL = 40075.017/360 #km per degree of latitude/longitude
-dLat,dLong = dL*np.cos(np.deg2rad(location[0])),dL 
-
-def coordinate(lat,long):
-    dx,dy = dX*(long-120),dY*(lat+30)
-    return np.abs(dx),np.abs(dy)
-
-df = pd.read_json(r"./data/countries.geojson").iloc[:,1].values
-
-def country_select(country):
-    for i in df:
-        if i["properties"]["ADMIN"]==country:
-            return pd.DataFrame(i)
-        
-country = "Australia" 
-AUS = country_select(country).iloc[-1,-1]
-
-polygons = []
-for polygon in AUS:
-    polygon = Polygon(polygon[0])
-    polygons.append(polygon)
-
-geom = MultiPolygon(polygons)
-clipped_array, clipped_transform = msk.mask(file, [mapping(geom)], crop=True)
-
-def clip_raster(img):
-     clipped_array, clipped_transform = msk.mask(img, [geom], crop=True)
-     clipped_array, clipped_transform = msk.mask(img, [geom],
-                                                           crop=True, nodata=2300)
-     return clipped_array
-
-topography1= clip_raster(file)
-topography2 = clip_raster(file2)
-topography = np.array([np.hstack((topography2[0],topography1[0]))])
+location = [-33.1,150.8]
 
 #------------------------------
 #RISK ANALYSIS OF AREA
 #------------------------------
 print("\nPerforming risk analysis...")
 from risk_analysis import risk
-risk_score = risk(location,topography,False,dX,dY)
+risk_score = risk(location,topography,True,dX,dY,dLat,dLong,1.5)
+
+quit()
 if risk_score>0.66:
     spacing = 280
     risk_level = "High"
@@ -80,6 +50,11 @@ if risk_score<0.33:
 
 print("risk level = "+risk_level)
 print("sensor spacing = ",spacing," m")
+input("Press Enter to continue...")
+
+#from sensor_placement_strategy import sensor_placement_grid
+
+#s = sensor_placement_grid(1)
 
 #------------------------------
 #SENSOR PLACEMENT
@@ -92,12 +67,13 @@ print("check if sensors are placed correctly")
 input("Press Enter to continue...")
 
 #-------------------------------
-#FLIGHT MAP
+#FLIGHT PATH
 #-------------------------------
 from flight_path import flight_map
 print("\nPerforming flight planning...")
-cruise_alt = 300    #m
+cruise_alt = 400    #m
 cruise_spd = 60/3.6  #m/s
+deployment_spd = 40/3.6 #m/s
 wind_dir = -180
-flight_map(True,location,topography[0],sensor_map,corner_points,sensor_points,spacing/1000,cruise_alt,cruise_spd,wind_dir,dL,dX,dY)
-#webbrowser.open_new_tab('flight_path.html')
+flight_map(True,location,topography,sensor_map,corner_points,sensor_points,spacing/1000,cruise_alt,cruise_spd,deployment_spd,wind_dir,dLat,dLong,dX,dY)
+webbrowser.open_new_tab('flight_path.html')
