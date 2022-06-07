@@ -53,8 +53,43 @@ if __name__ == "__main__":
     samples["wind_dir"] = np.random.uniform(225,315,len(samples))
     samples.to_csv("./data/samples.csv", index=False)
 
+    def MC(RH,T):
+        return  5.658+0.04651*RH+0.0003151*(RH**3)/T -0.184*T**(0.77)
+
+    def FFDI(mc,U):
+        return 34.81*np.exp(0.987*np.log(10))*(mc**(-2.1))*np.exp(0.0234*U)
+    
+    def R(ffdi,w):
+        return 0.0012*ffdi*w
+
+    samples = samples[samples["RH"]>10]
+    samples.to_csv("./data/samples.csv", index=False)
+    samples["MC"] = MC(samples["RH"].values,samples["max_temp"].values)
+    samples["FFDI"] = FFDI(samples["MC"].values,samples["wind_spd"].values)
+    samples["R"] = R(samples["FFDI"].values,18)
+
     plot = True
     if plot:
+        fig,ax = plt.subplots(2,2)
+        ax[0,0].hist(samples["R"],color="tab:red")
+        ax[0,0].set_xlabel("R [km/h]")
+
+        ax[0,1].scatter(samples["max_temp"],samples["R"],c = samples["MC"],cmap="Reds_r")
+        ax[0,1].set_xlabel("Temperature [C]")
+        ax[0,1].set_ylabel("Rate of spread [km/h]")
+
+        ax[1,0].scatter(samples["RH"],samples["R"],c = samples["MC"],cmap="Reds_r")
+        ax[1,0].set_xlabel("Relative Humidity [%]")
+        ax[1,0].set_ylabel("Rate of spread [km/h]")
+
+        c = ax[1,1].scatter(samples["wind_spd"],samples["R"],c = samples["MC"],cmap="Reds_r")
+        ax[1,1].set_xlabel("Wind speed [km/h]")
+        ax[1,1].set_ylabel("Rate of spread [km/h]")
+        plt.subplots_adjust(wspace=0.25,hspace=0.5,right=0.8)
+        cax = plt.axes([0.85, 0.1, 0.075, 0.8])
+        cbar = plt.colorbar(c,cax=cax)
+        cbar.ax.set_title('Moisture Content')
+
         fig,ax = plt.subplots(2,3)
         ax[0,0].hist(data["max_temp"],density=True)
         s,pdf = normal_pdf(data["max_temp"])
