@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Fin:
-    def __init__(self, root_chord, tip_chord, control_chord, span, taper_ratio, mass, surface, MAC, cg, AR):
+    def __init__(self, root_chord, tip_chord, control_chord, span, taper_ratio, mass, surface, MAC, cg, AR, CLa):
         self.root_chord = root_chord
         self.tip_chord = tip_chord
         self.control_chord = control_chord
@@ -13,6 +13,7 @@ class Fin:
         self.MAC = MAC
         self.cg = cg
         self.AR = AR
+        self.CLa = CLa
 
 
 def sizeControl(blimp):
@@ -30,7 +31,10 @@ def sizeControl(blimp):
     MAC = fin_root * 2/3 * \
         ((1 + taper_ratio + taper_ratio**2) / (1 + taper_ratio))
     cg = 0.52*fin_root
+    sweep_LE = np.radians(29.4)
     AR = span**2 / surface
+    CLa = (2 * np.pi * AR) / (2 + np.sqrt(4 + AR**2 * (1 + np.tan(sweep_LE)**2)))
+    CLa_easy = np.pi / 2 * AR
 
 
     # first: ratio of control surfaces, second, third:coefficients from book
@@ -41,5 +45,5 @@ def sizeControl(blimp):
     mass_actuator = surface*surface_ratio*0.08*4.88*1.15
 
     fin = Fin(fin_root, fin_tip, control_root, span, taper_ratio, sum(
-        [mass_fin, mass_control, mass_actuator]), surface, MAC, cg, AR)
+        [mass_fin, mass_control, mass_actuator]), surface, MAC, cg, AR, CLa)
     return fin
