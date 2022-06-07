@@ -89,7 +89,10 @@ def calculateCD(blimp):
     
     #undercarriage
     undercarriage_projected_area_temp=0.2
-    Cd_undercarriage_A=0.11
+    undercarriage_length_temp=8
+    undercarriage_height_temp=0.5
+    Cd_undercarriage_interference=0.002*undercarriage_length_temp/undercarriage_height_temp
+    Cd_undercarriage_A=0.11+Cd_undercarriage_interference
     Cd_undercarriage=Cd_undercarriage_A*undercarriage_projected_area_temp/blimp.volume**(2/3)
     
     #engines
@@ -104,5 +107,5 @@ def calculateCD(blimp):
     # print(blimp.n_engines*Cd_engine)
     
     
-    Cd=Cd_body+blimp.n_fins*(Cd_airfoil+Cd_fin_interference)+Cd_undercarriage+blimp.n_engines*Cd_engine
+    Cd=Cd_body+blimp.n_fins*(Cd_airfoil+Cd_fin_interference)+Cd_undercarriage+blimp.n_engines/blimp.n_engines_rod*Cd_engine
     return Cd
