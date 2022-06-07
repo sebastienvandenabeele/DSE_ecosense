@@ -19,10 +19,13 @@ from terrain_analysis import topography_data
 #dX,dY: scale/deg of lat or lon , dLat,dLong: km per degree of lat/lon
 topography,dX,dY,dLat,dLon = topography_data()
 
-from flight_path_optimization import SENSOR_PLACEMENT
+from sensor_placement_strategy import SENSOR_PLACEMENT
 ds = 1.5 #km subtile_spacing
 location = [-33.62613184957613, 150.35662385708508]
 sensor_df = SENSOR_PLACEMENT(location,topography,dLon,dLat,ds)
+
+from flight_path_optimization import optimal_path
+path = optimal_path(sensor_df)
 
 quit()
 #------------------------------
