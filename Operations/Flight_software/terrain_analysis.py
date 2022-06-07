@@ -9,10 +9,10 @@ import pandas as pd
 from shapely.geometry import MultiPolygon, Polygon
 
 def topography_data():
-    file = rasterio.open(r'./data/50S150E_20101117_gmted_mea075.tif')
+    file = rasterio.open(r'external_data/50S150E_20101117_gmted_mea075.tif')
     dataset = file.read() #(-50,120)->(-30,150)
 
-    file2 = rasterio.open(r'./data/50S120E_20101117_gmted_mea075.tif')
+    file2 = rasterio.open(r'external_data/50S120E_20101117_gmted_mea075.tif')
     dataset2 = file2.read()
 
     dX,dY = np.shape(dataset[0])[1]/30,np.shape(dataset[0])[0]/20 #scale per degree of latitude/longitude

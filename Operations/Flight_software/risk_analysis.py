@@ -127,4 +127,3 @@ def risk(location,topography,plot,dX,dY,dLat,dLong,dspacing):
 
         plt.show()
     
-    return risk_score
