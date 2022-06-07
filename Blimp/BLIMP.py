@@ -75,7 +75,7 @@ class Blimp:
         self.engine = engine
         self.n_engines_rod=n_engines_rod
         if self.n_engines_rod==1:
-            self.mass_engine_mount=0.226
+            self.mass_engine_mount=0.536487
         elif self.n_engines_rod==2:
             self.mass_engine_mount=0.36
         self.mass_servo=0.197
