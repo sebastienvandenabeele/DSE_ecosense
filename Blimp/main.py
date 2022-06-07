@@ -26,38 +26,50 @@ gondola = Gondola(length=2, height=0.5, x=-1, z=-2)
 
 
 #Creation of blimp design, run either this or unpickle from file
-# Shlimp = Blimp(name=                "Shlimp_for_model",
-#                mass_payload =       REQ_payload_mass,
-#                target_speed=        minimum_velocity,
-#                mass_deployment=      15,
-#                n_fins=                4,
-#                gondola=             gondola,
-#
-#                envelope_material=    mat.polyethylene_fiber,
-#                balloon_pressure=     500,
-#                h_trim=               trim_altitude,
-#                n_engines=            4,
-#                n_engines_rod=        1,
-#                engine=              eng.tmt_4130_300,
-#                d_eng=                2,
-#
-#                gondola_electronics=         el.config_option_1,
-#                length_factor=        0.9,
-#                spheroid_ratio=       3,
-#                liftgas=             gas.hydrogen,
-#                solar_cell=          solar.maxeon_gen3)
-#
-# #
-# #
-# # # # simAltitudeDynamics(Shlimp, cruisepath)
-# # Shlimp.MTOM += Shlimp.mass['payload']
-Shlimp = unpickle('Shlimp_for_model')
+Shlimp = Blimp(name=                "Shlimp_for_model",
+               mass_payload =       REQ_payload_mass,
+               target_speed=        minimum_velocity,
+               mass_deployment=      15,
+               n_fins=                4,
+               gondola=             gondola,
+
+               envelope_material=    mat.polyethylene_fiber,
+               balloon_pressure=     500,
+               h_trim=               trim_altitude,
+               n_engines=            4,
+               n_engines_rod=        1,
+               engine=              eng.tmt_4130_300,
+               d_eng=                2,
+
+               gondola_electronics=  el.config_option_1,
+               length_factor=        0.9,
+               spheroid_ratio=       3,
+               liftgas=             gas.hydrogen,
+               solar_cell=          solar.maxeon_gen3)
+
+
+# Shlimp = unpickle('Shlimp_for_model')
 Shlimp.report()
+Shlimp.estimateCost()
+Shlimp.save()
 symStateSpace(Shlimp)
-#Shlimp.estimateCost()
-#Shlimp.save()
+
+
+# Shlimp.h_trim = 250
+# print(getISA('p', 0))
+# print(getISA('p', 250))
+# print(getISA('p', 500))
+# print()
+# print(getISA('rho', 0))
+# print(getISA('rho', 250))
+# print(getISA('rho', 500))
+# print()
+# print(getK(Shlimp) * 250)
+# print(getK(Shlimp) * -250)
+
 
 # simulateRange(Shlimp)
+
 # simAltitudeDynamics(Shlimp, cruisepath)
 # vys = np.arange(-20, 20, 1)
 # fs = [0.5 * getISA('rho', Shlimp.h_trim) * np.sqrt(vy**2 + Shlimp.cruiseV**2) * vy * Shlimp.ref_area * Shlimp.CD for vy in vys]

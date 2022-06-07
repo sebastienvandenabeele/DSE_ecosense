@@ -153,26 +153,25 @@ def getC(blimp):
 
 
 def symStateSpace(blimp):
-    blimp.fin.AR = 3
-
     V = blimp.cruiseV
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
     S = blimp.ref_area
     C_m_q_hat = -0.073 # from Blibble, based on Solar HALE
     T1 = blimp.cruise_thrust / 2
+    T0 = blimp.cruise_thrust
     I_yy = blimp.Iyy
     k_atm = getK(blimp)
     c_atm = getC(blimp)
     l_ref  = blimp.volume**(1/3)
 
     # Moment Arms
-    x_ac = blimp.length / 4   # Assumed at quarter length
+    x_ac = blimp.length * (0.5 - 0.37)   # Assumed at 37% length, from Blibble p 103
     z_cg = - blimp.z_cg
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
-    d_eng = blimp.d_eng
+    d_eng = blimp.d_eng * 1
 
     # Coefficients for model
-    C_w    = blimp.MTOM * g / (dyn_pressure * S)
+    C_w    = blimp.MTOW / (dyn_pressure * S)
     C_m_q  = C_m_q_hat * l_ref / V
     C_T1   = T1 / (dyn_pressure * S)
     K_yy   = I_yy / (dyn_pressure * S * l_ref)
@@ -180,7 +179,10 @@ def symStateSpace(blimp):
     C_mtom = blimp.MTOM / (dyn_pressure * S)
     C_c    = c_atm / (dyn_pressure * S)
     C_L_a_e = 2 / blimp.spheroid_ratio
-    C_L_a_h = 2 * blimp.fin.AR * np.pi * blimp.fin.surface / blimp.ref_area
+    C_L_a_h = blimp.fin.CLa * 0.1995 * 0.5
+
+
+
 
     C_m_a = C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref - C_w * z_cg / l_ref
     print('Static stability, CMalpha = ', C_m_a)
@@ -191,7 +193,7 @@ def symStateSpace(blimp):
                   [0, 0, 0, 0, -C_mtom],
                   [0, 0, 0, 1, 0]])
 
-    C2 = np.array([[C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref, -C_w * z_cg / l_ref, C_m_q, 0, 0],
+    C2 = np.array([[C_L_a_e * x_ac / l_ref - 0.8 * C_L_a_h * x_fin / l_ref, -C_w * z_cg / l_ref, C_m_q, 0, 0],
                    [0, 0, 1, 0, 0],
                    [0, 0, -1, 0, 0],
                    [C_L_a_e + C_L_a_h, 0, 0, -C_k, -C_c],
@@ -211,10 +213,21 @@ def symStateSpace(blimp):
     sys = ml.ss(A, B, C, D)
     ml.damp(sys)
 
+    U_hat = 40 # N
+    nu = 1.8/T0 * U_hat
+
+    U = np.sin(nu) / (1 + np.cos(nu)) * T0
+
+    throttle_up = 2 / (1 + np.cos(nu))
+
+    new_throttle = blimp.cruise_throttle * throttle_up
+
+    print('Targeted input of ', round(U_hat, 2), 'N')
+    print("Actual input of ", round(U, 2), 'N')
+    print('thrust vectored at ', round(nu * 57.3, 2), 'degrees')
+    print('throttle at ', round(new_throttle, 2), ', ', round((throttle_up-1)*100, 1), ' higher than cruise')
+
     ts = np.arange(0, 30, 0.1)
-    U = 40 # N
-    nu = np.arcsin(U/T1)
-    print("Step input of ", U, 'N, thrust vectored at ', round(nu * 57.3, 2), 'degrees')
     us = np.ones(len(ts)) * U
 
     ys, ts_, xs = ml.lsim(sys, us, ts)

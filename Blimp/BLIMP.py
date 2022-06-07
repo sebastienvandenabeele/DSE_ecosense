@@ -135,8 +135,10 @@ class Blimp:
 
         self.target_speed = target_speed
         self.setCruiseSpeed(plot=False)
+        self.MTOW = self.MTOM * g
         self.cruise_thrust = self.net_prop_power / self.cruiseV
         self.power_per_engine = self.gross_prop_power / self.n_engines
+        self.cruise_throttle = self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff
         self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
         self.estimateCG()
         self.placeGondola()
@@ -208,7 +210,7 @@ class Blimp:
         print('Number of engines:', self.n_engines)
         print('Actual propulsion power available: ', round(self.net_prop_power / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
-        print('Cruise throttle ', round(self.power_per_engine / self.engine.max_power / self.engine.efficiency / prop_eff * 100, 1), ' % (out of 55% recommended for steady-state)')
+        print('Cruise throttle ', round(self.cruise_throttle * 100, 1), ' % (out of 55% recommended for steady-state)')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Speed on battery: ', round(self.battery_speed * 3.6, 2), ' km/h')
@@ -354,18 +356,18 @@ class Blimp:
         self.gondola.z_cg = - self.radius - self.gondola.height / 2
         self.gondola.x_cg = 0
         self.z_eng = self.gondola.z_cg
-        for i in range(4):
-            self.x_eng = self.x_cg
-            self.estimateCG()
-        # xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
-        # for x_gondola in np.arange(0, self.length / 4, 0.01):
-        #     self.gondola.x_cg = -x_gondola
-        #     self.x_eng = xcg_target
-        #
-        #
+        # for i in range(4):
+        #     self.x_eng = self.x_cg
         #     self.estimateCG()
-        #     if np.abs(xcg_target - self.x_cg) < 0.005:
-        #         break
+        xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
+        for x_gondola in np.arange(0, self.length / 4, 0.01):
+            self.gondola.x_cg = -x_gondola
+            self.x_eng = xcg_target
+
+
+            self.estimateCG()
+            if np.abs(xcg_target - self.x_cg) < 0.005:
+                break
 
 
 

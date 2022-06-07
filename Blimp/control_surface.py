@@ -31,10 +31,10 @@ def sizeControl(blimp):
     MAC = fin_root * 2/3 * \
         ((1 + taper_ratio + taper_ratio**2) / (1 + taper_ratio))
     cg = 0.52*fin_root
+
     sweep_LE = np.radians(29.4)
-    AR = span**2 / surface
+    AR = 4.17
     CLa = (2 * np.pi * AR) / (2 + np.sqrt(4 + AR**2 * (1 + np.tan(sweep_LE)**2)))
-    CLa_easy = np.pi / 2 * AR
 
 
     # first: ratio of control surfaces, second, third:coefficients from book

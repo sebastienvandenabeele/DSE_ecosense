@@ -6,7 +6,7 @@ import BLIMP as Blimp
 
 rho = 1.225
 T0 = 288.15             # [K]
-p0 = 103125             # [Pa]
+p0 = 101325             # [Pa]
 rho0 = 1.225            # [kg/m^3]
 g = 9.81                # [m/s^2]
 R = 287                 # [J/kg/K]
