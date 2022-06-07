@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def coordindate_reverse(x,y):
     lat,lon = (y/480) -30 , (x/480) +120
@@ -29,14 +30,19 @@ def SENSOR_PLACEMENT(location,topography,dlon,dlat,ds):
         sensor_points = np.vstack((sensor_points,subtile_grid))
 
     sensor_points = sensor_points[1:,:]
-    print(len(sensor_points))
+    print("total sensors:",len(sensor_points))
     dtile = 10 #km
     minlat,maxlat,minlon,maxlon = location[0]-dtile/(2*dlat), location[0]+dtile/(2*dlat), location[1]-dtile/(2*dlon), location[1]+dtile/(2*dlon)
     sensor_sel = sensor_points[(sensor_points[:,0]<maxlat)&(sensor_points[:,0]>minlat)&(sensor_points[:,1]<maxlon)&(sensor_points[:,1]>minlon)]
+    print("selected sensors:",len(sensor_sel))
     sensor_df = pd.DataFrame(sensor_sel,columns=["lat","lon"])
     sensor_scaled_coordinates = coordinate(sensor_df["lat"].values,sensor_df["lon"].values)
     sensor_df["x"],sensor_df["y"] = sensor_scaled_coordinates[0], sensor_scaled_coordinates[1]
     sensor_df["elevation"] = topography[np.array(sensor_df["y"].values,dtype=int),np.array(sensor_df["x"].values,dtype=int)]
+    plot = True
+    if plot:
+        plt.scatter(sensor_df["lon"],sensor_df["lat"])
+        plt.show()
     return sensor_df
 
 
