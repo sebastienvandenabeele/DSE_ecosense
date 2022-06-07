@@ -26,7 +26,26 @@ if __name__ == "__main__":
         plotting_df.loc[i,
                         "avg_detection_time"] = df["detection_time_gas"].mean()
 
-    spacing_range = np.linspace(300, 700, 51)
+        plotting_df.loc[i, "max_fire_size"] = df["fire_area"].max()
+
+    df_histograms = pd.read_csv(r"./data/fire_detection_time_0.csv")
+    # fig, ax = plt.subplots(figsize=(5, 4))
+    # ax.hist(df_histograms.loc[df_histograms['detection_time_gas']
+    #         < 10*60]["detection_time_gas"].values)
+    # ax.set_xlabel("Detection Time [s]")
+    # ax.set_ylabel('Number of Samples [-]')
+    # fig.savefig('./figures/detection_time_hist.png')
+    # plt.show()
+
+    # fig, ax = plt.subplots(figsize=(5, 4))
+    # ax.hist(df_histograms.loc[df_histograms['detection_time_gas']
+    #         < 10*60]["fire_area"].values)
+    # ax.set_xlabel("Detection Fire Area [m²]")
+    # ax.set_ylabel('Number of Samples [-]')
+    # fig.savefig('./figures/detection_area_hist.png')
+    # plt.show()
+
+    spacing_range = np.linspace(300, 550, 51)
     shift_range = [0.]
     iteration_list = list(itertools.product(
         spacing_range, shift_range))
@@ -40,15 +59,15 @@ if __name__ == "__main__":
                           ["reliability"].mean() * 100, 2) for shift in shift_range]
 
     spacing_array = np.flip([float(spacing)
-                             for spacing in plotting_df["spacing"].values][:34])
+                             for spacing in plotting_df["spacing"].values])
     reliability_array = np.flip([float(reliability)
-                                 for reliability in plotting_df["reliability"].values*100][:34])
+                                 for reliability in plotting_df["reliability"].values*100])
 
     z = np.polyfit(reliability_array, spacing_array, 5)
     f = np.poly1d(z)
 
     x_new = np.linspace(
-        np.min(reliability_array), np.max(reliability_array), len(reliability_array)-1)
+        np.min(reliability_array), np.max(reliability_array), len(reliability_array))
     y_new = f(x_new)
 
     ybar = np.sum(spacing_array)/len(spacing_array)
@@ -75,6 +94,8 @@ if __name__ == "__main__":
     df["spacing_req"] = f(df["rel_req"].values)
     df["nbr_sensor"] = np.floor(1500/df["spacing_req"].values)**2
 
+    # df.to_csv("./data/custom_mesh.csv", index=False)
+
     final_park_reliability = np.round(
         np.dot(df["rel_req"].values, probabilities), 2)
     park_nbr_sensors = int(df["nbr_sensor"].sum())
@@ -83,11 +104,10 @@ if __name__ == "__main__":
     variable_vs_constant = constant_spacing_nbr_sensor - park_nbr_sensors
     minimum_spacing = np.round(np.min(df["spacing_req"].values), 2)
     maximum_spacing = np.round(np.max(df["spacing_req"].values), 2)
-    # print(df)
-    fig, ax = plt.subplots(figsize=(7, 5))
-    ax.hist(df["spacing_req"].values)
-    ax.set_xlabel("Sensor Spacing [m]")
-    ax.set_ylabel("Subtile Count [-]")
+    # fig, ax = plt.subplots(figsize=(7, 5))
+    # ax.hist(df["spacing_req"].values)
+    # ax.set_xlabel("Sensor Spacing [m]")
+    # ax.set_ylabel("Subtile Count [-]")
     # fig.savefig('./figures/sensor_spacing_distribution.png')
     # plt.show()
 
@@ -121,11 +141,6 @@ if __name__ == "__main__":
             mesh_temp_array[:][1] += y_shift
             mesh_fin[i] = mesh_temp_array
         return mesh_fin
-
-
-    # mesh = create_optimised_mesh(df)
-    # print(mesh[0, 0])
-    # gui.mesh_plot(mesh, 100000)
 
     plotting = False
     if plotting:

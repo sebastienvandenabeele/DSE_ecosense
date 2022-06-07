@@ -153,12 +153,14 @@ def getC(blimp):
 
 
 def symStateSpace(blimp):
+    blimp.fin.AR = 3
+
     V = blimp.cruiseV
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
     S = blimp.ref_area
     C_m_q_hat = -0.073 # from Blibble, based on Solar HALE
     T1 = blimp.cruise_thrust / 2
-    I_yy = 200 # TODO: estimate Moment of Inertia
+    I_yy = blimp.Iyy
     k_atm = getK(blimp)
     c_atm = getC(blimp)
     l_ref  = blimp.volume**(1/3)
@@ -173,30 +175,85 @@ def symStateSpace(blimp):
     C_w    = blimp.MTOM * g / (dyn_pressure * S)
     C_m_q  = C_m_q_hat * l_ref / V
     C_T1   = T1 / (dyn_pressure * S)
-    mu_y   = I_yy / (dyn_pressure * S * l_ref)
+    K_yy   = I_yy / (dyn_pressure * S * l_ref)
     C_k    = k_atm / (dyn_pressure * S)
     C_mtom = blimp.MTOM / (dyn_pressure * S)
     C_c    = c_atm / (dyn_pressure * S)
-    C_m_a_e = 2 / blimp.spheroid_ratio
-    C_m_a_h = 2 * blimp.fin.AR * np.pi() * blimp.fin.surface / blimp.ref_area
+    C_L_a_e = 2 / blimp.spheroid_ratio
+    C_L_a_h = 2 * blimp.fin.AR * np.pi * blimp.fin.surface / blimp.ref_area
 
-    C1 = np.array([[0, 0, -mu_y, 0, 0],
-                  [0, 0, 0, 0, 0],
+    C_m_a = C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref - C_w * z_cg / l_ref
+    print('Static stability, CMalpha = ', C_m_a)
+
+    C1 = np.array([[0, 0, -K_yy, 0, 0],
+                  [-1, 0, 0, 0, -1/V],
                   [0, 1, 0, 0, 0],
-                  [0, 0, 0, 0, C_mtom],
+                  [0, 0, 0, 0, -C_mtom],
                   [0, 0, 0, 1, 0]])
 
-    C2 = np.array([[],
-                   [],
-                   [],
-                   [],
-                   []])
+    C2 = np.array([[C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref, -C_w * z_cg / l_ref, C_m_q, 0, 0],
+                   [0, 0, 1, 0, 0],
+                   [0, 0, -1, 0, 0],
+                   [C_L_a_e + C_L_a_h, 0, 0, -C_k, -C_c],
+                   [0, 0, 0, 0, -1]])
 
-    C3 = np.array([C_T1 * d_eng / l_ref],
+    C3 = np.array([[2/(rho*V**2*S) * d_eng / l_ref],
                   [0],
                   [0],
-                  [C_T1],
-                  [0])
+                  [2/(rho*V**2*S)],
+                  [0]])
 
+    A = -np.linalg.inv(C1) @ C2  # State Matrix
+    B = -np.linalg.inv(C1) @ C3  # Feedback Matrix
+    C = np.eye(5)        # Output Matrix
+    D = np.zeros([5, 1])            # Feedthrough matrix
 
+    sys = ml.ss(A, B, C, D)
+    ml.damp(sys)
 
+    ts = np.arange(0, 30, 0.1)
+    U = 40 # N
+    nu = np.arcsin(U/T1)
+    print("Step input of ", U, 'N, thrust vectored at ', round(nu * 57.3, 2), 'degrees')
+    us = np.ones(len(ts)) * U
+
+    ys, ts_, xs = ml.lsim(sys, us, ts)
+
+    plt.subplot(326)
+    plt.plot(ts, ys[:, 0] * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Angle of Attack [deg]')
+
+    plt.subplot(322)
+    plt.plot(ts, ys[:, 1] * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Pitch Angle [deg]')
+
+    plt.subplot(325)
+    plt.plot(ts, ys[:, 2] * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Pitch Rate [deg/s]')
+
+    plt.subplot(321)
+    plt.plot(ts, ys[:, 3] + blimp.h_trim)
+    plt.plot(ts, blimp.h_trim * np.ones(len(ts)), linestyle='dashed', color='black')
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Altitude [m]')
+
+    plt.subplot(323)
+    plt.plot(ts, ys[:, 4] * 3.6)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Vertical Velocity [km/h]')
+
+    plt.subplot(324)
+    plt.plot(ts, ys[:, 4] / V * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Flightpath Angle [deg]')
+
+    plt.show()

@@ -14,6 +14,9 @@ def simulate(mesh_points, time, df, threshold, N, size, gas, t_max, chsn_idx, pl
             # Get random fire location within mesh
             x_f, y_f = np.random.uniform(0, size, 2)
             df.loc[index, ["x_start", "y_start"]] = [x_f, y_f]
+           
+            # Default not detected
+            df.loc[index, "detected"] = False
 
             # Determine parameters corresponding to the iteration sample
             R, lb, wind_dir, wind_spd, temp = df.iloc[index]["R"], df.iloc[index]["LB"], df.iloc[
@@ -33,6 +36,7 @@ def simulate(mesh_points, time, df, threshold, N, size, gas, t_max, chsn_idx, pl
             gas_init_ppm = simfunc.initial_gas_concentration(gas, t)
 
             upper_break = False
+            detection_point_arr = np.array([[0, 0]])
 
             # Get the relevant points given the fire ellipse centre (those that can realistically detect a fire)
             relevant_points = simfunc.get_relevant_detection_nodes(
@@ -41,15 +45,11 @@ def simulate(mesh_points, time, df, threshold, N, size, gas, t_max, chsn_idx, pl
             # Start the loop to go through time in the current iteration
             for time_idx in range(N):
 
-                inside_break = False
-
                 # Move on to next iteration as soon as the fire has been detected
                 if upper_break:
                     break
 
                 # Determine detection times of the fire at the current iteration by determining the concentration of every relevant node
-                detection_times = []
-                detection_point = []
                 for i, xy in enumerate(relevant_points):
                     # Get sensor gas concentration
                     sensor_concentration_temp = simfunc.get_concentration(
@@ -57,34 +57,21 @@ def simulate(mesh_points, time, df, threshold, N, size, gas, t_max, chsn_idx, pl
 
                     # Determine the extra time due to sensor placement wrt. to gas cone initial point
                     sensor_additional_time = time_idx/N * t_max
-
-                    # Check if any sensor has detected a fire within the required time
-                    if sensor_concentration_temp > threshold:
-
-                        # Implement sensor manufacturer reliability and append detection time of the node that detected the fire
-                        if np.random.uniform(0, 1) <= 0.92:
-                            detection_times.append(
-                                sensor_additional_time+t[time_idx])
-                            detection_point.append(xy)
-                            inside_break = True
-
-                    if inside_break:
+                    
+                    # Move on to next iteration as soon as the fire has been detected
+                    if upper_break:
                         break
 
-                detection_point_arr = np.array(detection_point)
-
-                # Get the final detection time of the fire for the current iteration and break the loop
-                if len(detection_times) != 0:
-                    detection_time = np.floor(np.min(detection_times)/10)*10
-                    print(f"Fire Detected!!! in {detection_time} [s]")
-                    df.loc[index, "detection_time_gas"] = detection_time
-                    df.loc[index, "detected"] = True
-                    df.loc[index, "fire_area"] = np.pi * \
-                        length_ellipse[time_idx]/2 * width_ellipse[time_idx]/2
-                    upper_break = True
-
-                else:
-                    df.loc[index, "detected"] = False
+                    # Check if any sensor has detected a fire within the required time and implement manufacturer reliability
+                    if sensor_concentration_temp > threshold and np.random.uniform(0, 1) <= 0.92:
+                        detection_point_arr[0] = xy
+                        detection_time = sensor_additional_time+t[time_idx]
+                        print(f"Fire Detected!!! in {detection_time} [s]")
+                        df.loc[index, "detection_time_gas"] = detection_time
+                        df.loc[index, "detected"] = True
+                        df.loc[index, "fire_area"] = np.pi * \
+                            length_ellipse[time_idx]/2 * width_ellipse[time_idx]/2
+                        upper_break = True
 
             if plotting:
                 gui.draw_patches(x_f, y_f, centre, length_ellipse, width_ellipse,

@@ -311,9 +311,9 @@ class Blimp:
         z = {}
         mass = {}
 
-        x['balloon'] = 0
-        z['balloon'] = 0
-        mass['balloon'] = self.mass['envelope']
+        x['envelope'] = 0
+        z['envelope'] = 0
+        mass['envelope'] = self.mass['envelope']
 
         x['gondola'] = self.gondola.x_cg
         z['gondola'] = self.gondola.z_cg
@@ -343,17 +343,20 @@ class Blimp:
 
         self.x_cg = sum([x[key] * mass[key] for key in x.keys()]) / sum(mass.values())
         self.z_cg = sum([z[key] * mass[key] for key in x.keys()]) / sum(mass.values())
-
+        self.Iyy = sum([(x[key]**2 + z[key]**2) * mass[key] for key in x.keys()])
+        self.Iyy += mass['engines'] * self.d_eng**2
+        self.Iyy += mass['envelope'] * self.radius * self.length * 2/3
         #print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
 
-        print(x)
+        print(self.Iyy)
 
     def placeGondola(self):
         self.gondola.z_cg = - self.radius - self.gondola.height / 2
         self.gondola.x_cg = 0
         self.z_eng = self.gondola.z_cg
-        self.x_eng = self.x_cg
-        self.estimateCG()
+        for i in range(4):
+            self.x_eng = self.x_cg
+            self.estimateCG()
         # xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
         # for x_gondola in np.arange(0, self.length / 4, 0.01):
         #     self.gondola.x_cg = -x_gondola

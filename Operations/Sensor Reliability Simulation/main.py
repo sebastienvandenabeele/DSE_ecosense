@@ -5,7 +5,7 @@ import numpy as np
 import simulation_functions as simfunc
 from joblib import Parallel, delayed
 
-spacing_range = np.linspace(300, 700, 51)
+spacing_range = np.linspace(300, 550, 51)
 shift_range = [0.]
 
 df = simfunc.read_and_edit_samples("./data/samples.csv")

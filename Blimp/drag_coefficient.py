@@ -64,7 +64,7 @@ def calculateCD(blimp):
     if Re>1000000:
         Cf=0.075/(np.log10(Re)-2)**2
     elif Re<=1000000:
-        Cf=0.664/np.sqrt(Re)
+        Cf=1.328/np.sqrt(Re)
     else:
         Cf=0.001
     Cd_Cf=4*blimp.spheroid_ratio**(1/3)+6*(1/blimp.spheroid_ratio)**1.2+24*(1/blimp.spheroid_ratio)**2.7
@@ -72,6 +72,7 @@ def calculateCD(blimp):
     
     #fins
     Re=blimp.cruiseV*blimp.fin.MAC/v
+    # print(Re)
     # if Re>1000000:
     #     Cf=0.075/(np.log10(Re)-2)**2
     # elif Re<=1000000:
@@ -84,7 +85,7 @@ def calculateCD(blimp):
     Cd_airfoil_S=0.00392
     Cd_airfoil=Cd_airfoil_S*blimp.fin.surface/blimp.volume**(2/3)
     Cd_fin_interference_t=0.75*tc-0.0003/tc**2
-    Cd_fin_interference=Cd_fin_interference_t*(blimp.fin.root_chord*0.08)**2/blimp.volume**(2/3)
+    Cd_fin_interference=Cd_fin_interference_t*(blimp.fin.root_chord*tc)**2/blimp.volume**(2/3)
     
     #undercarriage
     undercarriage_projected_area_temp=0.2

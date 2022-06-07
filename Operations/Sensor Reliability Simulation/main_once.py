@@ -17,6 +17,6 @@ if __name__ == "__main__":
         size, iteration[0], iteration[1])
     time = np.linspace(0, t_max, N)*np.ones((M, 1))
     df = simulation.simulate(mesh_points, time, df,
-                             threshold, N, size, gas, t_max, 1, plotting=False)
+                             threshold, N, size, gas, t_max, 1, plotting=True)
     print("Saving to CSV...")
     df.to_csv(r"./data/fire_detection_time_.csv")
