@@ -25,10 +25,26 @@ if __name__ == "__main__":
 
         plotting_df.loc[i,
                         "avg_detection_time"] = df["detection_time_gas"].mean()
-        
+
         plotting_df.loc[i, "max_fire_size"] = df["fire_area"].max()
 
-    
+    df_histograms = pd.read_csv(r"./data/fire_detection_time_0.csv")
+    # fig, ax = plt.subplots(figsize=(5, 4))
+    # ax.hist(df_histograms.loc[df_histograms['detection_time_gas']
+    #         < 10*60]["detection_time_gas"].values)
+    # ax.set_xlabel("Detection Time [s]")
+    # ax.set_ylabel('Number of Samples [-]')
+    # fig.savefig('./figures/detection_time_hist.png')
+    # plt.show()
+
+    # fig, ax = plt.subplots(figsize=(5, 4))
+    # ax.hist(df_histograms.loc[df_histograms['detection_time_gas']
+    #         < 10*60]["fire_area"].values)
+    # ax.set_xlabel("Detection Fire Area [m²]")
+    # ax.set_ylabel('Number of Samples [-]')
+    # fig.savefig('./figures/detection_area_hist.png')
+    # plt.show()
+
     spacing_range = np.linspace(300, 550, 51)
     shift_range = [0.]
     iteration_list = list(itertools.product(
@@ -59,38 +75,42 @@ if __name__ == "__main__":
     sstot = np.sum((spacing_array - ybar)**2)
     r_squared = ssreg / sstot
 
-    fig, ax = plt.subplots(figsize=(5, 4))
-    ax.plot(x_new, y_new, label="Curve Fit")
-    ax.plot(reliability_array,
-            spacing_array, label="Raw Data")
-    ax.set_xlabel("Reliability [%]")
-    ax.set_ylabel('Spacing [m]')
-    ax.legend()
-    ax.grid()
-    ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
-    fig.savefig('./figures/curve_fit.png')
-    plt.show()
+    # fig, ax = plt.subplots(figsize=(5, 4))
+    # ax.plot(x_new, y_new, label="Curve Fit")
+    # ax.plot(reliability_array,
+    #         spacing_array, label="Raw Data")
+    # ax.set_xlabel("Reliability [%]")
+    # ax.set_ylabel('Spacing [m]')
+    # ax.legend()
+    # ax.grid()
+    # ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
+    # fig.savefig('./figures/curve_fit.png')
+    # plt.show()
 
     df = pd.read_csv("../Flight_software/data/prob_density.csv")
     likelihood = df["likelihood"].values
     probabilities = df["fire_prob"].values
-    df["rel_req"] = get_reliability((55, 75), likelihood)
+    df["rel_req"] = get_reliability((53.5, 74.5), likelihood)
     df["spacing_req"] = f(df["rel_req"].values)
     df["nbr_sensor"] = np.floor(1500/df["spacing_req"].values)**2
+
+    df.to_csv("./data/custom_mesh.csv", index=False)
 
     final_park_reliability = np.round(
         np.dot(df["rel_req"].values, probabilities), 2)
     park_nbr_sensors = int(df["nbr_sensor"].sum())
     constant_spacing_nbr_sensor = int(
-        np.floor(1500/f(final_park_reliability))**2 * 3770)
+        np.floor(1500/f(final_park_reliability))**2 * np.shape(df["nbr_sensor"])[0])
     variable_vs_constant = constant_spacing_nbr_sensor - park_nbr_sensors
     minimum_spacing = np.round(np.min(df["spacing_req"].values), 2)
     maximum_spacing = np.round(np.max(df["spacing_req"].values), 2)
-    # print(df)
-    fig, ax = plt.subplots(figsize=(7, 5))
-    ax.hist(df["spacing_req"].values)
-    ax.set_xlabel("Sensor Spacing [m]")
-    ax.set_ylabel("Subtile Count [-]")
+
+    print(df)
+
+    # fig, ax = plt.subplots(figsize=(7, 5))
+    # ax.hist(df["spacing_req"].values)
+    # ax.set_xlabel("Sensor Spacing [m]")
+    # ax.set_ylabel("Subtile Count [-]")
     # fig.savefig('./figures/sensor_spacing_distribution.png')
     # plt.show()
 
@@ -100,35 +120,6 @@ if __name__ == "__main__":
     print(f"Variable mesh nbr. of sensors: {park_nbr_sensors}")
     print(f"Constant mesh nbr. of sensors: {constant_spacing_nbr_sensor}")
     print(f"Variable vs. Constant mesh: {variable_vs_constant}")
-
-    def create_optimised_mesh(df):
-        x_shift, y_shift = 0, 0
-        lat, long = -33.673333, 150.146369
-        mesh_fin = np.empty((len(df["spacing_req"]), 2))
-        for idx in range(len(df["spacing_req"])):
-            spacing_temp = df["spacing_req"][idx]
-            mesh_temp = mesh_types.mesh1(1500, spacing_temp).tolist()
-            mesh_temp_2 = [i for i in mesh_temp]
-            for j in range(len(mesh_temp)):
-                if mesh_temp[j][0] > 1500 or mesh_temp[j][1] > 1500:
-                    mesh_temp_2.remove([mesh_temp[j][0], mesh_temp[j][1]])
-            mesh_temp_array = np.array(mesh_temp_2)
-            long_temp = df["lon"][idx]
-            lat_temp = df["lat"][idx]
-            if long_temp != long:
-                y_shift += 1500
-                x_shift = 0
-            if lat_temp > lat:
-                x_shift += 1500
-            mesh_temp_array[:][0] += x_shift
-            mesh_temp_array[:][1] += y_shift
-            mesh_fin[i] = mesh_temp_array
-        return mesh_fin
-
-
-    # mesh = create_optimised_mesh(df)
-    # print(mesh[0, 0])
-    # gui.mesh_plot(mesh, 100000)
 
     plotting = False
     if plotting:
