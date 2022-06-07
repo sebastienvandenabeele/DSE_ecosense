@@ -10,14 +10,21 @@ from shapely.geometry import MultiPolygon, Polygon
 import seaborn as sns
 from sklearn.neighbors import KernelDensity
 import webbrowser
+
 #----------------------------------------------
 #IMPORT DATA
 #----------------------------------------------
 print("\nImporting terrain data...")
 from terrain_analysis import topography_data
 #dX,dY: scale/deg of lat or lon , dLat,dLong: km per degree of lat/lon
-topography,dX,dY,dLat,dLong = topography_data()
+topography,dX,dY,dLat,dLon = topography_data()
 
+from flight_path_optimization import SENSOR_PLACEMENT
+ds = 1.5 #km subtile_spacing
+location = [-33.62613184957613, 150.35662385708508]
+sensor_df = SENSOR_PLACEMENT(location,topography,dLon,dLat,ds)
+
+quit()
 #------------------------------
 #SELECTION OF AREA
 #------------------------------
@@ -28,7 +35,6 @@ print("\nLocation coordinates :")
 #print("Distance from ground station: ",distance," km")
 #input("Press Enter to continue...")
 
-location = [-33.1,150.8]
 
 #------------------------------
 #RISK ANALYSIS OF AREA
@@ -37,7 +43,6 @@ print("\nPerforming risk analysis...")
 from risk_analysis import risk
 risk_score = risk(location,topography,True,dX,dY,dLat,dLong,1.5)
 
-quit()
 if risk_score>0.66:
     spacing = 280
     risk_level = "High"
