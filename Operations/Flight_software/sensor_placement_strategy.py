@@ -10,8 +10,10 @@ def coordinate(lat,long):
     dx,dy = 480*(long-120),480*(lat+30)
     return np.abs(dx),np.abs(dy)
 
-def SENSOR_PLACEMENT(location,topography,dlon,dlat,ds):
+def SENSOR_PLACEMENT(dlon,dlat,ds):
     mesh_df = pd.read_csv(r"../Sensor Reliability Simulation/data/custom_mesh.csv")
+    mesh_df[["lon","lat"]].plot.scatter(x="lon",y="lat")
+    plt.show()
     min_lat,max_lat = mesh_df["lat"] - ds/(2*dlat) , mesh_df["lat"] + ds/(2*dlat)
     min_lon,max_lon = mesh_df["lon"] - ds/(2*dlon) , mesh_df["lon"] + ds/(2*dlon)
     mesh_df["min_lat"] = min_lat
@@ -31,29 +33,4 @@ def SENSOR_PLACEMENT(location,topography,dlon,dlat,ds):
 
     sensor_points = sensor_points[1:,:]
     print("total sensors:",len(sensor_points))
-    dtile = 10 #km
-    minlat,maxlat,minlon,maxlon = location[0]-dtile/(2*dlat), location[0]+dtile/(2*dlat), location[1]-dtile/(2*dlon), location[1]+dtile/(2*dlon)
-    sensor_sel = sensor_points[(sensor_points[:,0]<maxlat)&(sensor_points[:,0]>minlat)&(sensor_points[:,1]<maxlon)&(sensor_points[:,1]>minlon)]
-    print("selected sensors:",len(sensor_sel))
-    sensor_df = pd.DataFrame(sensor_sel,columns=["lat","lon"])
-    sensor_scaled_coordinates = coordinate(sensor_df["lat"].values,sensor_df["lon"].values)
-    sensor_df["x"],sensor_df["y"] = sensor_scaled_coordinates[0], sensor_scaled_coordinates[1]
-    sensor_df["elevation"] = topography[np.array(sensor_df["y"].values,dtype=int),np.array(sensor_df["x"].values,dtype=int)]
-    plot = True
-    if plot:
-        plt.scatter(sensor_df["lon"],sensor_df["lat"])
-        plt.show()
-    return sensor_df
-
-
-
-
-    
-
-
-
-
-
-
-
-
+    return sensor_points

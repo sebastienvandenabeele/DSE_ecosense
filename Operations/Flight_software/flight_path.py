@@ -110,7 +110,6 @@ def flight_map(plot,location,topography,map,outer_points,sensor_points,spacing,c
     elevation_ma = forward_average(elevation,30)
     top = tops(elevation,10)
     top = np.maximum(moving_average(top,30),elevation[0])
-
     altitude = top + cruise_alt
 
     #heading path
