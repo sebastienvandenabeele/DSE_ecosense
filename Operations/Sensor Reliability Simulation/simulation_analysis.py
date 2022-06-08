@@ -101,6 +101,7 @@ if __name__ == "__main__":
     park_nbr_sensors = int(df["nbr_sensor"].sum())
     constant_spacing_nbr_sensor = int(
         np.floor(1500/f(final_park_reliability))**2 * np.shape(df["nbr_sensor"])[0])
+    print(f(final_park_reliability))
     variable_vs_constant = constant_spacing_nbr_sensor - park_nbr_sensors
     minimum_spacing = np.round(np.min(df["spacing_req"].values), 2)
     maximum_spacing = np.round(np.max(df["spacing_req"].values), 2)
