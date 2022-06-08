@@ -10,6 +10,8 @@ from shapely.geometry import MultiPolygon, Polygon
 import seaborn as sns
 from sklearn.neighbors import KernelDensity
 import webbrowser
+from matplotlib.path import Path
+import math
 
 #----------------------------------------------
 #IMPORT DATA and SENSOR LOCATIONS
@@ -19,18 +21,23 @@ from terrain_analysis import topography_data
 from sensor_placement_strategy import SENSOR_PLACEMENT
 #dX,dY: scale/deg of lat or lon , dLat,dLong: km per degree of lat/lon
 topography,dX,dY,dLat,dLon = topography_data()
-
 ds = 1.5 #km subtile_spacing
 sensor_points = SENSOR_PLACEMENT(dLon,dLat,ds)
-
-
 
 #------------------------------
 #SELECTION OF AREA
 #------------------------------
-print("\nLocation coordinates :")
+print("\nSelecting location...")
 from area_selection import select_area_map
-select_area = select_area_map(sensor_points,topography,dX,dY,dLat,dLon)
+Number_Sensors_per_Flight = 550
+flights = select_area_map(sensor_points,False,dLat,dLon,Number_Sensors_per_Flight)
+selected_tile_nbr = 0
+tile = flights[selected_tile_nbr]
+mpath = Path( tile ) 
+mask = mpath.contains_points(sensor_points)
+sensor_points = sensor_points[mask]
+N_sens = len(sensor_points)
+N_flight = math.ceil(N_sens/Number_Sensors_per_Flight)
 
 quit()
 #location,distance = select_area_map(topography,True,dX,dY,dLat,dLong)

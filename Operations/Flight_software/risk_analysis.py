@@ -42,7 +42,6 @@ def risk(topography,plot,dX,dY,dLat,dLong,dspacing):
         arg = np.argwhere(mask==False)
         
     Nx,Ny = int(np.abs((xmax-xmin)*(dLong/dX)*(1/dspacing))) , int(np.abs((ymax-ymin)*(dLat/dY)*(1/dspacing)))
-
     m1, m2 = human_activity.lat.values,human_activity.long.values
     X, Y = np.meshgrid(np.linspace(xmin,xmax,Nx),np.linspace(ymin,ymax,Ny))
     XY = np.dstack((X, Y))
