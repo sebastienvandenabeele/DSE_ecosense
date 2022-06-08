@@ -12,22 +12,48 @@ from sklearn.neighbors import KernelDensity
 import webbrowser
 
 #----------------------------------------------
-#IMPORT DATA
+#IMPORT DATA and SENSOR LOCATIONS
 #----------------------------------------------
-print("\nImporting terrain data...")
+print("\nImporting data...")
 from terrain_analysis import topography_data
+from sensor_placement_strategy import SENSOR_PLACEMENT
 #dX,dY: scale/deg of lat or lon , dLat,dLong: km per degree of lat/lon
 topography,dX,dY,dLat,dLon = topography_data()
 
-from sensor_placement_strategy import SENSOR_PLACEMENT
 ds = 1.5 #km subtile_spacing
-location = [-33.62613184957613, 150.35662385708508]
-sensor_df = SENSOR_PLACEMENT(location,topography,dLon,dLat,ds)
+sensor_points = SENSOR_PLACEMENT(dLon,dLat,ds)
 
-from flight_path_optimization import optimal_path
-path = optimal_path(sensor_df)
+
+
+#------------------------------
+#SELECTION OF AREA
+#------------------------------
+print("\nLocation coordinates :")
+from area_selection import select_area_map
+select_area = select_area_map(sensor_points,topography,dX,dY,dLat,dLon)
 
 quit()
+#location,distance = select_area_map(topography,True,dX,dY,dLat,dLong)
+#print("\nFinal location: ",location)
+#print("Distance from ground station: ",distance," km")
+#input("Press Enter to continue...")
+
+#------------------------------
+#FLIGHT PATH
+#------------------------------
+from sensor_placement_strategy import SENSOR_PLACEMENT
+ds = 1.5 #km subtile_spacing
+location = [-33.62613184957613, 150.5]
+sensor_df = SENSOR_PLACEMENT(location,topography,dLon,dLat,ds)
+
+quit()
+
+from flight_path_optimization import optimal_path
+range_weight,cruise_alt = .75 , 300
+for range_weight in [0.25,0.5,0.75]:
+    path = optimal_path(sensor_df,dLat,dLon,range_weight,cruise_alt)
+    route = sensor_df.iloc[path]
+    print(route)
 #------------------------------
 #SELECTION OF AREA
 #------------------------------

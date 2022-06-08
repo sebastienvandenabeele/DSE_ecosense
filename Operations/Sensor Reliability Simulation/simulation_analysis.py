@@ -69,6 +69,7 @@ if __name__ == "__main__":
     x_new = np.linspace(
         np.min(reliability_array), np.max(reliability_array), len(reliability_array))
     y_new = f(x_new)
+    print(y_new.min())
 
     ybar = np.sum(spacing_array)/len(spacing_array)
     ssreg = np.sum((y_new-ybar)**2)
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     probabilities = df["fire_prob"].values
     df["rel_req"] = get_reliability((53.5, 74.5), likelihood)
     df["spacing_req"] = f(df["rel_req"].values)
-    df["nbr_sensor"] = np.floor(1500/df["spacing_req"].values)**2
+    df["nbr_sensor"] = (np.floor(1500/df["spacing_req"].values)+1)**2
 
     df.to_csv("./data/custom_mesh.csv", index=False)
 
@@ -100,7 +101,7 @@ if __name__ == "__main__":
         np.dot(df["rel_req"].values, probabilities), 2)
     park_nbr_sensors = int(df["nbr_sensor"].sum())
     constant_spacing_nbr_sensor = int(
-        np.floor(1500/f(final_park_reliability))**2 * np.shape(df["nbr_sensor"])[0])
+        (np.floor(1500/f(final_park_reliability))+1)**2 * np.shape(df["nbr_sensor"])[0])
     variable_vs_constant = constant_spacing_nbr_sensor - park_nbr_sensors
     minimum_spacing = np.round(np.min(df["spacing_req"].values), 2)
     maximum_spacing = np.round(np.max(df["spacing_req"].values), 2)
