@@ -16,6 +16,7 @@ def get_link_margin_node_relay(d):
     sensitivity = -174 + 10 * np.log10(bandwidth) + 6 - 20
     path_loss = 0.48 * f**0.43 * d**0.13 + 40 * \
         np.log10(d) - 20*np.log10(h_transmitter) - 20*np.log10(h_receiver)
+    print(path_loss)
     return p_transmitter + g_transmitter + g_receiver - cable_loss*2 - path_loss - sensitivity - 3
 
 
