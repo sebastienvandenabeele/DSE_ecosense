@@ -152,7 +152,7 @@ def getC(blimp):
     return c
 
 
-def symStateSpace(blimp):
+def symStateSpace(blimp, d_eng, U):
     V = blimp.cruiseV
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
     S = blimp.ref_area
@@ -168,7 +168,7 @@ def symStateSpace(blimp):
     x_ac = blimp.length * (0.5 - 0.37)   # Assumed at 37% length, from Blibble p 103
     z_cg = - blimp.z_cg
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
-    d_eng = blimp.d_eng * 1
+    #d_eng = d_eng
 
     # Coefficients for model
     C_w    = blimp.MTOW / (dyn_pressure * S)
@@ -213,16 +213,13 @@ def symStateSpace(blimp):
     sys = ml.ss(A, B, C, D)
     ml.damp(sys)
 
-    U_hat = 40 # N
-    nu = 1.8/T0 * U_hat
 
-    U = np.sin(nu) / (1 + np.cos(nu)) * T0
+    nu = 2 * np.arctan(U/T0)
 
     throttle_up = 2 / (1 + np.cos(nu))
 
     new_throttle = blimp.cruise_throttle * throttle_up
 
-    print('Targeted input of ', round(U_hat, 2), 'N')
     print("Actual input of ", round(U, 2), 'N')
     print('thrust vectored at ', round(nu * 57.3, 2), 'degrees')
     print('throttle at ', round(new_throttle, 2), ', ', round((throttle_up-1)*100, 1), ' higher than cruise')
@@ -231,7 +228,7 @@ def symStateSpace(blimp):
     us = np.ones(len(ts)) * U
 
     ys, ts_, xs = ml.lsim(sys, us, ts)
-
+    #return ys[150, 4]
     plt.subplot(326)
     plt.plot(ts, ys[:, 0] * 57.3)
     plt.grid()

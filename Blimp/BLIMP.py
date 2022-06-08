@@ -28,7 +28,7 @@ lift_h2                          = 1.14125
 p                               = 1.6075  # []          Constant for ellipsoid calculation
 
 # Propulsion constants
-prop_eff                        = 0.8065 # Set by Louis design
+prop_eff                        = 0.7981 # Set by Louis design
 prop_limit                      = 0.55
 
 # Environment
