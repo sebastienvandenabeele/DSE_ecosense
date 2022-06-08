@@ -98,7 +98,10 @@ def calculateCD(blimp):
     #engines
     engine_projected_area_temp=0.0122
     Cd_engine_A=0.5*1.2
-    Cd_engine=Cd_engine_A*engine_projected_area_temp/blimp.volume**(2/3)
+    Cd_rim_A=0.00807
+    rim_area=2*np.pi*0.41*0.07 #data from duct shape
+    Cd_rim=Cd_rim_A*rim_area/blimp.volume**(2/3)
+    Cd_engine=Cd_engine_A*engine_projected_area_temp/blimp.volume**(2/3)+Cd_rim
     
     # print(Cd_body)
     # print(blimp.n_fins*Cd_airfoil)
