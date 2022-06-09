@@ -10,104 +10,72 @@ from shapely.geometry import MultiPolygon, Polygon
 import seaborn as sns
 from sklearn.neighbors import KernelDensity
 import webbrowser
+from matplotlib.path import Path
+import math
 
 #----------------------------------------------
-#IMPORT DATA and SENSOR LOCATIONS
+#IMPORT DATA and ALL SENSOR LOCATIONS
 #----------------------------------------------
 print("\nImporting data...")
 from terrain_analysis import topography_data
 from sensor_placement_strategy import SENSOR_PLACEMENT
 #dX,dY: scale/deg of lat or lon , dLat,dLong: km per degree of lat/lon
 topography,dX,dY,dLat,dLon = topography_data()
-
 ds = 1.5 #km subtile_spacing
 sensor_points = SENSOR_PLACEMENT(dLon,dLat,ds)
 
-
-
 #------------------------------
 #SELECTION OF AREA
 #------------------------------
-print("\nLocation coordinates :")
+print("\nSelecting location...")
 from area_selection import select_area_map
-select_area = select_area_map(sensor_points,topography,dX,dY,dLat,dLon)
-
-quit()
-#location,distance = select_area_map(topography,True,dX,dY,dLat,dLong)
-#print("\nFinal location: ",location)
-#print("Distance from ground station: ",distance," km")
-#input("Press Enter to continue...")
+Number_Sensors_per_Flight = 550
+flights = select_area_map(sensor_points,False,dLat,dLon,Number_Sensors_per_Flight)
+selected_tile_nbr = 0
+tile = flights[selected_tile_nbr]
+mpath = Path( tile ) 
+mask = mpath.contains_points(sensor_points)
+sensor_points = sensor_points[mask]
+sensor_df = pd.DataFrame(sensor_points,columns = ["lat","lon"])
+N_sens = len(sensor_points)
+print("\nNumber of sensors in selected location:",N_sens)
+if N_sens>Number_Sensors_per_Flight:
+    N_flight = math.ceil(N_sens/Number_Sensors_per_Flight)
+else:
+    N_flight = 1
+print("\nNumber of flights needed for selected location:",N_flight)
 
 #------------------------------
 #FLIGHT PATH
 #------------------------------
-from sensor_placement_strategy import SENSOR_PLACEMENT
-ds = 1.5 #km subtile_spacing
-location = [-33.62613184957613, 150.5]
-sensor_df = SENSOR_PLACEMENT(location,topography,dLon,dLat,ds)
-
-quit()
-
 from flight_path_optimization import optimal_path
-range_weight,cruise_alt = .75 , 300
-for range_weight in [0.25,0.5,0.75]:
-    path = optimal_path(sensor_df,dLat,dLon,range_weight,cruise_alt)
-    route = sensor_df.iloc[path]
-    print(route)
-#------------------------------
-#SELECTION OF AREA
-#------------------------------
-print("\nLocation coordinates :")
-#from area_selection import select_area_map
-#location,distance = select_area_map(topography,True,dX,dY,dLat,dLong)
-#print("\nFinal location: ",location)
-#print("Distance from ground station: ",distance," km")
-#input("Press Enter to continue...")
+from flight_path_analysis import path
 
+range_weight = 0.9
+cruise_alt = 200 #m
+cruise_spd,mvr_spd = 70/3.6 , 40/3.6
 
-#------------------------------
-#RISK ANALYSIS OF AREA
-#------------------------------
-print("\nPerforming risk analysis...")
-from risk_analysis import risk
-risk_score = risk(location,topography,True,dX,dY,dLat,dLong,1.5)
+if N_flight>1:
+    for flight_nbr in range(N_flight):
+        start,stop = int(flight_nbr*len(sensor_df)/N_flight), int((flight_nbr+1)*len(sensor_df)/N_flight)
+        sensor_df = sensor_df.iloc[start:stop,:]
+        x,y = np.array(480*(sensor_df.lon.values-120),dtype=int),np.array(-480*(sensor_df.lat.values+30),dtype=int)
+        elevation = topography[y,x]
+        sensor_df["elevation"] = elevation
+        optimal_route = optimal_path(sensor_df,dLat,dLon,range_weight,cruise_alt)
+        sensor_df = sensor_df.loc[optimal_route,:]
+        print(sensor_df)
 
-if risk_score>0.66:
-    spacing = 280
-    risk_level = "High"
-if risk_score>0.33 and risk_score<0.66:
-    spacing = 500
-    risk_level = "Medium"
-if risk_score<0.33:
-    spacing = 750
-    risk_level = "Low"
+       # X,Y = np.arange(np.min(x),np.max(x)+1,1), np.arange(np.min(y),np.max(y)+1,1)
+       # lat,lon = (-Y/480) -30 , (X/480) +120
+       # Z = topography[np.min(y):(np.max(y)+1),np.min(x):(np.max(x)+1)]
+       # topography_df = pd.DataFrame(Z,columns=lon,index=lat)
+       # flight_path = path(sensor_df,topography_df)
 
-print("risk level = "+risk_level)
-print("sensor spacing = ",spacing," m")
-input("Press Enter to continue...")
-
-#from sensor_placement_strategy import sensor_placement_grid
-
-#s = sensor_placement_grid(1)
-
-#------------------------------
-#SENSOR PLACEMENT
-#------------------------------
-print("\nPerforming sensor placement...")
-from sensor_placement import sensor_locating
-sensor_map,corner_points,sensor_points = sensor_locating(location,dX,dY,dLat,dLong,spacing)
-#webbrowser.open_new_tab('sensor_locations.html')
-print("check if sensors are placed correctly")
-input("Press Enter to continue...")
-
-#-------------------------------
-#FLIGHT PATH
-#-------------------------------
-from flight_path import flight_map
-print("\nPerforming flight planning...")
-cruise_alt = 400    #m
-cruise_spd = 60/3.6  #m/s
-deployment_spd = 40/3.6 #m/s
-wind_dir = -180
-flight_map(True,location,topography,sensor_map,corner_points,sensor_points,spacing/1000,cruise_alt,cruise_spd,deployment_spd,wind_dir,dLat,dLong,dX,dY)
-webbrowser.open_new_tab('flight_path.html')
+       # fig,ax = plt.subplots()
+       # c = ax.pcolormesh(lon,lat,Z,cmap="RdBu_r")
+       # ax.scatter(sensor_df.lon,sensor_df.lat,zorder=3,color="k")
+       # ax.plot(sensor_df.lon,sensor_df.lat,color="k")
+       # plt.colorbar(c)
+       # plt.show()
+       # break
