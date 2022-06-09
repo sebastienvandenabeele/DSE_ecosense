@@ -12,6 +12,7 @@ def coordinate(lat,long):
 
 def SENSOR_PLACEMENT(dlon,dlat,ds):
     mesh_df = pd.read_csv(r"../Sensor Reliability Simulation/data/custom_mesh.csv")
+    print(mesh_df)
     min_lat,max_lat = mesh_df["lat"] - ds/(2*dlat) , mesh_df["lat"] + ds/(2*dlat)
     min_lon,max_lon = mesh_df["lon"] - ds/(2*dlon) , mesh_df["lon"] + ds/(2*dlon)
     mesh_df["min_lat"] = min_lat

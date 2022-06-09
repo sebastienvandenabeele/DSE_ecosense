@@ -37,7 +37,9 @@ mpath = Path( tile )
 mask = mpath.contains_points(sensor_points)
 sensor_points = sensor_points[mask]
 N_sens = len(sensor_points)
-N_flight = math.ceil(N_sens/Number_Sensors_per_Flight)
+
+print(sensor_points)
+
 
 quit()
 #location,distance = select_area_map(topography,True,dX,dY,dLat,dLong)
