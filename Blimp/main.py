@@ -14,7 +14,7 @@ n_relays                        = 9
 
 m_sensor                        = 0.080      # [kg]
 m_relay                         = 0.150     # [kg]
-REQ_payload_mass                = 44
+REQ_payload_mass                = 45
 
 flightdata = np.genfromtxt('flight_path_data.csv', delimiter=',', skip_header=1)
 altitude_path = flightdata[:, 2]
@@ -55,7 +55,8 @@ Shlimp.report()
 Shlimp.estimateCost()
 Shlimp.save()
 print('thrust0:', Shlimp.cruise_thrust)
-symStateSpace(Shlimp, 2, 18.24)
+#longitudinalStateSpace(Shlimp, 2, 18.24)
+lateralStateSpace(Shlimp, np.radians(10))
 
 
 

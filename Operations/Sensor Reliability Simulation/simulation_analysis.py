@@ -1,4 +1,3 @@
-from turtle import color
 import numpy as np
 import pandas as pd
 import gui_functions as gui
@@ -69,7 +68,6 @@ if __name__ == "__main__":
     x_new = np.linspace(
         np.min(reliability_array), np.max(reliability_array), len(reliability_array))
     y_new = f(x_new)
-    print(y_new.min())
 
     ybar = np.sum(spacing_array)/len(spacing_array)
     ssreg = np.sum((y_new-ybar)**2)
