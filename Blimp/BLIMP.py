@@ -45,7 +45,7 @@ iteration_precision = 0.001
 
 # Creation of Blimp class
 class Blimp:
-    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0, gondola=0, x_l_fins=0.9,
+    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0, gondola=0, x_l_fins=0.9, trip_time=7,
                   mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0, n_engines_rod=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0, d_eng=0):
         """
@@ -133,6 +133,7 @@ class Blimp:
         self.volume = self.MTOM / lift_h2
         self.n_engines = n_engines
 
+        self.trip_time = trip_time
         self.target_speed = target_speed
         self.setCruiseSpeed(plot=False)
         self.MTOW = self.MTOM * g
@@ -142,7 +143,11 @@ class Blimp:
         self.n_panels = self.area_solar * self.solar_cell.fillfac / self.solar_cell.area
         self.estimateCG()
         self.placeGondola()
-
+        self.vol_ventedH2 = self.mass['payload'] / self.MTOM * self.volume
+        self.range = self.cruiseV * self.trip_time   # m
+        self.deployment_distance = self.range - 200000  # m
+        self.deployment_time = self.deployment_distance / self.cruiseV   # s
+        self.venting_vol_flow = self.vol_ventedH2 / self.deployment_time
 
     def save(self):
         pickle(self, self.name)
@@ -182,6 +187,7 @@ class Blimp:
         print('###################### DESIGN CHARACTERISTICS ###################################')
         print()
         print('MTOM: ', round(self.MTOM, 2), ' kg')
+        print('MTOW: ', round(self.MTOW, 2), ' N')
         for key, value in self.mass.items():
             print('Mass of', key, ':', round(value, 2), "kg")
         print()
@@ -191,6 +197,7 @@ class Blimp:
         print('Balloon thickness: ', round(self.balloon_thickness*1000, 3), ' mm')
         print('Balloon surface area: ', round(self.surface_area, 1), ' m^2')
         print('Explosive potential: ', round(self.explosive_potential/10**6, 2), ' MJ')
+        print('Vented hydrogen per mission:', round(self.vol_ventedH2, 2), 'm^3')
         print('Spheroid ratio: ', round(self.spheroid_ratio, 0))
         print('Number of fins: ', self.n_fins)
         print()
@@ -211,11 +218,17 @@ class Blimp:
         print('Actual propulsion power available: ', round(self.net_prop_power / 1000, 2), ' kW')
         print('Actual power delivered per engine: ', round(self.power_per_engine/1000, 2), ' kW')
         print('Cruise throttle ', round(self.cruise_throttle * 100, 1), ' % (out of 55% recommended for steady-state)')
+        print('Cruise thrust: ', round(self.cruise_thrust, 2), ' N')
         print()
         print('Drag coefficient: ', round(self.CD, 4))
         print('Speed on battery: ', round(self.battery_speed * 3.6, 2), ' km/h')
         print('Return time on battery: ', round(req.range_on_battery/self.battery_speed/3600, 1), ' h')
         print('Cruise Speed: ', round(self.cruiseV * 3.6, 2), ' km/h')
+        print('Range: ', round(self.range/1000, 2), ' km')
+        print('Mission time', round(self.trip_time / 3600, 2), ' h')
+        print('Deployment distance:', round(self.deployment_distance / 1000, 2), ' km')
+        print('Deployment time:', round(self.deployment_time / 3600, 2), ' h')
+
 
     def trim(self, cruisepath):
         self.h_trim = np.mean(cruisepath)
@@ -348,7 +361,6 @@ class Blimp:
         self.Iyy = sum([(x[key]**2 + z[key]**2) * mass[key] for key in x.keys()])
         self.Iyy += mass['engines'] * self.d_eng**2
         self.Iyy += mass['envelope'] * self.radius * self.length * 2/3
-        #print('C.g. estimated for ', round(sum(mass.values()) / self.MTOM * 100, 1), ' % of the mass.')
 
         print(self.Iyy)
 

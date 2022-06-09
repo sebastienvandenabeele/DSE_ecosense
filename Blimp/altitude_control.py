@@ -287,6 +287,7 @@ def lateralStateSpace(blimp, u):
     # Moment Arms
     x_ac = blimp.length * (0.5 - 0.37)  # Assumed at 37% length, from Blibble p 103
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
+    dx_hinge = 0.55 * blimp.fin.root_chord
 
     # Coefficients for model
     K_zz = 900 # TODO
@@ -297,7 +298,7 @@ def lateralStateSpace(blimp, u):
     C_m_q_e = C_m_q_hat * l_ref / V
     C_m_q_h = -0.1995 * C_Y_b * (x_fin / l_ref) ** 2  # Blibble p 283
     C_N_r = C_m_q_h + C_m_q_e
-    C_F_delta = 0.06 # TODO
+    C_F_delta = C_F_b * 0.9
 
     # C1 = np.array([[0, -K_zz, 0],
     #                [1, 0, 1/V],
@@ -321,7 +322,7 @@ def lateralStateSpace(blimp, u):
 
     C3 = np.array([[C_F_delta],
                    [0],
-                   [C_F_delta * x_fin/l_ref]])
+                   [C_F_delta * (x_fin + dx_hinge)/l_ref]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
     B = -np.linalg.inv(C1) @ C3  # Feedback Matrix

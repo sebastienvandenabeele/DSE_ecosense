@@ -103,11 +103,24 @@ def simulateRange(blimp):
     plt.grid()
     plt.show()
 
+print()
 
-def simulateTurn(blimp):
 
-    print()
-
+# def simPower(blimp):
+#     ts = np.arange(0, 8 * 60, 1)
+#     for t in ts:
+#         hour = t//60
+#         print('Its', t, 'o clock')
+#         elevation = elevations[t - 8]
+#         total_area, shone_area = projectPanel(blimp, elevation, 30)
+#         tmy = getIrradiance(t, t)
+#         DNI = np.mean(tmy['DNI'])
+#         DHI = np.mean(tmy['DHI'])
+#
+#         generated_power = (DNI * shone_area + DHI * total_area) * blimp.solar_cell.efficiency * blimp.solar_cell.fillfac
+#         powers.append(generated_power)
+#         installed_power = blimp.n_engines * blimp.engine.max_power * Blimp.prop_limit
+#         power_for_prop = generated_power - blimp.power_electronics
 
 
 

@@ -62,8 +62,10 @@ solar_pack_3 = Electronic(name="Solar pack 3", mass=smart_solar_3.mass*7, power_
 # Altitude Control actuators
 
 
-# Valve actuators for venting system
-air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, power_consumption=0, cost=8.85, type="Air Value")
+# Venting and Ballonet
+#air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, power_consumption=0, cost=8.85, type="Air Value")
+valve = Electronic(name="2 Way Solenoid Valve", mass=0.235, power_consumption=19, cost=283.68, type="Valve")
+fan = Electronic(name='Ballonet Fan', mass=0.046, power_consumption=7.56, cost=11.35, type='Fan')
 
 
 ############################################
@@ -71,6 +73,6 @@ air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, power_con
 ############################################
 
 # 8kW system config
-config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, solar_pack_2, air_valve, battery_pack] # Costas favourite one
-config_option_2 = [NEO_M9N, ultrasonic, Honeywell_SATCOM, skynode, solar_pack_1, air_valve, battery_pack]
-config_option_3 = [NEO_M9N, lidar, Honeywell_SATCOM, skynode, solar_pack_3, air_valve, battery_pack]
+config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_1, valve, valve, valve, battery_pack, fan] # Costas favourite one
+#config_option_2 = [NEO_M9N, ultrasonic, Honeywell_SATCOM, skynode, solar_pack_1, air_valve, battery_pack]
+#config_option_3 = [NEO_M9N, lidar, Honeywell_SATCOM, skynode, solar_pack_3, air_valve, battery_pack]
