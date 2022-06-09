@@ -11,8 +11,7 @@ def coordinate(lat,long):
     return np.abs(dx),np.abs(dy)
 
 def SENSOR_PLACEMENT(dlon,dlat,ds):
-    mesh_df = pd.read_csv(r"../Sensor Reliability Simulation/data/custom_mesh.csv")
-    print(mesh_df)
+    mesh_df = pd.read_csv(r"../Sensor Reliability Simulation/data/custom_mesh.csv").dropna()
     min_lat,max_lat = mesh_df["lat"] - ds/(2*dlat) , mesh_df["lat"] + ds/(2*dlat)
     min_lon,max_lon = mesh_df["lon"] - ds/(2*dlon) , mesh_df["lon"] + ds/(2*dlon)
     mesh_df["min_lat"] = min_lat
@@ -29,7 +28,6 @@ def SENSOR_PLACEMENT(dlon,dlat,ds):
         LAT,LON = np.meshgrid(lat_range,lon_range)
         subtile_grid = np.array([LAT.ravel(),LON.ravel()]).T
         sensor_points = np.vstack((sensor_points,subtile_grid))
-
+    
     sensor_points = sensor_points[1:,:]
-    print("total sensors:",len(sensor_points))
     return sensor_points

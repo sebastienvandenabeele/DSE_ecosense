@@ -14,8 +14,6 @@ def reverse_coordinate(x,y,dX,dY):
 
 def select_area_map(sensor_points,showmap,dLat,dLon,Nbr):
     N_flights = int(len(sensor_points)/Nbr)
-    print("\nNumber of flights: ",N_flights)
-
     value_range = 2200
     park_perimeter = pd.read_excel(r"./data/coordinates.xlsx")
     park_perimeter.set_index("loc",inplace=True)
