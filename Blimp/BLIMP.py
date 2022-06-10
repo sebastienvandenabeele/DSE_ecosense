@@ -119,7 +119,7 @@ class Blimp:
 
         self.gondola_electronics = gondola_electronics
         self.envelope_electronics = envelope_electronics
-        self.power_electronics = sum([el.power_consumption for el in self.envelope_electronics]) + sum([el.power_consumption for el in self.gondola_electronics])
+        self.power_electronics = sum([el.constant_power_consumption for el in self.envelope_electronics]) + sum([el.constant_power_consumption for el in self.gondola_electronics])
         self.mass['envelope electronics'] = sum([el.mass for el in self.envelope_electronics])
         self.mass['gondola electronics'] = sum([el.mass for el in self.gondola_electronics])
 
@@ -363,9 +363,9 @@ class Blimp:
         print(self.Iyy)
 
     def placeGondola(self):
-        self.gondola.z_cg = -2.017
+        self.gondola.z_cg = -2.1
         self.gondola.x_cg = 0
-        self.z_eng = self.gondola.z_cg
+        self.z_eng = -1.968
         # for i in range(4):
         #     self.x_eng = self.x_cg
         #     self.estimateCG()

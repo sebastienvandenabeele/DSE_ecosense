@@ -288,11 +288,11 @@ def lateralStateSpace(blimp, u):
     x_ac = blimp.length * (0.5 - 0.37)  # Assumed at 37% length, from Blibble p 103
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
     dx_hinge = 0.55 * blimp.fin.root_chord
+    dx_hinge = 0
 
     # Coefficients for model
-    K_zz = 900 # TODO
+    K_zz = 800 # TODO
     C_mtom = blimp.MTOM / (dyn_pressure * S)
-    C_c = c_atm / (dyn_pressure * S)
     C_Y_b = 2 / blimp.spheroid_ratio
     C_F_b = blimp.fin.CLa * 0.1995 * 0.5
     C_m_q_e = C_m_q_hat * l_ref / V

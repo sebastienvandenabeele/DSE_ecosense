@@ -52,13 +52,13 @@ Shlimp = Blimp(name=                "Shlimp_for_model",
                solar_cell=          solar.maxeon_gen3)
 
 
-# Shlimp = unpickle('Shlimp_for_model')
+Shlimp = unpickle('Shlimp_for_model')
 Shlimp.report()
 Shlimp.estimateCost()
 Shlimp.save()
-#longitudinalStateSpace(Shlimp, 2, 18.24)
-#lateralStateSpace(Shlimp, np.radians(10))
-
+#longitudinalStateSpace(Shlimp, 2.033, 92.14)
+lateralStateSpace(Shlimp, np.radians(10))
+#simPower(Shlimp)
 
 
 # ds = []
