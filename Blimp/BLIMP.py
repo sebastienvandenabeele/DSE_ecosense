@@ -45,7 +45,7 @@ iteration_precision = 0.001
 
 # Creation of Blimp class
 class Blimp:
-    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0, mass_deployment=0, gondola=0, x_l_fins=0.9, trip_time=7,
+    def __init__(self, name, target_speed=0, mass_payload=0, envelope_material=0, liftgas=0,mass_gondola_structure=0, mass_deployment=0, gondola=0, x_l_fins=0.9, trip_time=7,
                   mass_ballonet=0, solar_cell=0, engine=0, gondola_electronics=[], envelope_electronics=[], length_factor=0, spheroid_ratio=0, n_engines=0, n_engines_rod=0,
                  mass_solar_cell=0, mass_balloon=0, panel_angle=0, mass_control=0, n_fins=0, h_trim=0, balloon_pressure=0, d_eng=0):
         """
@@ -113,7 +113,7 @@ class Blimp:
         self.x_cg = 0
         self.z_cg = 0
         self.mass['payload'] = mass_payload
-        self.mass['gondola structure'] = 8
+        self.mass['gondola structure'] = mass_gondola_structure
         self.mass['controls'] = mass_control
         self.gondola = gondola
 
@@ -256,8 +256,6 @@ class Blimp:
                 self.sizeBalloon()
                 self.fin=sizeControl(self)
                 self.mass["controls"]=self.fin.mass * self.n_fins
-                self.mass['gondola structure'] = 0.15 * (
-                            self.mass['payload'] + self.mass['gondola electronics'] + self.mass['battery'])
                 self.sizeBattery()
 
                 if i % 4 == 0:
@@ -365,13 +363,13 @@ class Blimp:
         print(self.Iyy)
 
     def placeGondola(self):
-        self.gondola.z_cg = - self.radius - self.gondola.height / 2
+        self.gondola.z_cg = -2.017
         self.gondola.x_cg = 0
         self.z_eng = self.gondola.z_cg
         # for i in range(4):
         #     self.x_eng = self.x_cg
         #     self.estimateCG()
-        xcg_target = self.cruise_thrust * self.z_eng / self.MTOM / g
+        xcg_target = self.cruise_thrust * self.z_eng / self.MTOW
         for x_gondola in np.arange(0, self.length / 4, 0.01):
             self.gondola.x_cg = -x_gondola
             self.x_eng = xcg_target
