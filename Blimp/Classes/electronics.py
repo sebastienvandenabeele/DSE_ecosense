@@ -60,12 +60,18 @@ solar_pack_2 = Electronic(name="Solar pack 2", mass=smart_solar_2.mass*2, consta
 solar_pack_3 = Electronic(name="Solar pack 3", mass=smart_solar_3.mass*7, constant_power_consumption=0, cost=smart_solar_3.cost*7, type="Solar pack") # 1.16kW*7 = 8.12kW
 
 
-# Electromagnet
-EM = Electronic(name="PEM1213A", mass=0.01, partial_power_consumption=1, cost=10, type="Electromagnet") 
-
+# Deployment components
+EM = Electronic(name="PEM1213A", mass=0.01, partial_power_consumption=1, cost=7, type="Electromagnet") 
+motion_sensor = Electronic(name="Quad-Beam Photoelectric Sensor", mass=2.27, constant_power_consumption=5, cost=119, type="Motion Sensor")
 
 # Fin and propulsion actuators
 MEGAservo = Electronic(name="HS-5805MG Mega", mass=0.197, constant_power_consumption=0.003, partial_power_consumption=15, cost=77, type="Servo")
+
+# Pressure and H2 sensors
+pressure_sensor = Electronic(name="MPX 2200DP", mass=0.05, cost=17.54, type="Pressure Sensor")
+H2_sensor = Electronic(name="H2-AF", mass=0.04, cost=30, type="H2 sensor")
+photoresistor = Electronic(name="GL5516 LDR", mass=0.025, cost=0.15, type="Servo")
+
 
 # Altitude Control actuators
 
@@ -81,10 +87,7 @@ fan = Electronic(name='Ballonet Fan', mass=0.046, partial_power_consumption=7.56
 ############################################
 
 # 8kW system config
-config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_1, battery_pack, fan] + [valve]*3 + [MEGAservo]*8  # Costas favourite one
-#config_option_2 = [NEO_M9N, ultrasonic, Honeywell_SATCOM, skynode, solar_pack_1, air_valve, battery_pack]
-#config_option_3 = [NEO_M9N, lidar, Honeywell_SATCOM, skynode, solar_pack_3, air_valve, battery_pack]
-
+config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_1, battery_pack, fan] + [valve]*3 + [MEGAservo]*8 +3*[motion_sensor] + 3*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor]
 
 elec_cost = 0
 elec_mass = 0
