@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Everything is done for a single 10x10km area containing 1089 sensors and 7 relays deployed in 2 trips (mission lasts 5 years)
-flights_per_year = 24
+flights_per_year = 24 * 2
 
 # Network Costs
 sensors = 1089 * 45.5
@@ -31,7 +31,7 @@ vehicle = (solar_panels + hydrogen + electronics +
 
 # Operations Costs
 drone_pilot = 3 * (8+2) * 180
-technicians = 3 * (8+2) * 3 * 40
+technicians = 3 * (8+2) * 40
 national_park_flying_permit = 2 * 2000
 motorhome = 2 * 2500
 living_expenses = 100 * 4 * 2
@@ -48,9 +48,16 @@ server = 4000 * 5  # one per mission
 maintenance = 0.25 * vehicle / flights_per_year
 recurring = software_engineer + server + maintenance
 
+# Misc
+hydorgen_delivery = 1000
+freight = 0.03 * 4350 * 0.250
+energy = 50
+salaries = 2500 * 5 * 5 * 12 / flights_per_year * 2
+office = 1500 * 12 * 5 / flights_per_year * 2
+misc = freight + hydorgen_delivery + energy + salaries + office
 
 final_cost_keur_arr = np.array(
-    [network, vehicle, operations, recurring])/1000
+    [network, vehicle, operations, recurring, misc])/1000
 final_cost_keur = np.round(np.sum(final_cost_keur_arr), 2)
 
 # Profit Margin
@@ -71,4 +78,4 @@ plt.legend(pie[0], cost_labels, bbox_to_anchor=(1, 0.5), loc="upper right", font
            bbox_transform=plt.gcf().transFigure)
 plt.title(f'Cost Breakdown')
 plt.axis('equal')
-plt.show()
+# plt.show()
