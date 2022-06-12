@@ -154,6 +154,8 @@ def getC(blimp):
 
 def longitudinalStateSpace(blimp, d_eng, U):
     V = blimp.cruiseV
+    VVh_sq = 0.75**2
+    # = 1
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
     S = blimp.ref_area
     C_m_q_hat = 0.073 # from Blibble, based on Solar HALE p 286
@@ -185,6 +187,7 @@ def longitudinalStateSpace(blimp, d_eng, U):
     C_m_q_h = 0.1995 * C_L_a_h * (x_fin/l_ref)**2 # Blibble p 283
     C_m_q = C_m_q_h + C_m_q_e
 
+    k_fin = 1/(blimp.fin.AR * 0.7 * np.pi)
 
 
     C_m_a = C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref - C_w * z_cg / l_ref
@@ -197,9 +200,9 @@ def longitudinalStateSpace(blimp, d_eng, U):
                    [0, 0, 0, 1, 0]])
 
     C2 = np.array([[0, 0, 0, 0, -1],
-                   [C_L_a_e + C_L_a_h, -C_k, -C_c * V, 0, 0],
+                   [C_L_a_e + C_L_a_h*VVh_sq, -C_k, -C_c * V, 0, 0],
                    [0, 0, -V, 0, 0],
-                   [C_L_a_e * x_ac/l_ref - C_L_a_h * x_fin/l_ref, 0, 0, -C_w * z_cg/l_ref, -C_m_q],
+                   [C_L_a_e * x_ac/l_ref - C_L_a_h*VVh_sq * x_fin/l_ref, 0, 0, -C_w * z_cg/l_ref, -C_m_q],
                    [0, 0, 0, 0, -1]])
 
     C3 = np.array([[0],
@@ -209,12 +212,11 @@ def longitudinalStateSpace(blimp, d_eng, U):
                   [0]])
 
     # Elevator solution
-    # C3 = np.array([[x_fin / l_ref],
-    #                [0],
-    #                [0],
-    #                [-1],
-    #                [0]])
-    #U = U * blimp.fin.CLa * 0.1995 * 0.5  # Force coefficient at tail
+    C3 = np.array([[0],
+                   [-blimp.fin.CLa * 0.1995*VVh_sq * 0.5],
+                   [0],
+                   [blimp.fin.CLa * 0.1995 * 0.5*VVh_sq * x_fin / l_ref],
+                   [0]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
     B = -np.linalg.inv(C1) @ C3  # Feedback Matrix
@@ -232,13 +234,14 @@ def longitudinalStateSpace(blimp, d_eng, U):
 
     new_throttle = blimp.cruise_throttle * throttle_up
 
-    print("Actual input of ", round(U, 2), 'N')
-    print('thrust vectored at ', round(nu * 57.3, 2), 'degrees')
-    print('throttle at ', round(new_throttle, 2), ', ', round((throttle_up-1)*100, 1), '% higher than cruise')
+    # print("Actual input of ", round(U, 2), 'N')
+    # print('thrust vectored at ', round(nu * 57.3, 2), 'degrees')
+    # print('throttle at ', round(new_throttle, 2), ', ', round((throttle_up-1)*100, 1), '% higher than cruise')
 
     ts = np.arange(0, 30, 0.1)
 
     us = np.ones(len(ts)) * U
+
 
     ys, ts_, xs = ml.lsim(sys, us, ts)
 
@@ -260,20 +263,29 @@ def longitudinalStateSpace(blimp, d_eng, U):
     # plt.xlabel('Time [s]')
     # plt.ylabel('Pitch Rate [deg/s]')
 
-    # plt.subplot(325)
-    # plt.plot(ts, ys[:, 0]**2 * C_L_a_e**2 * 0.5 * rho * V**3 * S)
-    # plt.grid()
-    # plt.xlabel('Time [s]')
-    # plt.ylabel('Additional Power [W]')
-
     plt.subplot(325)
-    plt.plot(ts, ys[:, 0] * (C_L_a_e+C_L_a_h) * 0.5 * rho * V**2 * S)
-    plt.plot(ts, us * 0.5 * rho * V**2 * S)
-    plt.plot(ts, ys[:, 0] * C_L_a_e * 0.5 * rho * V**2 * S - us * 0.5 * 1.225 * V**2 * S)
+    plt.plot(ts, ys[:, 0]**2 * (C_L_a_e**2 + k_fin * C_L_a_h**2*VVh_sq) * 0.5 * rho * V**2 * S/blimp.cruise_thrust * 100)
     plt.grid()
-    plt.legend(['Envelope Lift', 'Downforce', 'Sum'])
     plt.xlabel('Time [s]')
-    plt.ylabel('Force [N]')
+    plt.ylabel('Additional Power [%]')
+
+    # plt.subplot(325)
+    # plt.plot(ts, ys[:, 0] * (C_L_a_e+C_L_a_h*VVh_sq) * 0.5 * rho * V**2 * S)
+    # plt.plot(ts, -us * blimp.fin.CLa *VVh_sq* 0.1995 * 0.5 * 0.5 * rho * V**2 * S)
+    # plt.plot(ts, ys[:, 0] * (C_L_a_e + C_L_a_h*VVh_sq) * 0.5 * rho * V**2 * S - us * blimp.fin.CLa *VVh_sq* 0.1995 * 0.5 * 0.5 * 1.225 * V**2 * S)
+    # plt.grid()
+    # plt.legend(['Envelope Lift', 'Downforce', 'Sum'])
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('Force [N]')
+
+    # plt.subplot(325)
+    # plt.plot(ts, ys[:, 1] * C_k * 0.5 * rho * V**2 * S)
+    # plt.plot(ts, ys[:, 2] * V * C_c * 0.5 * rho * V**2 * S)
+    # plt.plot(ts, ys[:, 1] * C_k * 0.5 * rho * V**2 * S + ys[:, 2] * V * C_c * 0.5 * rho * V**2 * S)
+    # plt.grid()
+    # plt.legend(['Heaviness', 'Drag', 'Sum'])
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('Force [N]')
 
 
     plt.subplot(321)
@@ -300,35 +312,39 @@ def longitudinalStateSpace(blimp, d_eng, U):
 
 def lateralStateSpace(blimp, u):
     V = blimp.cruiseV
+    VVh_sq = 0.75 ** 2
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V ** 2
     S = blimp.ref_area
-    C_n_r_hat = -0.073  # from Blibble, based on Solar HALE p 286
+    C_N_r_hat = 0.073  # from Blibble, based on Solar HALE p 286
     C_Y_r_hat = 0.024   # ''
 
-    l_ref = blimp.volume ** (1 / 3)
     l_ref = blimp.length
 
     # Moment Arms
     x_ac = blimp.length * (0.5 - 0.37)  # Assumed at 37% length, from Blibble p 103
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
-    dx_hinge = 0.55 * blimp.fin.root_chord
+    x_hinge = x_fin + 0.55 * blimp.fin.root_chord
 
     # Coefficients for model
     K_zz = 800 / (dyn_pressure * S * l_ref)# TODO
     C_mtom = blimp.MTOM / (dyn_pressure * S)
-    C_Y_b = 2 / blimp.spheroid_ratio
-    C_F_b = blimp.fin.CLa * 0.1995 * 0.5
+    C_L_beta_e = 2 / blimp.spheroid_ratio
+    C_L_beta_v = blimp.fin.CLa * 0.1995 * 0.5 * VVh_sq
 
-    C_n_r_e = C_n_r_hat * np.sqrt(S) / V
-    C_n_r_t = -0.1995 * C_Y_b * (x_fin / l_ref) ** 2  # Blibble p 283
-    C_N_r = C_n_r_t + C_n_r_e
+    C_N_r_e = C_N_r_hat * np.sqrt(S) / V
+    C_N_r_t = -0.1995 * C_L_beta_v * (x_fin / l_ref) ** 2 * VVh_sq   # Blibble p 283
+    C_N_r = C_N_r_t + C_N_r_e
 
-    C_Y_r_e = C_Y_r_hat * np.sqrt(S) / V
-    C_Y_r_t = 0.1995 * C_Y_b * x_fin / np.sqrt(S)
-    C_Y_r = C_Y_r_t + C_Y_r_e
+    C_L_r_e = C_Y_r_hat * np.sqrt(S) / V
+    C_L_r_t = 0.1995 * C_L_beta_v * x_fin / np.sqrt(S) * VVh_sq
+    C_L_r = C_L_r_t + C_L_r_e
 
-    C_F_delta = C_F_b * 0.9
+    C_F_delta = C_L_beta_v * 0.9 * VVh_sq
 
+    K_ac = (C_L_beta_e * x_ac/l_ref - C_L_beta_v * x_fin/l_ref) / (C_L_beta_e + C_L_beta_v)
+
+    slope = (1 + x_hinge/l_ref)*C_F_delta / (C_N_r - K_ac*(C_L_r - C_mtom*V))
+    print(slope)
 
     # C1 = np.array([[0, -K_zz, 0],
     #                [1, 0, 1/V],
@@ -342,17 +358,29 @@ def lateralStateSpace(blimp, u):
     #                [0],
     #                [-C_F_delta]])
 
-    C1 = np.array([[0, -C_mtom, 0],
-                   [1, -1/V, 0],
-                   [0, 0, -K_zz]])
+    # C1 = np.array([[0, -C_mtom, 0],
+    #                [1, -1/V, 0],
+    #                [0, 0, -K_zz]])
+    #
+    # C2 = np.array([[-(C_L_beta_e + C_L_beta_v), 0, -V*C_mtom],
+    #                [0, 0, 0],
+    #                [(C_L_beta_e * x_ac/l_ref - C_L_beta_v * x_fin/l_ref), C_N_r, 0]])
+    #
+    # C3 = np.array([[C_F_delta],
+    #                [0],
+    #                [C_F_delta * (x_hinge)/l_ref]])
 
-    C2 = np.array([[-(C_Y_b + C_F_b), 0, -V*C_mtom],
-                   [0, 0, 0],
-                   [(C_Y_b * x_ac/l_ref - C_F_b * x_fin/l_ref), C_N_r, 0]])
+    C1 = np.array([[0, -K_zz, 0],
+                   [-C_mtom * V, 0, 0],
+                   [0, V/g, -1]])
 
-    C3 = np.array([[C_F_delta],
-                   [0],
-                   [C_F_delta * (x_fin + dx_hinge)/l_ref]])
+    C2 = np.array([[C_L_beta_e * x_ac/l_ref - C_L_beta_v * x_fin/l_ref, -C_N_r, 0],
+                   [-(C_L_beta_e + C_L_beta_v), C_L_r - C_mtom * V, 0],
+                   [0, 0, 0]])
+
+    C3 = np.array([[C_F_delta * x_hinge/l_ref],
+                   [C_F_delta],
+                   [0]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
     B = -np.linalg.inv(C1) @ C3  # Feedback Matrix
@@ -362,28 +390,41 @@ def lateralStateSpace(blimp, u):
     sys = ml.ss(A, B, C, D)
     ml.damp(sys)
 
-    ts = np.arange(0, 0.5, 0.1)
+    ts = np.arange(0, 20, 0.1)
     us = np.ones(len(ts)) * u
 
     ys, ts_, xs = ml.lsim(sys, us, ts)
 
-    plt.subplot(311)
+    plt.subplot(321)
+    plt.plot(ts, us * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Rudder Deflection [deg]')
+
+    plt.subplot(322)
     plt.plot(ts, ys[:, 0] * 57.3)
     plt.grid()
     plt.xlabel('Time [s]')
     plt.ylabel('Sideslip Angle [deg]')
 
-    plt.subplot(313)
+    plt.subplot(323)
     plt.plot(ts, ys[:, 1] * 57.3)
     plt.grid()
     plt.xlabel('Time [s]')
     plt.ylabel('Turn Rate [deg/s]')
 
-    plt.subplot(312)
-    plt.plot(ts, ys[:, 1])
+    plt.subplot(324)
+    plt.plot(ts, V / ys[:, 1] )
     plt.grid()
     plt.xlabel('Time [s]')
-    plt.ylabel('Lateral Velocity [m/s]')
+    plt.ylabel('Turn Radius [m]')
+
+    plt.subplot(325)
+    plt.plot(ts, ys[:, 2] * 57.3)
+    plt.grid()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Bank Angle [deg]')
+
 
     plt.show()
 
