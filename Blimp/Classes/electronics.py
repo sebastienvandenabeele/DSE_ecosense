@@ -2,7 +2,7 @@
 
 
 class Electronic:
-    def __init__(self, name, mass, type, constant_power_consumption=0, partial_power_consumption=0, cost=0):
+    def __init__(self, name, mass, type, constant_power_consumption=0.0, partial_power_consumption=0.0, cost=0.0):
         """
         A class describing any secondary electronic component
         :param: name: [str] Name of component

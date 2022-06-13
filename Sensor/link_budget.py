@@ -16,7 +16,7 @@ def get_link_margin_node_relay(d):
     sensitivity = -174 + 10 * np.log10(bandwidth) + 6 - 20
     path_loss = 0.48 * f**0.43 * d**0.13 + 40 * \
         np.log10(d) - 20*np.log10(h_transmitter) - 20*np.log10(h_receiver)
-    return p_transmitter + g_transmitter + g_receiver - cable_loss*2 - path_loss - sensitivity - 3
+    return p_transmitter + g_transmitter + g_receiver - cable_loss*2 - path_loss - sensitivity - 6
 
 
 def get_link_margin_relay_relay(d):
@@ -32,7 +32,7 @@ def get_link_margin_relay_relay(d):
     path_loss = 0.48 * f**0.43 * d**0.13 + 40 * \
         np.log10(d) - 20*np.log10(h_transmitter) - 20*np.log10(h_receiver)
     print(path_loss)
-    return p_transmitter + g_transmitter + g_receiver - cable_loss*2 - path_loss - sensitivity - 3
+    return p_transmitter + g_transmitter + g_receiver - cable_loss*2 - path_loss - sensitivity - 6
 
 
 result_node_relay = sco.root_scalar(
@@ -42,6 +42,7 @@ result_relay_relay = sco.root_scalar(
     get_link_margin_relay_relay, method='bisect', bracket=[5000, 100000000])
 
 print(result_relay_relay)
+
 # df_test = pd.DataFrame(index=range(12), columns=[
 #                        "Status", "Temp", "Hum", "Fire", "CO", "Gas", "Disturb"])
 
@@ -63,20 +64,20 @@ print(result_relay_relay)
 # req_array = np.array(req_list)
 # print(req_array.max())
 
-df_test_2 = pd.DataFrame(index=range(3), columns=[
-                         "Temp", "Hum", "CO", "Gas", "Disturb"])
+# df_test_2 = pd.DataFrame(index=range(3), columns=[
+#                          "Temp", "Hum", "CO", "Gas", "Disturb"])
 
-req_list = []
+# req_list = []
 
-for i in range(10000):
-    df_test_2["Temp"] = np.round(np.random.uniform(10.000, 40.000, 3), 2)
-    df_test_2["Hum"] = np.round(np.random.uniform(0.000, 100.000, 3), 2)
-    df_test_2["CO"] = np.round(np.random.uniform(0.000, 100.000, 3), 2)
-    df_test_2["Gas"] = np.round(np.random.uniform(0.000, 100.000, 3), 2)
-    df_test_2.to_csv("bitrate_test_2.csv", index=False)
+# for i in range(10000):
+#     df_test_2["Temp"] = np.round(np.random.uniform(10.000, 40.000, 3), 2)
+#     df_test_2["Hum"] = np.round(np.random.uniform(0.000, 100.000, 3), 2)
+#     df_test_2["CO"] = np.round(np.random.uniform(0.000, 100.000, 3), 2)
+#     df_test_2["Gas"] = np.round(np.random.uniform(0.000, 100.000, 3), 2)
+#     df_test_2.to_csv("bitrate_test_2.csv", index=False)
 
-    req_bps = (os.path.getsize("bitrate_test_2.csv") + 4 + 4*1089) * 8
-    req_list.append(req_bps)
+#     req_bps = (os.path.getsize("bitrate_test_2.csv") + 4 + 4*1089) * 8
+#     req_list.append(req_bps)
 
-req_array = np.array(req_list)
-print(req_array.max())
+# req_array = np.array(req_list)
+# print(req_array.max())

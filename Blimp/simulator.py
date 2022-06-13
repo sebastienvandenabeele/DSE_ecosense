@@ -106,21 +106,61 @@ def simulateRange(blimp):
 print()
 
 
-# def simPower(blimp):
-#     ts = np.arange(0, 8 * 60, 1)
-#     for t in ts:
-#         hour = t//60
-#         print('Its', t, 'o clock')
-#         elevation = elevations[t - 8]
-#         total_area, shone_area = projectPanel(blimp, elevation, 30)
-#         tmy = getIrradiance(t, t)
-#         DNI = np.mean(tmy['DNI'])
-#         DHI = np.mean(tmy['DHI'])
-#
-#         generated_power = (DNI * shone_area + DHI * total_area) * blimp.solar_cell.efficiency * blimp.solar_cell.fillfac
-#         powers.append(generated_power)
-#         installed_power = blimp.n_engines * blimp.engine.max_power * Blimp.prop_limit
-#         power_for_prop = generated_power - blimp.power_electronics
+def simPower(blimp):
+    global power_required
+    dt = 20 # min
+    ts = np.arange(9 * 60, 16 * 60, dt)
+    generated_powers = []
+    times = []
+    powerdiffs = []
+    E = 0
+
+    elevations = []
+    shone_areas = []
+    total_areas = []
+
+
+    for t in ts:
+        hour = t//60
+        minute = t % 60
+        time = hour + minute/60
+
+        print('Its', hour, ':', minute, '/ ', time)
+        elevation = -2 * time**2 + 49 * time -244
+        elevations.append(elevation)
+        print('Sun elevation:', elevation, 'deg')
+
+        total_area, shone_area = projectPanel(blimp, elevation, 30)
+        total_areas.append(total_area)
+        shone_areas.append(shone_area)
+        tmy = getIrradiance(hour, hour)
+        DNI = np.mean(tmy['DNI'])
+        DHI = np.mean(tmy['DHI'])
+
+        generated_power = (DNI * shone_area + DHI * total_area) * blimp.solar_cell.efficiency * blimp.solar_cell.fillfac
+        generated_powers.append(generated_power)
+        print('Power generated', generated_power, 'W')
+
+        power_required = (blimp.power_for_prop + blimp.power_electronics)
+
+        times.append(time)
+
+        powerdiff = generated_power - power_required
+        powerdiffs.append(powerdiff)
+
+    usedpower = power_required * np.ones(len(ts))
+
+    for powerdiff in powerdiffs:
+        E += powerdiff * dt * 60
+
+    print(E)
+    plt.plot(times, usedpower)
+    plt.plot(times, generated_powers)
+    plt.xlabel('Time [h]')
+    plt.ylabel('Power [W]')
+    plt.grid()
+    plt.legend(['Power generated', 'Power required'])
+    plt.show()
 
 
 

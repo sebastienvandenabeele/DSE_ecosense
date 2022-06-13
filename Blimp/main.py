@@ -28,37 +28,55 @@ gondola = Gondola(length=4, height=0.5, x=-1, z=-2)
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_for_model",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               trip_time=           maximum_triptime,
-               mass_deployment=      3.44*2,
-               n_fins=                4,
-               gondola=             gondola,
-               mass_gondola_structure= 14.2 * 1.05,
+# Shlimp = Blimp(name=                "Shlimp_for_model",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                trip_time=           maximum_triptime,
+#                mass_deployment=      3.44*2,
+#                n_fins=                4,
+#                gondola=             gondola,
+#                mass_gondola_structure= 14.2 * 1.05,
+#
+#                envelope_material=    mat.polyethylene_fiber,
+#                balloon_pressure=     500,
+#                h_trim=               trim_altitude,
+#                n_engines=            4,
+#                n_engines_rod=        1,
+#                engine=              eng.tmt_4130_300,
+#                d_eng=                2,
+#
+#                gondola_electronics=  el.config_option_1,
+#                length_factor=        0.9,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          solar.maxeon_gen3)
 
-               envelope_material=    mat.polyethylene_fiber,
-               balloon_pressure=     500,
-               h_trim=               trim_altitude,
-               n_engines=            4,
-               n_engines_rod=        1,
-               engine=              eng.tmt_4130_300,
-               d_eng=                2,
 
-               gondola_electronics=  el.config_option_1,
-               length_factor=        0.9,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          solar.maxeon_gen3)
-
-
-# Shlimp = unpickle('Shlimp_for_model')
+Shlimp = unpickle('Shlimp_for_model')
 Shlimp.report()
 Shlimp.estimateCost()
 Shlimp.save()
-#longitudinalStateSpace(Shlimp, 2, 18.24)
-#lateralStateSpace(Shlimp, np.radians(10))
 
+# vs = np.arange(-20, 20, 0.2)
+# fs = [-getRestoringForce(h, Shlimp) for h in hs]
+# fs_lin = -getK(Shlimp) * hs
+#
+# plt.plot(hs, fs, linestyle = 'dashed')
+# plt.plot(hs, fs_lin)
+# plt.grid()
+# plt.xlabel('Deviation from Trim Altitude [m]')
+# plt.ylabel('Net Buoyancy Force [N]')
+# plt.legend(['ISA Model', 'ISA Model (linearised)'])
+# plt.xlim([-2000, 2000])
+# plt.show()
+#
+# lateralStateSpace(Shlimp, np.radians(7))
+# while True:
+#     U = float(input('Elevator deflection:'))
+#     U = U / 57.3
+#     longitudinalStateSpace(Shlimp, d_eng=2.033, U=U)
+#lateralStateSpace(Shlimp, np.radians(5))
+#simPower(Shlimp)
 
 
 # ds = []
@@ -98,17 +116,17 @@ Shlimp.save()
 # simulateRange(Shlimp)
 
 # simAltitudeDynamics(Shlimp, cruisepath)
-# vys = np.arange(-20, 20, 1)
-# fs = [0.5 * getISA('rho', Shlimp.h_trim) * np.sqrt(vy**2 + Shlimp.cruiseV**2) * vy * Shlimp.ref_area * Shlimp.CD for vy in vys]
-# fs_linearised = getC(Shlimp, cruisepath) * vys
-# plt.plot(vys, fs, linestyle='dashed')
-# plt.plot(vys, fs_linearised)
-# plt.xlim((-20, 20))
-# plt.legend(['Usual Drag Model', 'Small Angle Approximation'])
-# plt.grid()
-# plt.xlabel('Vertical Velocity [m/s]')
-# plt.ylabel('Drag in Vertical Direction [N]')
-# plt.show()
+vys = np.arange(-20, 20, 1)
+fs = [-0.5 * getISA('rho', Shlimp.h_trim) * np.sqrt(vy**2 + Shlimp.cruiseV**2) * vy * Shlimp.ref_area * Shlimp.CD for vy in vys]
+fs_linearised = getC(Shlimp) * -vys
+plt.plot(vys, fs, linestyle='dashed')
+plt.plot(vys, fs_linearised)
+plt.xlim((-20, 20))
+plt.legend(['Usual Drag Model', 'Small Angle Approximation'])
+plt.grid()
+plt.xlabel('Vertical Velocity [m/s]')
+plt.ylabel('Drag in Vertical Direction [N]')
+plt.show()
 
 # dhs = np.arange(-2000, 2000, 1)
 # fs = [getRestoringForce(dh, Shlimp) for dh in dhs]
