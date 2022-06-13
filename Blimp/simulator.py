@@ -112,7 +112,7 @@ def simPower(blimp):
     ts = np.arange(9 * 60, 16 * 60, dt)
     generated_powers = []
     times = []
-    powerdiffs = []
+
     E = 0
 
     elevations = []
@@ -145,21 +145,26 @@ def simPower(blimp):
 
         times.append(time)
 
-        powerdiff = generated_power - power_required
-        powerdiffs.append(powerdiff)
 
-    usedpower = power_required * np.ones(len(ts))
+    usedpowers = power_required * np.ones(len(ts))
 
-    for powerdiff in powerdiffs:
-        E += powerdiff * dt * 60
+    generated_energy = 0
+    used_energy = 0
+    for power in generated_powers:
+        generated_energy += power * dt * 60
+    for power in usedpowers:
+        used_energy += power * dt * 60
+
+    print('Total Generated Energy [J] ', generated_energy)
+    print('Total Used Energy [J]', used_energy)
 
     print(E)
-    plt.plot(times, usedpower)
-    plt.plot(times, generated_powers)
+    plt.plot(times, usedpowers)
+    plt.scatter(times, generated_powers)
     plt.xlabel('Time [h]')
     plt.ylabel('Power [W]')
     plt.grid()
-    plt.legend(['Power generated', 'Power required'])
+    plt.legend(['Power Required', 'Power Available'])
     plt.show()
 
 

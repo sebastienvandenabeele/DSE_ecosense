@@ -61,6 +61,8 @@ def projectPanel(blimp, angle_sun, n_iter):
     projected area/real area ratio
 
     """
+
+    angle_sun = 90 - angle_sun
     plt.ioff()
     beta_vec = 0
     alpha_vec = np.radians(angle_sun)
