@@ -63,6 +63,8 @@ solar_pack_3 = Electronic(name="Solar pack 3", mass=smart_solar_3.mass*7, consta
 # Deployment components
 EM = Electronic(name="PEM1213A", mass=0.01, partial_power_consumption=1, cost=7, type="Electromagnet") 
 motion_sensor = Electronic(name="Quad-Beam Photoelectric Sensor", mass=2.27, constant_power_consumption=5, cost=119, type="Motion Sensor")
+photoresistor = Electronic(name="GL5516 LDR", mass=0.00025, cost=0.15, type="Servo")
+mass_flow_sensor = Electronic(name="Auto Mass Air Flow Sensor Meter", mass=0.45, cost=75, type="Mass flow sesnsor")
 
 # Fin and propulsion actuators
 MEGAservo = Electronic(name="HS-5805MG Mega", mass=0.197, constant_power_consumption=0.003, partial_power_consumption=15, cost=77, type="Servo")
@@ -70,7 +72,6 @@ MEGAservo = Electronic(name="HS-5805MG Mega", mass=0.197, constant_power_consump
 # Pressure and H2 sensors
 pressure_sensor = Electronic(name="MPX 2200DP", mass=0.05, cost=17.54, type="Pressure Sensor")
 H2_sensor = Electronic(name="H2-AF", mass=0.04, cost=30, type="H2 sensor")
-photoresistor = Electronic(name="GL5516 LDR", mass=0.00025, cost=0.15, type="Servo")
 
 
 # Altitude Control actuators
@@ -79,7 +80,7 @@ photoresistor = Electronic(name="GL5516 LDR", mass=0.00025, cost=0.15, type="Ser
 # Venting and Ballonet
 #air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, constant_power_consumption=0, cost=8.85, type="Air Value")
 valve = Electronic(name="2 Way Solenoid Valve", mass=0.235, partial_power_consumption=19, cost=283.68, type="Valve")
-fan = Electronic(name='Ballonet Fan', mass=0.046, partial_power_consumption=7.56, cost=11.35, type='Fan')
+fan = Electronic(name='Ballonet Fan', mass=0.08, partial_power_consumption=19.2, cost=26.9, type='Fan')
 
 
 ############################################
@@ -87,7 +88,7 @@ fan = Electronic(name='Ballonet Fan', mass=0.046, partial_power_consumption=7.56
 ############################################
 
 # 8kW system config
-config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_1, battery_pack, fan] + [valve]*3 + [MEGAservo]*8 + 3*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor]
+config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_2, fan] + [valve]*3 + [MEGAservo]*8 + 2*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor] + 2*[mass_flow_sensor]
 
 elec_cost = 0
 elec_mass = 0
@@ -103,5 +104,5 @@ for item in config_option_1:
     max_power += item.constant_power_consumption + item.partial_power_consumption
 
 
-
+print(elec_cost, elec_mass, elec_powercons, max_power)
 
