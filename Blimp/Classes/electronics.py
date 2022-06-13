@@ -70,7 +70,7 @@ MEGAservo = Electronic(name="HS-5805MG Mega", mass=0.197, constant_power_consump
 # Pressure and H2 sensors
 pressure_sensor = Electronic(name="MPX 2200DP", mass=0.05, cost=17.54, type="Pressure Sensor")
 H2_sensor = Electronic(name="H2-AF", mass=0.04, cost=30, type="H2 sensor")
-photoresistor = Electronic(name="GL5516 LDR", mass=0.025, cost=0.15, type="Servo")
+photoresistor = Electronic(name="GL5516 LDR", mass=0.00025, cost=0.15, type="Servo")
 
 
 # Altitude Control actuators
@@ -87,7 +87,7 @@ fan = Electronic(name='Ballonet Fan', mass=0.046, partial_power_consumption=7.56
 ############################################
 
 # 8kW system config
-config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_1, battery_pack, fan] + [valve]*3 + [MEGAservo]*8 +3*[motion_sensor] + 3*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor]
+config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_1, battery_pack, fan] + [valve]*3 + [MEGAservo]*8 + 3*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor]
 
 elec_cost = 0
 elec_mass = 0
@@ -103,5 +103,5 @@ for item in config_option_1:
     max_power += item.constant_power_consumption + item.partial_power_consumption
 
 
-print(elec_cost, elec_mass, elec_powercons, max_power)
+
 
