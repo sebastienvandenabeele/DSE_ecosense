@@ -80,7 +80,7 @@ H2_sensor = Electronic(name="H2-AF", mass=0.04, cost=30, type="H2 sensor")
 # Venting and Ballonet
 #air_valve = Electronic(name="Electric Solenoid Air Valve", mass=0.141, constant_power_consumption=0, cost=8.85, type="Air Value")
 valve = Electronic(name="2 Way Solenoid Valve", mass=0.235, partial_power_consumption=19, cost=283.68, type="Valve")
-fan = Electronic(name='Ballonet Fan', mass=0.046, partial_power_consumption=7.56, cost=11.35, type='Fan')
+fan = Electronic(name='Ballonet Fan', mass=0.08, partial_power_consumption=19.2, cost=26.9, type='Fan')
 
 
 ############################################
