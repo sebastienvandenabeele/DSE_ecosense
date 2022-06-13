@@ -29,36 +29,36 @@ gondola = Gondola(length=4, height=0.5, x=-1, z=-2)
 
 
 #Creation of blimp design, run either this or unpickle from file
-Shlimp = Blimp(name=                "Shlimp_for_model",
-               mass_payload =       REQ_payload_mass,
-               target_speed=        minimum_velocity,
-               trip_time=           maximum_triptime,
-               mass_deployment=      6.2*2,
-               n_fins=                4,
-               gondola=             gondola,
-               mass_gondola_structure= 21.3,
-               mass_fire_ex=            6,
+# Shlimp = Blimp(name=                "Shlimp_for_model",
+#                mass_payload =       REQ_payload_mass,
+#                target_speed=        minimum_velocity,
+#                trip_time=           maximum_triptime,
+#                mass_deployment=      3.9*2,
+#                n_fins=                4,
+#                gondola=             gondola,
+#                mass_gondola_structure= 21.3,
+#                mass_fire_ex=            6,
+#
+#                envelope_material=    mat.polyethylene_fiber,
+#                balloon_pressure=     500,
+#                h_trim=               trim_altitude,
+#                n_engines=            4,
+#                n_engines_rod=        1,
+#                engine=              eng.tmt_V505_260,
+#                d_eng=                2,
+#
+#                gondola_electronics=  el.config_option_1,
+#                length_factor=        0.8,
+#                spheroid_ratio=       3,
+#                liftgas=             gas.hydrogen,
+#                solar_cell=          solar.maxeon_gen3)
 
-               envelope_material=    mat.polyethylene_fiber,
-               balloon_pressure=     500,
-               h_trim=               trim_altitude,
-               n_engines=            4,
-               n_engines_rod=        1,
-               engine=              eng.tmt_V505_260,
-               d_eng=                2,
 
-               gondola_electronics=  el.config_option_1,
-               length_factor=        0.8,
-               spheroid_ratio=       3,
-               liftgas=             gas.hydrogen,
-               solar_cell=          solar.maxeon_gen3)
-
-
-#Shlimp = unpickle('Shlimp_for_model')
+Shlimp = unpickle('Shlimp_for_model')
 Shlimp.report()
 Shlimp.estimateCost()
 Shlimp.save()
-simPower(Shlimp)
+longitudinalStateSpace(Shlimp, 0.2)
 # vs = np.arange(-20, 20, 0.2)
 # fs = [-getRestoringForce(h, Shlimp) for h in hs]
 # fs_lin = -getK(Shlimp) * hs

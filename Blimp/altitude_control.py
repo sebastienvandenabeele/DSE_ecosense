@@ -153,39 +153,57 @@ def getC(blimp):
 
 
 def longitudinalStateSpace(blimp, U):
+    print('#########LONGITUDINAL COEFFICIENTS#############')
     V = blimp.cruiseV
+    print('V:', V)
     VVh_sq = 0.75**2
+    print('VVh_sq', VVh_sq)
 
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V**2
     S = blimp.ref_area
+    print('S', S)
     C_m_q_hat = 0.073 # from Blibble, based on Solar HALE p 286
     C_L_q_hat = 0.024  # from Blibble, based on Solar HALE p 286
 
     I_yy = blimp.Iyy
+    print('I_yy', I_yy)
     k_atm = getK(blimp)
     c_atm = getC(blimp)
     l_ref  = blimp.length
+    print('lref', l_ref)
 
     # Moment Arms
     x_ac = blimp.length * (0.5 - 0.37)   # Assumed at 37% length, from Blibble p 103
+    print('xac', x_ac)
     z_cg = - blimp.z_cg
+    print('zcg', z_cg)
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
+    print('xfin', x_fin)
     x_hinge = x_fin + 0.55 * blimp.fin.root_chord
+    print('xhinge', x_hinge)
 
     # Coefficients for model
     K_yy   = I_yy / (dyn_pressure * S * l_ref)
+    print('K_yy: ', K_yy)
     C_k    = k_atm / (dyn_pressure * S)
+    print('Ck', C_k)
     mu = blimp.MTOM / (dyn_pressure * S)
+    print('mu', mu)
     C_c    = c_atm / (dyn_pressure * S)
+    print('Cc', C_c)
 
     C_L_a_e = 2 / blimp.spheroid_ratio
+    print('CLae', C_L_a_e)
     C_L_a_h = blimp.fin.CLa * 0.1995 * 0.5
+    print('CLah', C_L_a_h)
 
     C_m_q_e =  C_m_q_hat * l_ref / V
     C_m_q_h = 0.1995 * C_L_a_h * (x_fin/l_ref)**2 # Blibble p 283
     C_m_q = C_m_q_h + C_m_q_e
+    print('Cmq', C_m_q)
 
     C_F_delta = C_L_a_h * 0.9 * VVh_sq
+    print('CFd', C_F_delta)
     k_fin = 1/(blimp.fin.AR * 0.7 * np.pi)
 
 
@@ -213,7 +231,9 @@ def longitudinalStateSpace(blimp, U):
                    [0]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
+    print(A)
     B = -np.linalg.inv(C1) @ C3  # Feedback Matrix
+    print(B)
     C = np.eye(5)        # Output Matrix
     D = np.zeros([5, 1])            # Feedthrough matrix
 
@@ -299,34 +319,49 @@ def longitudinalStateSpace(blimp, U):
 
 
 def lateralStateSpace(blimp, u):
+    print('##### LATERAL DYNAMICS ######')
     V = blimp.cruiseV
+    print('V', V)
     VVh_sq = 0.75 ** 2
+    print('vvsq', VVh_sq)
     dyn_pressure = 0.5 * getISA('rho', blimp.h_trim) * V ** 2
     S = blimp.ref_area
+    print('S', S)
     C_N_r_hat = 0.073  # from Blibble, based on Solar HALE p 286
     C_Y_r_hat = 0.024   # ''
 
     # Moment Arms
     l_ref = blimp.length
+    print('lref', l_ref)
     x_ac = blimp.length * (0.5 - 0.37)  # Assumed at 37% length, from Blibble p 103
+    print('xac', x_ac)
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
+    print('xfin', x_fin)
     x_hinge = x_fin + 0.55 * blimp.fin.root_chord
+    print('xhinge', x_hinge)
 
     # Coefficients for model
     K_zz = 800 / (dyn_pressure * S * l_ref)# TODO
+    print('Kzz', K_zz)
     mu = blimp.MTOM / (dyn_pressure * S)
+    print('mu', mu)
     C_Y_beta_e = 2 / blimp.spheroid_ratio
+    print('CYbe', C_Y_beta_e)
     C_Y_beta_v = blimp.fin.CLa * 0.1995 * 0.5 * VVh_sq
+    print('CYbv', C_Y_beta_v)
 
     C_N_r_e = C_N_r_hat * np.sqrt(S) / V
     C_N_r_t = -0.1995 * C_Y_beta_v * (x_fin / l_ref) ** 2 * VVh_sq   # Blibble p 283
     C_N_r = C_N_r_t + C_N_r_e
+    print('CNR', C_N_r)
 
     C_Y_r_e = C_Y_r_hat * np.sqrt(S) / V
     C_Y_r_t = 0.1995 * C_Y_beta_v * x_fin / np.sqrt(S) * VVh_sq
     C_Y_r = C_Y_r_t + C_Y_r_e
+    print('CYR', C_Y_r)
 
     C_F_delta = C_Y_beta_v * 0.9 * VVh_sq
+    print('CFdelta', C_F_delta)
 
 
     C1 = np.array([[0, -K_zz, 0],
@@ -342,7 +377,9 @@ def lateralStateSpace(blimp, u):
                    [0]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
+    print(A)
     B = -np.linalg.inv(C1) @ C3  # Feedback Matrix
+    print(B)
     C = np.eye(3)                # Output Matrix
     D = np.zeros([3, 1])         # Feedthrough matrix
 
