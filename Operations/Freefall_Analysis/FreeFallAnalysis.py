@@ -68,7 +68,8 @@ class SensorObject:
     def return_deploytime(self):
         return self.t
 
-x_init, y_init = 0, 310  # [m]
+
+x_init, y_init = 0, 300  # [m]
 vtot = 15 # [m/s]
 gamma = 0  # [rad]
 cd_fall = 0.9  # [-]
@@ -92,13 +93,31 @@ deploytime = round((sensorfall_minwind.return_deploytime() + sensorfall_nowind.r
               sensorfall_maxwind.return_deploytime()) / 3, 2)
 
 print(sensorfall_maxwind.return_deploytime(), sensorfall_nowind.return_deploytime(), sensorfall_minwind.return_deploytime())
-plt.plot(xlst_nowind, ylst_nowind, label="No WInd")
-plt.plot(xlst_maxwind, ylst_maxwind, label="Max WInd")
-plt.plot(xlst_minwind, ylst_minwind, label="Min WInd")
+plt.plot(xlst_nowind, ylst_nowind, label="No wind")
+plt.plot(xlst_maxwind, ylst_maxwind, label="WInd with deployment")
+plt.plot(xlst_minwind, ylst_minwind, label="Wind against deployment")
+plt.plot([0, 100], [15, 15], color='r', linestyle='--', label="Deployment altitude")
+plt.xlabel("Horizontal distance (m)")
+plt.ylabel("Height (m)")
 
 acc1 = round(xlst_maxwind[-1] - xlst_nowind[-1])
 acc2 = round(xlst_nowind[-1] - xlst_minwind[-1])
-
+plt.grid()
 plt.legend()
-plt.title(f"Accuracy of deployment is {(acc1 + acc2)/2} m. Time until string deployment is {deploytime} s")
+plt.title(f"Accuracy of deployment is {(acc1 + acc2)/2} m")
 plt.show()
+
+# sensorfall_nowind = SensorObject(x_init, y_init, gamma, m, vtot, cd_fall, A_fall, 0, 0, 0)
+# xlst_nowind, ylst_nowind = sensorfall_nowind.return_positions()
+#
+# sensorfall_maxwind = SensorObject(x_init, y_init, gamma, m, vtot, cd_fall, A_fall, cd_wind, A_wind, v_wind + 5)
+# xlst_maxwind, ylst_maxwind = sensorfall_maxwind.return_positions()
+#
+# plt.plot(xlst_nowind, ylst_nowind, label="15 km/h wind")
+# plt.plot(xlst_maxwind, ylst_maxwind, label="30 km/h wind")
+# plt.xlabel("Horizontal distance (m)")
+# plt.ylabel("Height (m)")
+# plt.plot([0, 200], [15, 15], color='r', linestyle='--', label="Deployment altitude")
+# plt.grid()
+# plt.legend()
+# plt.show()
