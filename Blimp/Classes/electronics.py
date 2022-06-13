@@ -48,7 +48,7 @@ skynode = Electronic(name="'Auterion Skynode", mass=0.188, constant_power_consum
 lion_battery = Electronic(name="Li-ion battery", mass=0.0485, constant_power_consumption=0, cost=4.35, type="Battery") # Capacity: 3450mAh, Volume: 3.6V - 3.7V
 # 12*7 battery pack:
 battery_pack = Electronic(name="Battery Pack", mass=12*7*lion_battery.mass, constant_power_consumption=0, cost=12*7*lion_battery.cost, type="Battery Pack")
-
+stepdown_converter = Electronic(name="LM2596 ", mass=0.03, cost=3, type="Stepdown Converter")
 
 # Solar Charge Controllers
 custom_scc = Electronic(name="Arduino MPPT Solar Charge Controller", mass=0.1, constant_power_consumption=0, cost=100, type="Solar Charge Controller") # 1kW
@@ -88,7 +88,7 @@ fan = Electronic(name='Ballonet Fan', mass=0.08, partial_power_consumption=19.2,
 ############################################
 
 # 8kW system config
-config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_2, fan] + [valve]*3 + [MEGAservo]*8 + 2*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor] + 2*[mass_flow_sensor]
+config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_2, fan] + [valve]*3 + [MEGAservo]*8 + 2*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor] + 2*[mass_flow_sensor] + 2*[stepdown_converter]
 
 elec_cost = 0
 elec_mass = 0
