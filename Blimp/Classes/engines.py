@@ -66,6 +66,9 @@ tmt_2321_950 = Engine(mfg="tmt", name="2321", max_power=450, mass=93, n_cells=4,
 tmt_2321_1250 = Engine(mfg="tmt", name="2321", max_power=700, mass=94, n_cells=4, prop_diameter=11, KV=1250, cost=42.8)
 tmt_4130_230 = Engine(mfg="tmt", name="4130", max_power=2500, mass=408, n_cells=12, prop_diameter=17, KV=230, cost=114.2)
 # Selected:
+tmt_V505_260 = Engine(mfg='tmt', name='V505', max_power=2500, mass=255, n_cells=12, prop_diameter=17, KV=260, cost=115)
+###########
+
 tmt_4130_300 = Engine(mfg="tmt", name="4130", max_power=3200, mass=405, n_cells=12, prop_diameter=18, KV=300, cost=114.2)
 ###########
 tmt_4130_450 = Engine(mfg="tmt", name="4130", max_power=1800, mass=408, n_cells=6, prop_diameter=18, KV=450, cost=114.2)

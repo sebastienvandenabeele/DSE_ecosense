@@ -80,8 +80,7 @@ class Blimp:
             self.mass_engine_mount=0.36
         self.mass_servo=0.197
         self.mass_esc=0.109
-        #self.mass['engines'] = (self.engine.mass+self.mass_esc) * self.n_engines + self.n_engines/self.n_engines_rod*(self.mass_engine_mount+self.mass_servo)   # margin for mounting, esc, servo
-        self.mass['engines'] = 1.426 * n_engines
+        self.mass['engines'] = (self.engine.mass+self.mass_esc) * self.n_engines + self.n_engines/self.n_engines_rod*(self.mass_engine_mount+self.mass_servo)   # margin for mounting, esc, servo
         self.installed_engine_power = self.n_engines * self.engine.max_power * prop_limit
         self.x_eng = 0
         self.z_eng = -1
@@ -176,7 +175,7 @@ class Blimp:
         n_series = 12
 
         self.battery_speed = (prop_eff * self.engine.efficiency * self.power_electronics / (rho * self.ref_area * self.CD)) ** (1 / 3)  # [m/s]
-        self.battery_capacity = (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed) * 1.1  + 1800000# [J]
+        self.battery_capacity = (1.5 * self.power_electronics * req.range_on_battery) / (self.battery_speed) * 1.1  + 600000# [J]
         self.battery_pack = bat.BatteryPack(self.battery_capacity, dod)
         self.mass['battery'] = self.battery_pack.mass
         self.battery_charge = self.battery_capacity / (n_series * voltage_nominal)  # [As]
