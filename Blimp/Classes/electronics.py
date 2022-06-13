@@ -88,7 +88,7 @@ fan = Electronic(name='Ballonet Fan', mass=0.08, partial_power_consumption=19.2,
 ############################################
 
 # 8kW system config
-config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_2, battery_pack, fan] + [valve]*3 + [MEGAservo]*8 + 2*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor] + 2*[mass_flow_sensor]
+config_option_1 = [ZED_F9P, Honeywell_SATCOM, skynode, smart_solar_2, fan] + [valve]*3 + [MEGAservo]*8 + 2*[pressure_sensor] + 2*[H2_sensor] + 551*[photoresistor] + 2*[mass_flow_sensor]
 
 elec_cost = 0
 elec_mass = 0
