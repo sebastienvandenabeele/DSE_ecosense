@@ -63,7 +63,7 @@ solar_pack_3 = Electronic(name="Solar pack 3", mass=smart_solar_3.mass*7, consta
 # Deployment components
 EM = Electronic(name="PEM1213A", mass=0.01, partial_power_consumption=1, cost=7, type="Electromagnet") 
 motion_sensor = Electronic(name="Quad-Beam Photoelectric Sensor", mass=2.27, constant_power_consumption=5, cost=119, type="Motion Sensor")
-photoresistor = Electronic(name="GL5516 LDR", mass=0.00025, cost=0.15, type="Servo")
+photoresistor = Electronic(name="GL5516 LDR", mass=0.00025, cost=0, type="Servo")
 mass_flow_sensor = Electronic(name="Auto Mass Air Flow Sensor Meter", mass=0.45, cost=75, type="Mass flow sesnsor")
 
 # Fin and propulsion actuators

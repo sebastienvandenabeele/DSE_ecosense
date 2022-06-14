@@ -23,7 +23,7 @@ cruisepath = altitude_path[260:-240]
 
 
 trim_altitude = np.mean(cruisepath)
-trim_altitude = 1000
+trim_altitude = 1500
 
 gondola = Gondola(length=4, height=0.5, x=-1, z=-2)
 
@@ -33,10 +33,10 @@ gondola = Gondola(length=4, height=0.5, x=-1, z=-2)
 #                mass_payload =       REQ_payload_mass,
 #                target_speed=        minimum_velocity,
 #                trip_time=           maximum_triptime,
-#                mass_deployment=      3.9*2,
+#                mass_deployment=      2.6*2 + 5.5,
 #                n_fins=                4,
 #                gondola=             gondola,
-#                mass_gondola_structure= 21.3,
+#                mass_gondola_structure= 21.7,
 #                mass_fire_ex=            6,
 #
 #                envelope_material=    mat.polyethylene_fiber,
@@ -58,7 +58,9 @@ Shlimp = unpickle('Shlimp_for_model')
 Shlimp.report()
 Shlimp.estimateCost()
 Shlimp.save()
-longitudinalStateSpace(Shlimp, 0.2)
+
+longitudinalStateSpace(Shlimp, 0.1)
+lateralStateSpace(Shlimp, 0.1)
 # vs = np.arange(-20, 20, 0.2)
 # fs = [-getRestoringForce(h, Shlimp) for h in hs]
 # fs_lin = -getK(Shlimp) * hs

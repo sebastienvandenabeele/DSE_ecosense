@@ -166,6 +166,7 @@ def longitudinalStateSpace(blimp, U):
     C_L_q_hat = 0.024  # from Blibble, based on Solar HALE p 286
 
     I_yy = blimp.Iyy
+    I_yy = 1114  # from CAD
     print('I_yy', I_yy)
     k_atm = getK(blimp)
     c_atm = getC(blimp)
@@ -176,10 +177,11 @@ def longitudinalStateSpace(blimp, U):
     x_ac = blimp.length * (0.5 - 0.37)   # Assumed at 37% length, from Blibble p 103
     print('xac', x_ac)
     z_cg = - blimp.z_cg
+    z_cg = 1.42 # from CAD
     print('zcg', z_cg)
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
     print('xfin', x_fin)
-    x_hinge = x_fin + 0.55 * blimp.fin.root_chord
+    x_hinge = x_fin + 0.55 * blimp.fin.root_chord * 1/np.sqrt(2)
     print('xhinge', x_hinge)
 
     # Coefficients for model
@@ -202,9 +204,10 @@ def longitudinalStateSpace(blimp, U):
     C_m_q = C_m_q_h + C_m_q_e
     print('Cmq', C_m_q)
 
-    C_F_delta = C_L_a_h * 0.9 * VVh_sq
+    C_F_delta = C_L_a_h * 0.9
     print('CFd', C_F_delta)
     k_fin = 1/(blimp.fin.AR * 0.7 * np.pi)
+    print('kfin', k_fin)
 
 
     C_m_a = C_L_a_e * x_ac / l_ref - C_L_a_h * x_fin / l_ref - mu * g * z_cg / l_ref
@@ -225,9 +228,9 @@ def longitudinalStateSpace(blimp, U):
 
     # Elevator solution
     C3 = np.array([[0],
-                   [-C_F_delta],
+                   [-C_F_delta*VVh_sq],
                    [0],
-                   [C_F_delta * x_hinge / l_ref],
+                   [C_F_delta*VVh_sq * x_hinge / l_ref],
                    [0]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
@@ -337,17 +340,17 @@ def lateralStateSpace(blimp, u):
     print('xac', x_ac)
     x_fin = (blimp.x_l_fins - 0.5) * blimp.length
     print('xfin', x_fin)
-    x_hinge = x_fin + 0.55 * blimp.fin.root_chord
+    x_hinge = x_fin + 0.55 * blimp.fin.root_chord * 1/np.sqrt(2)
     print('xhinge', x_hinge)
 
     # Coefficients for model
-    K_zz = 800 / (dyn_pressure * S * l_ref)# TODO
+    K_zz = 704 / (dyn_pressure * S * l_ref)
     print('Kzz', K_zz)
     mu = blimp.MTOM / (dyn_pressure * S)
     print('mu', mu)
     C_Y_beta_e = 2 / blimp.spheroid_ratio
     print('CYbe', C_Y_beta_e)
-    C_Y_beta_v = blimp.fin.CLa * 0.1995 * 0.5 * VVh_sq
+    C_Y_beta_v = blimp.fin.CLa * 0.1995 * 0.5
     print('CYbv', C_Y_beta_v)
 
     C_N_r_e = C_N_r_hat * np.sqrt(S) / V
@@ -360,28 +363,25 @@ def lateralStateSpace(blimp, u):
     C_Y_r = C_Y_r_t + C_Y_r_e
     print('CYR', C_Y_r)
 
-    C_F_delta = C_Y_beta_v * 0.9 * VVh_sq
+    C_F_delta = C_Y_beta_v * 0.9
     print('CFdelta', C_F_delta)
 
 
-    C1 = np.array([[0, -K_zz, 0],
-                   [-mu * V, 0, 0],
-                   [0, V/g, -1]])
+    C1 = np.array([[0, -K_zz],
+                   [-mu * V, 0]])
 
-    C2 = np.array([[C_Y_beta_e * x_ac/l_ref - C_Y_beta_v * x_fin/l_ref, -C_N_r, 0],
-                   [-(C_Y_beta_e + C_Y_beta_v), C_Y_r - mu * V, 0],
-                   [0, 0, 0]])
+    C2 = np.array([[C_Y_beta_e * x_ac/l_ref - C_Y_beta_v *VVh_sq * x_fin/l_ref, -C_N_r],
+                   [-(C_Y_beta_e + C_Y_beta_v * VVh_sq), C_Y_r - mu * V]])
 
-    C3 = np.array([[C_F_delta * x_hinge/l_ref],
-                   [C_F_delta],
-                   [0]])
+    C3 = np.array([[C_F_delta*VVh_sq * x_hinge/l_ref],
+                   [C_F_delta*VVh_sq]])
 
     A = -np.linalg.inv(C1) @ C2  # State Matrix
     print(A)
     B = -np.linalg.inv(C1) @ C3  # Feedback Matrix
     print(B)
-    C = np.eye(3)                # Output Matrix
-    D = np.zeros([3, 1])         # Feedthrough matrix
+    C = np.eye(2)                # Output Matrix
+    D = np.zeros([2, 1])         # Feedthrough matrix
 
     sys = ml.ss(A, B, C, D)
     ml.damp(sys)
