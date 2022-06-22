@@ -74,17 +74,17 @@ if __name__ == "__main__":
     sstot = np.sum((spacing_array - ybar)**2)
     r_squared = ssreg / sstot
 
-    # fig, ax = plt.subplots(figsize=(5, 4))
-    # ax.plot(x_new, y_new, label="Curve Fit")
-    # ax.plot(reliability_array,
-    #         spacing_array, label="Raw Data")
-    # ax.set_xlabel("Reliability [%]")
-    # ax.set_ylabel('Spacing [m]')
-    # ax.legend()
-    # ax.grid()
-    # ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
-    # fig.savefig('./figures/curve_fit.png')
-    # plt.show()
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.plot(x_new, y_new, label="Curve Fit")
+    ax.scatter(reliability_array,
+               spacing_array, label="Raw Data", color="orange")
+    ax.set_xlabel("Reliability [%]")
+    ax.set_ylabel('Spacing [m]')
+    ax.legend()
+    ax.grid()
+    ax.text(65.7, 472, "R²: "+str(np.round(r_squared, 4)))
+    fig.savefig('./figures/curve_fit.png')
+    plt.show()
 
     df = pd.read_csv("../Flight_software/data/prob_density.csv")
     likelihood = df["likelihood"].values

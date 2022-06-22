@@ -10,32 +10,31 @@ relays = 7 * 32.03
 sensor_manufacturing = 2950
 relay_manufacturing = 196
 ground_station = 550  # From Dryad
-misc = 1000
 network = sensors + relays + sensor_manufacturing + \
-    relay_manufacturing + ground_station + misc
+    relay_manufacturing + ground_station
 
 
 # Vehicle Costs
 no_use = 1000
-solar_panels = 6683.05
-hydrogen = 71.61
-electronics = 6179.78
-engines = 548.16
-envelope = 2740.29
-deployment = 1000
-fins = 520
-manufacturing = 100000
-misc = 10000
+solar_panels = 5962.68
+hydrogen = 85.6
+electronics = 7132.01
+engines = 552
+envelope = 4000
+deployment = 7000
+fins = 700
+gondola = 5000
+manufacturing = 10000
 vehicle = (solar_panels + hydrogen + electronics +
-           engines + envelope + deployment + fins + manufacturing + misc)/no_use * 2
+           engines + envelope + deployment + fins + manufacturing + gondola)/no_use * 2
 
 # Operations Costs
 drone_pilot = 3 * (8+2) * 180
 technicians = 3 * (8+2) * 40
 national_park_flying_permit = 2 * 2000
-motorhome = 2 * 2500
+motorhome = 2500
 living_expenses = 100 * 4 * 2
-ford_ranger_rental = 1000  # for three days with trailer
+ford_ranger_rental = 1400  # for three days with trailer
 fuel = 100  # 80 liters
 operations = drone_pilot + technicians + \
     national_park_flying_permit + motorhome + \
@@ -45,19 +44,21 @@ operations = drone_pilot + technicians + \
 software_engineer = 50000/8 * 5  # one can handle 8 missions
 server = 4000 * 5  # one per mission
 # gross estimate at 25% of blimp cost per year
-maintenance = 0.25 * vehicle / flights_per_year
+maintenance = 500
 recurring = software_engineer + server + maintenance
 
 # Misc
-hydorgen_delivery = 1000
-freight = 0.03 * 4350 * 0.250
-energy = 50
-salaries = 2500 * 5 * 5 * 12 / flights_per_year * 2
-office = 1500 * 12 * 5 / flights_per_year * 2
-misc = freight + hydorgen_delivery + energy + salaries + office
+hydrogen_delivery = 40
+freight = 33.75
+energy = 60
+salaries = 31250
+office = 3750
+misc = freight + hydrogen_delivery + energy + salaries + office
 
 final_cost_keur_arr = np.array(
     [network, vehicle, operations, recurring, misc])/1000
+
+print(final_cost_keur_arr*1000)
 final_cost_keur = np.round(np.sum(final_cost_keur_arr), 2)
 
 # Profit Margin
